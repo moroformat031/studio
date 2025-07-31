@@ -6,6 +6,9 @@ import { useLocalStorage } from "@/hooks/use-local-storage";
 import { Header } from './Header';
 import { TranscriptionCard } from './TranscriptionCard';
 import { SummaryCard } from './SummaryCard';
+import { transcribeMedicalAppointment } from '@/ai/flows/transcribe-medical-appointment';
+import { summarizeMedicalAppointment } from '@/ai/flows/summarize-medical-appointment';
+
 
 export function NotasMedApp() {
   const [transcription, setTranscription] = useState<string>('');
@@ -20,21 +23,12 @@ export function NotasMedApp() {
   const handleTranscribe = async (audioDataUri: string) => {
     setIsLoadingTranscription(true);
     try {
-      const response = await fetch('/api/transcribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ audioDataUri }),
-      });
-      if (!response.ok) {
-        throw new Error('Transcription failed');
-      }
-      const result = await response.json();
+      const result = await transcribeMedicalAppointment({ audioDataUri });
       setTranscription(result.transcription);
       toast({
         title: "Transcription Complete",
         description: "The audio has been successfully transcribed.",
+        variant: 'default',
       });
     } catch (error) {
       console.error(error);
@@ -59,21 +53,12 @@ export function NotasMedApp() {
     }
     setIsLoadingSummary(true);
     try {
-      const response = await fetch('/api/summarize', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ transcription }),
-      });
-      if (!response.ok) {
-        throw new Error('Summarization failed');
-      }
-      const result = await response.json();
+      const result = await summarizeMedicalAppointment({ transcription });
       setSummary(result.summary);
       toast({
         title: "Summary Generated",
         description: "The AI summary has been successfully created.",
+        variant: 'default',
       });
     } catch (error) {
       console.error(error);
@@ -88,6 +73,7 @@ export function NotasMedApp() {
   };
 
   const handleExport = () => {
+    if (typeof window === "undefined") return;
     const content = `TRANSCRIPTION:\n\n${transcription}\n\n\nSUMMARY:\n\n${summary}`;
     const blob = new Blob([content], { type: `text/${exportFormat}` });
     const url = URL.createObjectURL(blob);
@@ -100,7 +86,8 @@ export function NotasMedApp() {
     URL.revokeObjectURL(url);
     toast({
       title: "Export Successful",
-      description: `Your notes have been downloaded as a .${exportFormat} file.`
+      description: `Your notes have been downloaded as a .${exportFormat} file.`,
+      variant: 'default'
     })
   };
 

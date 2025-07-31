@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Mic, Square, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,9 +24,15 @@ export function TranscriptionCard({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
 
   const handleStartRecording = async () => {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    if (isMounted && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaRecorderRef.current = new MediaRecorder(stream);
@@ -65,6 +71,10 @@ export function TranscriptionCard({
       toast({ title: "Recording Stopped", description: "Processing audio for transcription." });
     }
   };
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <Card className="flex flex-col">
