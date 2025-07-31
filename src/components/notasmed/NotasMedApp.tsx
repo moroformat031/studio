@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from 'react';
-import { transcribeMedicalAppointment } from "@/ai/flows/transcribe-medical-appointment";
-import { summarizeMedicalAppointment } from "@/ai/flows/summarize-medical-appointment";
 import { useToast } from "@/hooks/use-toast";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { Header } from './Header';
@@ -22,7 +20,17 @@ export function NotasMedApp() {
   const handleTranscribe = async (audioDataUri: string) => {
     setIsLoadingTranscription(true);
     try {
-      const result = await transcribeMedicalAppointment({ audioDataUri });
+      const response = await fetch('/api/transcribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ audioDataUri }),
+      });
+      if (!response.ok) {
+        throw new Error('Transcription failed');
+      }
+      const result = await response.json();
       setTranscription(result.transcription);
       toast({
         title: "Transcription Complete",
@@ -51,7 +59,17 @@ export function NotasMedApp() {
     }
     setIsLoadingSummary(true);
     try {
-      const result = await summarizeMedicalAppointment({ transcription });
+      const response = await fetch('/api/summarize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ transcription }),
+      });
+      if (!response.ok) {
+        throw new Error('Summarization failed');
+      }
+      const result = await response.json();
       setSummary(result.summary);
       toast({
         title: "Summary Generated",
