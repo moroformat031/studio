@@ -8,9 +8,12 @@ import { TranscriptionCard } from './TranscriptionCard';
 import { SummaryCard } from './SummaryCard';
 import { transcribeMedicalAppointment } from '@/ai/flows/transcribe-medical-appointment';
 import { summarizeMedicalAppointment } from '@/ai/flows/summarize-medical-appointment';
+import { useAuth } from '@/context/AuthContext';
+import { PlanGate } from './PlanGate';
 
 
 export function NotasMedApp() {
+  const { user } = useAuth();
   const [transcription, setTranscription] = useState<string>('');
   const [summary, setSummary] = useState<string>('');
   const [isLoadingTranscription, setIsLoadingTranscription] = useState<boolean>(false);
@@ -99,19 +102,23 @@ export function NotasMedApp() {
         style={{ fontSize: `${fontSize}px` }}
       >
         <div className="grid gap-8 md:grid-cols-2">
-          <TranscriptionCard
-            transcription={transcription}
-            setTranscription={setTranscription}
-            isLoading={isLoadingTranscription}
-            onTranscribe={handleTranscribe}
-          />
-          <SummaryCard
-            transcription={transcription}
-            summary={summary}
-            setSummary={setSummary}
-            isLoading={isLoadingSummary}
-            onSummarize={handleSummarize}
-          />
+          <PlanGate allowedPlans={['Free', 'Pro', 'Admin']}>
+            <TranscriptionCard
+              transcription={transcription}
+              setTranscription={setTranscription}
+              isLoading={isLoadingTranscription}
+              onTranscribe={handleTranscribe}
+            />
+          </PlanGate>
+           <PlanGate allowedPlans={['Pro', 'Admin']}>
+            <SummaryCard
+              transcription={transcription}
+              summary={summary}
+              setSummary={setSummary}
+              isLoading={isLoadingSummary}
+              onSummarize={handleSummarize}
+            />
+          </PlanGate>
         </div>
       </main>
     </div>
