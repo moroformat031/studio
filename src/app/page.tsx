@@ -4,7 +4,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { NotasMedApp } from '@/components/notasmed/NotasMedApp';
+import { EHRApp } from '@/components/ehr/EHRApp';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
@@ -29,14 +29,11 @@ export default function Home() {
                 </div>
             </header>
             <main className="flex-1 container mx-auto p-4 sm:p-6 md:p-8">
-                <div className="grid gap-8 md:grid-cols-2">
-                    <Skeleton className="h-[450px] w-full" />
-                    <Skeleton className="h-[450px] w-full" />
-                </div>
+                 <Skeleton className="h-[600px] w-full" />
             </main>
         </div>
     );
   }
 
-  return <NotasMedApp />;
+  return <EHRApp />;
 }

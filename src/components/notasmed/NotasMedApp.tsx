@@ -1,25 +1,25 @@
+
 "use client";
 
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { useLocalStorage } from "@/hooks/use-local-storage";
-import { Header } from './Header';
 import { TranscriptionCard } from './TranscriptionCard';
 import { SummaryCard } from './SummaryCard';
 import { transcribeMedicalAppointment } from '@/ai/flows/transcribe-medical-appointment';
 import { summarizeMedicalAppointment } from '@/ai/flows/summarize-medical-appointment';
-import { useAuth } from '@/context/AuthContext';
 import { PlanGate } from './PlanGate';
+import { Button } from '../ui/button';
 
+interface NotasMedAppProps {
+    onSave: (note: { transcription: string; summary: string; date: string }) => void;
+    onCancel: () => void;
+}
 
-export function NotasMedApp() {
-  const { user } = useAuth();
+export function NotasMedApp({ onSave, onCancel }: NotasMedAppProps) {
   const [transcription, setTranscription] = useState<string>('');
   const [summary, setSummary] = useState<string>('');
   const [isLoadingTranscription, setIsLoadingTranscription] = useState<boolean>(false);
   const [isLoadingSummary, setIsLoadingSummary] = useState<boolean>(false);
-  const [fontSize] = useLocalStorage('notasmed-fontSize', 16);
-  const [exportFormat] = useLocalStorage('notasmed-exportFormat', 'txt');
 
   const { toast } = useToast();
 
@@ -31,7 +31,6 @@ export function NotasMedApp() {
       toast({
         title: "Transcription Complete",
         description: "The audio has been successfully transcribed.",
-        variant: 'default',
       });
     } catch (error) {
       console.error(error);
@@ -61,7 +60,6 @@ export function NotasMedApp() {
       toast({
         title: "Summary Generated",
         description: "The AI summary has been successfully created.",
-        variant: 'default',
       });
     } catch (error) {
       console.error(error);
@@ -74,53 +72,52 @@ export function NotasMedApp() {
       setIsLoadingSummary(false);
     }
   };
-
-  const handleExport = () => {
-    if (typeof window === "undefined") return;
-    const content = `TRANSCRIPTION:\n\n${transcription}\n\n\nSUMMARY:\n\n${summary}`;
-    const blob = new Blob([content], { type: `text/${exportFormat}` });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `notasmed_export.${exportFormat}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast({
-      title: "Export Successful",
-      description: `Your notes have been downloaded as a .${exportFormat} file.`,
-      variant: 'default'
-    })
-  };
+  
+  const handleSaveNote = () => {
+    if (!transcription && !summary) {
+        toast({
+            variant: "destructive",
+            title: "Cannot Save Note",
+            description: "Please provide a transcription or summary before saving.",
+        });
+        return;
+    }
+    onSave({
+        transcription,
+        summary,
+        date: new Date().toISOString(),
+    });
+     toast({
+        title: "Note Saved",
+        description: "The consultation note has been added to the patient's record.",
+    });
+  }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground font-body">
-      <Header onExport={handleExport} />
-      <main 
-        className="flex-1 container mx-auto p-4 sm:p-6 md:p-8"
-        style={{ fontSize: `${fontSize}px` }}
-      >
+    <div className="space-y-8">
         <div className="grid gap-8 md:grid-cols-2">
-          <PlanGate allowedPlans={['Free', 'Pro', 'Admin']}>
-            <TranscriptionCard
-              transcription={transcription}
-              setTranscription={setTranscription}
-              isLoading={isLoadingTranscription}
-              onTranscribe={handleTranscribe}
-            />
-          </PlanGate>
-           <PlanGate allowedPlans={['Pro', 'Admin']}>
-            <SummaryCard
-              transcription={transcription}
-              summary={summary}
-              setSummary={setSummary}
-              isLoading={isLoadingSummary}
-              onSummarize={handleSummarize}
-            />
-          </PlanGate>
+            <PlanGate allowedPlans={['Free', 'Pro', 'Admin']}>
+                <TranscriptionCard
+                    transcription={transcription}
+                    setTranscription={setTranscription}
+                    isLoading={isLoadingTranscription}
+                    onTranscribe={handleTranscribe}
+                />
+            </PlanGate>
+            <PlanGate allowedPlans={['Pro', 'Admin']}>
+                <SummaryCard
+                    transcription={transcription}
+                    summary={summary}
+                    setSummary={setSummary}
+                    isLoading={isLoadingSummary}
+                    onSummarize={handleSummarize}
+                />
+            </PlanGate>
         </div>
-      </main>
+        <div className="flex justify-end gap-4">
+            <Button variant="outline" onClick={onCancel}>Cancel</Button>
+            <Button onClick={handleSaveNote}>Save Note</Button>
+        </div>
     </div>
   );
 }

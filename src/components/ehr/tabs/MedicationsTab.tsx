@@ -1,0 +1,45 @@
+
+"use client";
+import { Patient } from '@/types/ehr';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
+interface MedicationsTabProps {
+    patient: Patient;
+}
+
+export function MedicationsTab({ patient }: MedicationsTabProps) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Medications</CardTitle>
+                <CardDescription>Current and past medications.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                 <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Medication</TableHead>
+                            <TableHead>Dosage</TableHead>
+                            <TableHead>Frequency</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {patient.medications.map((med) => (
+                            <TableRow key={med.id}>
+                                <TableCell>{med.name}</TableCell>
+                                <TableCell>{med.dosage}</TableCell>
+                                <TableCell>{med.frequency}</TableCell>
+                            </TableRow>
+                        ))}
+                        {patient.medications.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={3} className="text-center">No medications prescribed.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+    );
+}
