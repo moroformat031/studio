@@ -21,6 +21,7 @@ export function usePatientData() {
             id: `pat-${Date.now()}`
         };
         setPatients(prev => [...prev, newPatient]);
+        return newPatient;
     };
 
     const updatePatient = (id: string, updatedData: Partial<Patient>) => {

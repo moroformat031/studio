@@ -2,7 +2,6 @@
 "use client";
 import { useState } from 'react';
 import { usePatientData } from '@/hooks/use-patient-data';
-import { PatientList } from './PatientList';
 import { PatientDetail } from './PatientDetail';
 import { Header } from '../notasmed/Header';
 import { AddPatientDialog } from './AddPatientDialog';
@@ -11,6 +10,7 @@ import { Patient } from '@/types/ehr';
 import { Button } from '../ui/button';
 import { Plus } from 'lucide-react';
 import { PlanGate } from '../notasmed/PlanGate';
+import { PatientCombobox } from './PatientCombobox';
 
 export function EHRApp() {
     const { patients, addPatient, updatePatient, addNoteToPatient } = usePatientData();
@@ -29,7 +29,8 @@ export function EHRApp() {
             procedures: [],
             notes: []
         };
-        addPatient(newPatientData);
+        const newPatient = addPatient(newPatientData);
+        setSelectedPatientId(newPatient.id);
         setIsAddPatientDialogOpen(false);
     };
 
@@ -50,14 +51,14 @@ export function EHRApp() {
                                     onOpenChange={setIsAddPatientDialogOpen}
                                     onSave={handleAddPatient}
                                 >
-                                    <Button size="sm">
+                                    <Button size="sm" variant="outline">
                                         <Plus className="h-4 w-4 mr-2" />
                                         Add Patient
                                     </Button>
                                 </AddPatientDialog>
                             </PlanGate>
                         </div>
-                        <PatientList
+                        <PatientCombobox
                             patients={patients}
                             selectedPatientId={selectedPatientId}
                             onSelectPatient={setSelectedPatientId}
