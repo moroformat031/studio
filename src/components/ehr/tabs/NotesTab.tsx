@@ -1,21 +1,47 @@
 
 "use client";
-import { Patient } from '@/types/ehr';
+import { useState } from 'react';
+import { Patient, PatientNote } from '@/types/ehr';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
+import { NotasMedApp } from '@/components/notasmed/NotasMedApp';
 
 interface NotesTabProps {
     patient: Patient;
+    onAddNote: (patientId: string, note: Omit<PatientNote, 'id'>) => void;
 }
 
-export function NotesTab({ patient }: NotesTabProps) {
+export function NotesTab({ patient, onAddNote }: NotesTabProps) {
+    const [isCreatingNote, setIsCreatingNote] = useState(false);
+    
+    const handleSaveNote = (note: { transcription: string; summary: string; date: string }) => {
+        onAddNote(patient.id, note);
+        setIsCreatingNote(false);
+    }
+
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Consultation Notes</CardTitle>
-                <CardDescription>Transcriptions and summaries from consultations.</CardDescription>
+                <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle>Consultation Notes</CardTitle>
+                        <CardDescription>Transcriptions and summaries from consultations.</CardDescription>
+                    </div>
+                     <Button onClick={() => setIsCreatingNote(prev => !prev)} variant="outline">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        {isCreatingNote ? 'Cancel' : 'New Note'}
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent>
+                {isCreatingNote && (
+                    <div className="mb-6">
+                        <NotasMedApp onSave={handleSaveNote} onCancel={() => setIsCreatingNote(false)} />
+                    </div>
+                )}
+
                 {patient.notes.length > 0 ? (
                     <Accordion type="single" collapsible className="w-full">
                         {patient.notes.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(note => (
@@ -46,9 +72,11 @@ export function NotesTab({ patient }: NotesTabProps) {
                         ))}
                     </Accordion>
                 ) : (
-                    <div className="text-center text-muted-foreground py-8">
-                        No consultation notes found for this patient.
-                    </div>
+                     !isCreatingNote && (
+                        <div className="text-center text-muted-foreground py-8">
+                            No consultation notes found for this patient.
+                        </div>
+                    )
                 )}
             </CardContent>
         </Card>

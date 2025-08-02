@@ -9,6 +9,7 @@ import { transcribeMedicalAppointment } from '@/ai/flows/transcribe-medical-appo
 import { summarizeMedicalAppointment } from '@/ai/flows/summarize-medical-appointment';
 import { PlanGate } from './PlanGate';
 import { Button } from '../ui/button';
+import { Separator } from '../ui/separator';
 
 interface NotasMedAppProps {
     onSave: (note: { transcription: string; summary: string; date: string }) => void;
@@ -94,8 +95,8 @@ export function NotasMedApp({ onSave, onCancel }: NotasMedAppProps) {
   }
 
   return (
-    <div className="space-y-8">
-        <div className="grid gap-8 md:grid-cols-2">
+    <div className="space-y-4 border rounded-lg p-4">
+        <div className="grid gap-4 md:grid-cols-2">
             <PlanGate allowedPlans={['Free', 'Pro', 'Admin']}>
                 <TranscriptionCard
                     transcription={transcription}
@@ -114,8 +115,9 @@ export function NotasMedApp({ onSave, onCancel }: NotasMedAppProps) {
                 />
             </PlanGate>
         </div>
-        <div className="flex justify-end gap-4">
-            <Button variant="outline" onClick={onCancel}>Cancel</Button>
+        <Separator />
+        <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={onCancel}>Cancel</Button>
             <Button onClick={handleSaveNote}>Save Note</Button>
         </div>
     </div>

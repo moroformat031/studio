@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
@@ -77,31 +78,32 @@ export function TranscriptionCard({
   }
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="flex flex-col shadow-none border-0">
+      <CardHeader className="flex flex-row items-center justify-between p-2">
         <div className="space-y-1.5">
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FileText className="h-4 w-4" />
             Transcription
           </CardTitle>
-          <CardDescription>Record audio and get an AI transcription.</CardDescription>
         </div>
         {isRecording ? (
-          <Button onClick={handleStopRecording} disabled={isLoading} variant="destructive" size="icon" aria-label="Stop Recording">
-            <Square className="h-5 w-5" />
+          <Button onClick={handleStopRecording} disabled={isLoading} variant="destructive" size="sm" aria-label="Stop Recording">
+            <Square className="h-4 w-4 mr-2" />
+            Stop
           </Button>
         ) : (
-          <Button onClick={handleStartRecording} disabled={isLoading} size="icon" aria-label="Start Recording">
-            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Mic className="h-5 w-5" />}
+          <Button onClick={handleStartRecording} disabled={isLoading} size="sm" aria-label="Start Recording">
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4 mr-2" />}
+            Record
           </Button>
         )}
       </CardHeader>
-      <CardContent className="flex-grow">
+      <CardContent className="flex-grow p-2">
         <Textarea
-          placeholder={isLoading ? "Transcription in progress..." : isRecording ? "Recording... speak now." : "Your transcribed text will appear here. You can also paste text to be summarized."}
+          placeholder={isLoading ? "Transcription in progress..." : isRecording ? "Recording... speak now." : "Transcribed text will appear here. You can also paste text."}
           value={transcription}
           onChange={(e) => setTranscription(e.target.value)}
-          className="h-full min-h-[300px] resize-none text-base"
+          className="h-full min-h-[150px] resize-none"
           readOnly={isLoading || isRecording}
           aria-label="Transcription text area"
         />
