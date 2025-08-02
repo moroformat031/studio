@@ -32,7 +32,7 @@ export function SummaryCard({
         </div>
         <Button onClick={onSummarize} disabled={isLoading || !transcription} size="sm" variant="ghost" aria-label="Generate Summary">
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-           <span className="ml-2">Generate</span>
+           <span className="ml-2 hidden sm:inline">Generate</span>
         </Button>
       </CardHeader>
       <CardContent className="flex-grow p-2">

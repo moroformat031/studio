@@ -88,13 +88,13 @@ export function TranscriptionCard({
         </div>
         {isRecording ? (
           <Button onClick={handleStopRecording} disabled={isLoading} variant="destructive" size="sm" aria-label="Stop Recording">
-            <Square className="h-4 w-4 mr-2" />
-            Stop
+            <Square className="h-4 w-4" />
+            <span className="ml-2 hidden sm:inline">Stop</span>
           </Button>
         ) : (
           <Button onClick={handleStartRecording} disabled={isLoading} size="sm" aria-label="Start Recording">
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4 mr-2" />}
-            Record
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4" />}
+            <span className="ml-2 hidden sm:inline">Record</span>
           </Button>
         )}
       </CardHeader>
