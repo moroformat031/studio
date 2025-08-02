@@ -19,14 +19,18 @@ export function MedicationsTab({ patient }: MedicationsTabProps) {
                  <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead>Date Prescribed</TableHead>
                             <TableHead>Medication</TableHead>
                             <TableHead>Dosage</TableHead>
                             <TableHead>Frequency</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {patient.medications.map((med) => (
+                        {patient.medications
+                          .sort((a, b) => new Date(b.prescribedDate).getTime() - new Date(a.prescribedDate).getTime())
+                          .map((med) => (
                             <TableRow key={med.id}>
+                                <TableCell>{new Date(med.prescribedDate).toLocaleDateString()}</TableCell>
                                 <TableCell>{med.name}</TableCell>
                                 <TableCell>{med.dosage}</TableCell>
                                 <TableCell>{med.frequency}</TableCell>
@@ -34,7 +38,7 @@ export function MedicationsTab({ patient }: MedicationsTabProps) {
                         ))}
                         {patient.medications.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={3} className="text-center">No medications prescribed.</TableCell>
+                                <TableCell colSpan={4} className="text-center">No medications prescribed.</TableCell>
                             </TableRow>
                         )}
                     </TableBody>

@@ -16,7 +16,7 @@ export const initialPatients: Patient[] = [
             { date: '2024-07-15T10:00:00Z', hr: 75, bp: '120/80', temp: 36.8, rr: 16 }
         ],
         medications: [
-            { id: 'med-1', name: 'Lisinopril', dosage: '10mg', frequency: 'Once a day'}
+            { id: 'med-1', name: 'Lisinopril', dosage: '10mg', frequency: 'Once a day', prescribedDate: '2024-07-15' }
         ],
         appointments: [
             { id: 'apt-1', date: '2024-08-01', time: '11:00', reason: 'Follow-up', status: 'Scheduled'}
@@ -45,7 +45,7 @@ export const initialPatients: Patient[] = [
              { date: '2024-07-18T09:30:00Z', hr: 82, bp: '130/85', temp: 37.0, rr: 18 }
         ],
         medications: [
-            { id: 'med-2', name: 'Metformin', dosage: '500mg', frequency: 'Twice a day'}
+            { id: 'med-2', name: 'Metformin', dosage: '500mg', frequency: 'Twice a day', prescribedDate: '2024-07-18' }
         ],
         appointments: [
             { id: 'apt-2', date: '2024-07-18', time: '09:30', reason: 'Routine Checkup', status: 'Completed'},
