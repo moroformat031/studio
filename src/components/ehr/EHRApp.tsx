@@ -41,29 +41,32 @@ export function EHRApp() {
                 className="flex-1 container mx-auto p-4 sm:p-6 md:p-8"
                 style={{ fontSize: `${fontSize}px` }}
             >
-                <div className="grid gap-8 md:grid-cols-[300px_1fr]">
-                    <div>
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-semibold">Patients</h2>
-                             <PlanGate allowedPlans={['Pro', 'Admin']}>
-                                <AddPatientDialog
-                                    open={isAddPatientDialogOpen}
-                                    onOpenChange={setIsAddPatientDialogOpen}
-                                    onSave={handleAddPatient}
-                                >
-                                    <Button size="sm" variant="outline">
-                                        <Plus className="h-4 w-4 mr-2" />
-                                        Add Patient
-                                    </Button>
-                                </AddPatientDialog>
-                            </PlanGate>
+                <div className="flex flex-col gap-8">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div className="flex-1">
+                            <h2 className="text-lg font-semibold mb-2">Select Patient</h2>
+                             <div className="w-full md:w-[300px]">
+                                <PatientCombobox
+                                    patients={patients}
+                                    selectedPatientId={selectedPatientId}
+                                    onSelectPatient={setSelectedPatientId}
+                                />
+                             </div>
                         </div>
-                        <PatientCombobox
-                            patients={patients}
-                            selectedPatientId={selectedPatientId}
-                            onSelectPatient={setSelectedPatientId}
-                        />
+                         <PlanGate allowedPlans={['Pro', 'Admin']}>
+                            <AddPatientDialog
+                                open={isAddPatientDialogOpen}
+                                onOpenChange={setIsAddPatientDialogOpen}
+                                onSave={handleAddPatient}
+                            >
+                                <Button size="sm" variant="outline" className="w-full md:w-auto">
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Add Patient
+                                </Button>
+                            </AddPatientDialog>
+                        </PlanGate>
                     </div>
+                    
                     <div>
                         {selectedPatient ? (
                             <PatientDetail
@@ -72,8 +75,8 @@ export function EHRApp() {
                                 onAddNote={addNoteToPatient}
                             />
                         ) : (
-                            <div className="flex items-center justify-center h-full text-muted-foreground">
-                                Select a patient to view their details.
+                            <div className="flex items-center justify-center h-[400px] text-muted-foreground border-2 border-dashed rounded-lg">
+                                Select a patient to view their details or add a new patient.
                             </div>
                         )}
                     </div>
