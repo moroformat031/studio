@@ -39,7 +39,7 @@ export function DemographicsTab({ patient, onUpdatePatient }: DemographicsTabPro
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <div>
-                        <CardTitle>Demografía</CardTitle>
+                        <CardTitle>Información del Paciente</CardTitle>
                         <CardDescription>Información personal del paciente.</CardDescription>
                     </div>
                     <PlanGate allowedPlans={['Pro', 'Admin']}>
