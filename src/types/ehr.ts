@@ -7,6 +7,7 @@ export interface PatientNote {
 }
 
 export interface Vital {
+    id: string;
     date: string;
     hr: number;
     bp: string;

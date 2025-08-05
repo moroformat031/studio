@@ -1,6 +1,6 @@
 
 "use client";
-import { Patient, PatientNote, Appointment } from '@/types/ehr';
+import { Patient, PatientNote, Appointment, Vital } from '@/types/ehr';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DemographicsTab } from './tabs/DemographicsTab';
 import { VitalsTab } from './tabs/VitalsTab';
@@ -13,9 +13,10 @@ interface PatientDetailProps {
     onUpdatePatient: (id: string, data: Partial<Patient>) => void;
     onAddNote: (patientId: string, note: Omit<PatientNote, 'id'>) => void;
     onUpdateAppointments: (patientId: string, appointments: Appointment[]) => void;
+    onUpdateVitals: (patientId: string, vitals: Vital[]) => void;
 }
 
-export function PatientDetail({ patient, onUpdatePatient, onAddNote, onUpdateAppointments }: PatientDetailProps) {
+export function PatientDetail({ patient, onUpdatePatient, onAddNote, onUpdateAppointments, onUpdateVitals }: PatientDetailProps) {
 
     return (
         <Tabs defaultValue="demographics" className="w-full">
@@ -32,7 +33,7 @@ export function PatientDetail({ patient, onUpdatePatient, onAddNote, onUpdateApp
                 <DemographicsTab patient={patient} onUpdatePatient={onUpdatePatient} />
             </TabsContent>
             <TabsContent value="vitals">
-                <VitalsTab patient={patient} />
+                <VitalsTab patient={patient} onUpdateVitals={onUpdateVitals} />
             </TabsContent>
             <TabsContent value="appointments">
                 <AppointmentsTab patient={patient} onUpdateAppointments={onUpdateAppointments} />

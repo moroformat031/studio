@@ -6,14 +6,14 @@ import { PatientDetail } from './PatientDetail';
 import { Header } from '../notasmed/Header';
 import { AddPatientDialog } from './AddPatientDialog';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { Patient, Appointment } from '@/types/ehr';
+import { Patient, Appointment, Vital } from '@/types/ehr';
 import { Button } from '../ui/button';
 import { Plus } from 'lucide-react';
 import { PlanGate } from '../notasmed/PlanGate';
 import { PatientCombobox } from './PatientCombobox';
 
 export function EHRApp() {
-    const { patients, addPatient, updatePatient, addNoteToPatient, updatePatientAppointments } = usePatientData();
+    const { patients, addPatient, updatePatient, addNoteToPatient, updatePatientAppointments, updatePatientVitals } = usePatientData();
     const [selectedPatientId, setSelectedPatientId] = useState<string | null>(patients[0]?.id || null);
     const [fontSize] = useLocalStorage('notasmed-fontSize', 16);
     const [isAddPatientDialogOpen, setIsAddPatientDialogOpen] = useState(false);
@@ -36,6 +36,10 @@ export function EHRApp() {
 
     const handleUpdateAppointments = (patientId: string, appointments: Appointment[]) => {
         updatePatientAppointments(patientId, appointments);
+    };
+    
+    const handleUpdateVitals = (patientId: string, vitals: Vital[]) => {
+        updatePatientVitals(patientId, vitals);
     };
 
     return (
@@ -78,6 +82,7 @@ export function EHRApp() {
                                 onUpdatePatient={updatePatient}
                                 onAddNote={addNoteToPatient}
                                 onUpdateAppointments={handleUpdateAppointments}
+                                onUpdateVitals={handleUpdateVitals}
                             />
                         ) : (
                             <div className="flex items-center justify-center h-[400px] text-muted-foreground border-2 border-dashed rounded-lg">
