@@ -26,12 +26,12 @@ export function NotesTab({ patient, onAddNote }: NotesTabProps) {
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <div>
-                        <CardTitle>Consultation Notes</CardTitle>
-                        <CardDescription>Transcriptions and summaries from consultations.</CardDescription>
+                        <CardTitle>Notas de Consulta</CardTitle>
+                        <CardDescription>Transcripciones y resúmenes de las consultas.</CardDescription>
                     </div>
                      <Button onClick={() => setIsCreatingNote(prev => !prev)} variant="outline">
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        {isCreatingNote ? 'Cancel' : 'New Note'}
+                        {isCreatingNote ? 'Cancelar' : 'Nueva Nota'}
                     </Button>
                 </div>
             </CardHeader>
@@ -48,7 +48,7 @@ export function NotesTab({ patient, onAddNote }: NotesTabProps) {
                             <AccordionItem value={note.id} key={note.id}>
                                 <AccordionTrigger>
                                     <div className="flex justify-between w-full pr-4">
-                                        <span>Consultation Note</span>
+                                        <span>Nota de Consulta</span>
                                         <span className="text-muted-foreground font-normal">{new Date(note.date).toLocaleString()}</span>
                                     </div>
                                 </AccordionTrigger>
@@ -56,13 +56,13 @@ export function NotesTab({ patient, onAddNote }: NotesTabProps) {
                                     <div className="space-y-4">
                                         {note.summary && (
                                             <div>
-                                                <h4 className="font-semibold mb-2">Summary</h4>
+                                                <h4 className="font-semibold mb-2">Resumen</h4>
                                                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{note.summary}</p>
                                             </div>
                                         )}
                                         {note.transcription && (
                                             <div>
-                                                <h4 className="font-semibold mb-2">Full Transcription</h4>
+                                                <h4 className="font-semibold mb-2">Transcripción Completa</h4>
                                                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{note.transcription}</p>
                                             </div>
                                         )}
@@ -74,7 +74,7 @@ export function NotesTab({ patient, onAddNote }: NotesTabProps) {
                 ) : (
                      !isCreatingNote && (
                         <div className="text-center text-muted-foreground py-8">
-                            No consultation notes found for this patient.
+                            No se encontraron notas de consulta para este paciente.
                         </div>
                     )
                 )}

@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
-      console.error("Failed to parse user from localStorage", error);
+      console.error("Error al analizar el usuario desde localStorage", error);
       localStorage.removeItem('notasmed-user');
     } finally {
         setLoading(false);
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('notasmed-user', JSON.stringify(newUser));
       setUser(newUser);
     } else {
-      throw new Error('Invalid username or password.');
+      throw new Error('Usuario o contraseña inválidos.');
     }
   };
 
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
   }
   return context;
 };

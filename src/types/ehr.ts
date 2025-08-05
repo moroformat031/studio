@@ -28,7 +28,7 @@ export interface Appointment {
     date: string;
     time: string;
     reason: string;
-    status: 'Scheduled' | 'Completed' | 'Canceled';
+    status: 'Programada' | 'Completada' | 'Cancelada';
 }
 
 export interface Procedure {
@@ -40,7 +40,7 @@ export interface Procedure {
 
 export interface Demographics {
     dob: string;
-    gender: 'Male' | 'Female' | 'Other';
+    gender: 'Masculino' | 'Femenino' | 'Otro';
     address: string;
     phone: string;
     email: string;

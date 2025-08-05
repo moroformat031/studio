@@ -34,7 +34,7 @@ export function PatientList({ patients, selectedPatientId, onSelectPatient }: Pa
                             <div className="flex-1 truncate">
                                 <p className="font-semibold truncate">{patient.name}</p>
                                 <p className={cn("text-xs truncate", selectedPatientId === patient.id ? 'text-primary-foreground/80' : 'text-muted-foreground')}>
-                                    DOB: {patient.demographics.dob}
+                                    FDN: {patient.demographics.dob}
                                 </p>
                             </div>
                         </button>

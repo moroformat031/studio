@@ -32,7 +32,7 @@ export function PatientCombobox({ patients, selectedPatientId, onSelectPatient }
   
   const selectedPatientName = patients.find(
       (patient) => patient.id === selectedPatientId
-    )?.name || "Select patient..."
+    )?.name || "Seleccionar paciente..."
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -49,9 +49,9 @@ export function PatientCombobox({ patients, selectedPatientId, onSelectPatient }
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0">
         <Command>
-          <CommandInput placeholder="Search patient..." />
+          <CommandInput placeholder="Buscar paciente..." />
           <CommandList>
-            <CommandEmpty>No patient found.</CommandEmpty>
+            <CommandEmpty>No se encontró ningún paciente.</CommandEmpty>
             <CommandGroup>
               {patients.map((patient) => (
                 <CommandItem

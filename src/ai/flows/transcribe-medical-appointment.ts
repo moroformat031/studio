@@ -32,9 +32,9 @@ const prompt = ai.definePrompt({
   name: 'transcribeMedicalAppointmentPrompt',
   input: {schema: TranscribeMedicalAppointmentInputSchema},
   output: {schema: TranscribeMedicalAppointmentOutputSchema},
-  prompt: `You are an expert medical transcriptionist specializing in Spanish audio.
+  prompt: `Eres un transcriptor médico experto especializado en audio en español.
 
-You will transcribe the audio provided into text. Ensure the transcription is accurate and reflects the spoken content.
+Transcribirás el audio proporcionado a texto. Asegúrate de que la transcripción sea precisa y refleje el contenido hablado.
 
 Audio: {{media url=audioDataUri}}`,
 });

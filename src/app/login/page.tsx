@@ -32,7 +32,7 @@ export default function LoginPage() {
         const e = error as Error;
       toast({
         variant: "destructive",
-        title: "Login Failed",
+        title: "Error de Inicio de Sesión",
         description: e.message,
       });
       setIsLoading(false);
@@ -47,13 +47,13 @@ export default function LoginPage() {
                 <Stethoscope className="h-8 w-8 text-primary" />
                 <h1 className="text-2xl font-bold">NotasMed</h1>
             </div>
-          <CardTitle>Welcome Back</CardTitle>
-          <CardDescription>Enter your credentials to access your account.</CardDescription>
+          <CardTitle>Bienvenido de Nuevo</CardTitle>
+          <CardDescription>Ingresa tus credenciales para acceder a tu cuenta.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">Usuario</Label>
               <Input
                 id="username"
                 type="text"
@@ -65,7 +65,7 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Contraseña</Label>
               <Input
                 id="password"
                 type="password"
@@ -77,7 +77,7 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? 'Iniciando Sesión...' : 'Iniciar Sesión'}
             </Button>
           </form>
         </CardContent>

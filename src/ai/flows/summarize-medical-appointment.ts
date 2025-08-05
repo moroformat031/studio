@@ -28,12 +28,12 @@ const prompt = ai.definePrompt({
   name: 'summarizeMedicalAppointmentPrompt',
   input: {schema: SummarizeMedicalAppointmentInputSchema},
   output: {schema: SummarizeMedicalAppointmentOutputSchema},
-  prompt: `You are an AI assistant specialized in summarizing medical appointments in Mexican Spanish.
-  Please provide a concise summary of the key discussion points and any action items from the following transcription:
+  prompt: `Eres un asistente de IA especializado en resumir citas médicas en español de México.
+  Proporciona un resumen conciso de los puntos clave de la discusión y cualquier plan de acción a partir de la siguiente transcripción:
 
-  Transcription: {{{transcription}}}
+  Transcripción: {{{transcription}}}
 
-  Summary in Mexican Spanish:`,
+  Resumen en español de México:`,
 });
 
 const summarizeMedicalAppointmentFlow = ai.defineFlow(

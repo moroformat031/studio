@@ -30,15 +30,15 @@ export function NotasMedApp({ onSave, onCancel }: NotasMedAppProps) {
       const result = await transcribeMedicalAppointment({ audioDataUri });
       setTranscription(result.transcription);
       toast({
-        title: "Transcription Complete",
-        description: "The audio has been successfully transcribed.",
+        title: "Transcripción Completa",
+        description: "El audio ha sido transcrito exitosamente.",
       });
     } catch (error) {
       console.error(error);
       toast({
         variant: "destructive",
-        title: "Transcription Failed",
-        description: "An error occurred while transcribing the audio. Please try again.",
+        title: "Falló la Transcripción",
+        description: "Ocurrió un error al transcribir el audio. Por favor, inténtelo de nuevo.",
       });
     } finally {
       setIsLoadingTranscription(false);
@@ -49,8 +49,8 @@ export function NotasMedApp({ onSave, onCancel }: NotasMedAppProps) {
     if (!transcription.trim()) {
       toast({
         variant: "destructive",
-        title: "Cannot Summarize",
-        description: "Please provide a transcription before generating a summary.",
+        title: "No se puede resumir",
+        description: "Por favor, proporcione una transcripción antes de generar un resumen.",
       });
       return;
     }
@@ -59,15 +59,15 @@ export function NotasMedApp({ onSave, onCancel }: NotasMedAppProps) {
       const result = await summarizeMedicalAppointment({ transcription });
       setSummary(result.summary);
       toast({
-        title: "Summary Generated",
-        description: "The AI summary has been successfully created.",
+        title: "Resumen Generado",
+        description: "El resumen de IA ha sido creado exitosamente.",
       });
     } catch (error) {
       console.error(error);
       toast({
         variant: "destructive",
-        title: "Summarization Failed",
-        description: "An error occurred while generating the summary. Please try again.",
+        title: "Falló la Resumición",
+        description: "Ocurrió un error al generar el resumen. Por favor, inténtelo de nuevo.",
       });
     } finally {
       setIsLoadingSummary(false);
@@ -78,8 +78,8 @@ export function NotasMedApp({ onSave, onCancel }: NotasMedAppProps) {
     if (!transcription && !summary) {
         toast({
             variant: "destructive",
-            title: "Cannot Save Note",
-            description: "Please provide a transcription or summary before saving.",
+            title: "No se puede Guardar la Nota",
+            description: "Por favor, proporcione una transcripción o un resumen antes de guardar.",
         });
         return;
     }
@@ -89,8 +89,8 @@ export function NotasMedApp({ onSave, onCancel }: NotasMedAppProps) {
         date: new Date().toISOString(),
     });
      toast({
-        title: "Note Saved",
-        description: "The consultation note has been added to the patient's record.",
+        title: "Nota Guardada",
+        description: "La nota de consulta ha sido agregada al expediente del paciente.",
     });
   }
 
@@ -117,8 +117,8 @@ export function NotasMedApp({ onSave, onCancel }: NotasMedAppProps) {
         </div>
         <Separator />
         <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-            <Button onClick={handleSaveNote}>Save Note</Button>
+            <Button variant="ghost" onClick={onCancel}>Cancelar</Button>
+            <Button onClick={handleSaveNote}>Guardar Nota</Button>
         </div>
     </div>
   );

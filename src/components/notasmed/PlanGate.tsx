@@ -22,12 +22,12 @@ export function PlanGate({ allowedPlans, children }: PlanGateProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-muted-foreground">
             <Lock className="h-5 w-5" />
-            Upgrade Required
+            Actualización Requerida
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground mb-4">This feature is available for {allowedPlans.join(' or ')} users.</p>
-          <Button>Upgrade Plan</Button>
+          <p className="text-muted-foreground mb-4">Esta función está disponible para usuarios de {allowedPlans.join(' o ')}.</p>
+          <Button>Actualizar Plan</Button>
         </CardContent>
       </Card>
     );

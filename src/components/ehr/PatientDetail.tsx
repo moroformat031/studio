@@ -23,11 +23,11 @@ export function PatientDetail({ patient, onUpdatePatient, onAddNote, onUpdateApp
         <Tabs defaultValue="demographics" className="w-full">
             <div className="flex justify-between items-center mb-4">
                 <TabsList>
-                    <TabsTrigger value="demographics">Demographics</TabsTrigger>
-                    <TabsTrigger value="vitals">Vitals</TabsTrigger>
-                    <TabsTrigger value="appointments">Appointments</TabsTrigger>
-                    <TabsTrigger value="medications">Medications</TabsTrigger>
-                    <TabsTrigger value="notes">Notes</TabsTrigger>
+                    <TabsTrigger value="demographics">Demografía</TabsTrigger>
+                    <TabsTrigger value="vitals">Signos Vitales</TabsTrigger>
+                    <TabsTrigger value="appointments">Citas</TabsTrigger>
+                    <TabsTrigger value="medications">Medicamentos</TabsTrigger>
+                    <TabsTrigger value="notes">Notas</TabsTrigger>
                 </TabsList>
             </div>
             <TabsContent value="demographics">

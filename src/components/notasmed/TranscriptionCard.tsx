@@ -57,10 +57,10 @@ export function TranscriptionCard({
 
         mediaRecorderRef.current.start();
         setIsRecording(true);
-        toast({ title: "Recording Started", description: "The microphone is now active." });
+        toast({ title: "Grabación Iniciada", description: "El micrófono está ahora activo." });
       } catch (err) {
-        console.error("Error accessing microphone:", err);
-        toast({ variant: "destructive", title: "Microphone Error", description: "Could not access the microphone. Please check your permissions." });
+        console.error("Error al acceder al micrófono:", err);
+        toast({ variant: "destructive", title: "Error de Micrófono", description: "No se pudo acceder al micrófono. Por favor, verifique sus permisos." });
       }
     }
   };
@@ -69,7 +69,7 @@ export function TranscriptionCard({
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      toast({ title: "Recording Stopped", description: "Processing audio for transcription." });
+      toast({ title: "Grabación Detenida", description: "Procesando audio para transcripción." });
     }
   };
 
@@ -83,29 +83,29 @@ export function TranscriptionCard({
         <div className="space-y-1.5">
           <CardTitle className="flex items-center gap-2 text-base">
             <FileText className="h-4 w-4" />
-            Transcription
+            Transcripción
           </CardTitle>
         </div>
         {isRecording ? (
-          <Button onClick={handleStopRecording} disabled={isLoading} variant="destructive" size="sm" aria-label="Stop Recording">
+          <Button onClick={handleStopRecording} disabled={isLoading} variant="destructive" size="sm" aria-label="Detener Grabación">
             <Square className="h-4 w-4" />
-            <span className="ml-2 hidden sm:inline">Stop</span>
+            <span className="ml-2 hidden sm:inline">Detener</span>
           </Button>
         ) : (
-          <Button onClick={handleStartRecording} disabled={isLoading} size="sm" aria-label="Start Recording">
+          <Button onClick={handleStartRecording} disabled={isLoading} size="sm" aria-label="Iniciar Grabación">
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4" />}
-            <span className="ml-2 hidden sm:inline">Record</span>
+            <span className="ml-2 hidden sm:inline">Grabar</span>
           </Button>
         )}
       </CardHeader>
       <CardContent className="flex-grow p-2">
         <Textarea
-          placeholder={isLoading ? "Transcription in progress..." : isRecording ? "Recording... speak now." : "Transcribed text will appear here. You can also paste text."}
+          placeholder={isLoading ? "Transcripción en progreso..." : isRecording ? "Grabando... hable ahora." : "El texto transcrito aparecerá aquí. También puede pegar texto."}
           value={transcription}
           onChange={(e) => setTranscription(e.target.value)}
           className="h-full min-h-[150px] resize-none"
           readOnly={isLoading || isRecording}
-          aria-label="Transcription text area"
+          aria-label="Área de texto de transcripción"
         />
       </CardContent>
     </Card>

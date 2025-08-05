@@ -61,13 +61,13 @@ export function MedicationsTab({ patient, onUpdateMedications }: MedicationsTabP
                 <CardHeader>
                     <div className="flex justify-between items-center">
                         <div>
-                            <CardTitle>Medications</CardTitle>
-                            <CardDescription>Current and past medications.</CardDescription>
+                            <CardTitle>Medicamentos</CardTitle>
+                            <CardDescription>Medicamentos actuales y pasados.</CardDescription>
                         </div>
                          <PlanGate allowedPlans={['Pro', 'Admin']}>
                             <Button onClick={handleAddClick} size="sm">
                                 <PlusCircle className="mr-2 h-4 w-4" />
-                                Add Medication
+                                Agregar Medicamento
                             </Button>
                         </PlanGate>
                     </div>
@@ -76,11 +76,11 @@ export function MedicationsTab({ patient, onUpdateMedications }: MedicationsTabP
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Date Prescribed</TableHead>
-                                <TableHead>Medication</TableHead>
-                                <TableHead>Dosage</TableHead>
-                                <TableHead>Frequency</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead>Fecha Prescrita</TableHead>
+                                <TableHead>Medicamento</TableHead>
+                                <TableHead>Dosis</TableHead>
+                                <TableHead>Frecuencia</TableHead>
+                                <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -98,18 +98,18 @@ export function MedicationsTab({ patient, onUpdateMedications }: MedicationsTabP
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button variant="ghost" className="h-8 w-8 p-0">
-                                                            <span className="sr-only">Open menu</span>
+                                                            <span className="sr-only">Abrir menú</span>
                                                             <MoreHorizontal className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuItem onClick={() => handleEditClick(med)}>
                                                             <Edit className="mr-2 h-4 w-4" />
-                                                            <span>Edit</span>
+                                                            <span>Editar</span>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem onClick={() => handleDeleteClick(med.id)} className="text-destructive">
                                                             <Trash2 className="mr-2 h-4 w-4" />
-                                                            <span>Delete</span>
+                                                            <span>Eliminar</span>
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
@@ -118,7 +118,7 @@ export function MedicationsTab({ patient, onUpdateMedications }: MedicationsTabP
                                     </TableRow>
                             ))): (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center">No medications prescribed.</TableCell>
+                                    <TableCell colSpan={5} className="text-center">No hay medicamentos prescritos.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>

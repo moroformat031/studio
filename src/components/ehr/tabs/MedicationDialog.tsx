@@ -49,8 +49,8 @@ export function MedicationDialog({ isOpen, onClose, onSave, medication }: Medica
         if (!formData.prescribedDate || !formData.name || !formData.dosage || !formData.frequency) {
             toast({
                 variant: 'destructive',
-                title: 'Missing Fields',
-                description: 'Please fill out all required fields.'
+                title: 'Campos Faltantes',
+                description: 'Por favor, complete todos los campos requeridos.'
             });
             return;
         }
@@ -62,8 +62,8 @@ export function MedicationDialog({ isOpen, onClose, onSave, medication }: Medica
         onSave(dataToSave);
         onClose();
         toast({
-            title: `Medication ${medication ? 'Updated' : 'Added'}`,
-            description: `The medication has been successfully ${medication ? 'updated' : 'saved'}.`
+            title: `Medicamento ${medication ? 'Actualizado' : 'Agregado'}`,
+            description: `El medicamento ha sido ${medication ? 'actualizado' : 'guardado'} exitosamente.`
         })
     };
 
@@ -76,40 +76,40 @@ export function MedicationDialog({ isOpen, onClose, onSave, medication }: Medica
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{medication ? 'Edit Medication' : 'Add New Medication'}</DialogTitle>
+          <DialogTitle>{medication ? 'Editar Medicamento' : 'Agregar Nuevo Medicamento'}</DialogTitle>
           <DialogDescription>
-            {medication ? 'Update the details for this medication.' : 'Enter the details for the new medication.'}
+            {medication ? 'Actualice los detalles de este medicamento.' : 'Introduzca los detalles del nuevo medicamento.'}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="prescribedDate" className="text-right">
-              Date
+              Fecha
             </Label>
             <Input id="prescribedDate" type="date" value={formData.prescribedDate} onChange={handleInputChange} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name" className="text-right">
-              Medication
+              Medicamento
             </Label>
-            <Input id="name" placeholder="e.g. Lisinopril" value={formData.name} onChange={handleInputChange} className="col-span-3" />
+            <Input id="name" placeholder="p.ej. Lisinopril" value={formData.name} onChange={handleInputChange} className="col-span-3" />
           </div>
            <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="dosage" className="text-right">
-              Dosage
+              Dosis
             </Label>
-            <Input id="dosage" placeholder="e.g. 10mg" value={formData.dosage} onChange={handleInputChange} className="col-span-3" />
+            <Input id="dosage" placeholder="p.ej. 10mg" value={formData.dosage} onChange={handleInputChange} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="frequency" className="text-right">
-              Frequency
+              Frecuencia
             </Label>
-            <Input id="frequency" placeholder="e.g. Once a day" value={formData.frequency} onChange={handleInputChange} className="col-span-3" />
+            <Input id="frequency" placeholder="p.ej. Una vez al día" value={formData.frequency} onChange={handleInputChange} className="col-span-3" />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="submit" onClick={handleSave}>Save Medication</Button>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" onClick={handleSave}>Guardar Medicamento</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

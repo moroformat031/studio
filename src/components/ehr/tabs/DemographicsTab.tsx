@@ -31,7 +31,7 @@ export function DemographicsTab({ patient, onUpdatePatient }: DemographicsTabPro
     const handleSave = () => {
         onUpdatePatient(patient.id, { demographics: formData });
         setIsEditing(false);
-        toast({ title: 'Success', description: 'Patient demographics updated.' });
+        toast({ title: 'Éxito', description: 'Datos demográficos del paciente actualizados.' });
     };
 
     return (
@@ -39,16 +39,16 @@ export function DemographicsTab({ patient, onUpdatePatient }: DemographicsTabPro
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <div>
-                        <CardTitle>Demographics</CardTitle>
-                        <CardDescription>Patient's personal information.</CardDescription>
+                        <CardTitle>Demografía</CardTitle>
+                        <CardDescription>Información personal del paciente.</CardDescription>
                     </div>
                     <PlanGate allowedPlans={['Pro', 'Admin']}>
                         {!isEditing ? (
-                            <Button variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
+                            <Button variant="outline" onClick={() => setIsEditing(true)}>Editar</Button>
                         ) : (
                             <div className="flex gap-2">
-                                <Button variant="outline" onClick={() => { setIsEditing(false); setFormData(patient.demographics); }}>Cancel</Button>
-                                <Button onClick={handleSave}>Save</Button>
+                                <Button variant="outline" onClick={() => { setIsEditing(false); setFormData(patient.demographics); }}>Cancelar</Button>
+                                <Button onClick={handleSave}>Guardar</Button>
                             </div>
                         )}
                     </PlanGate>
@@ -57,24 +57,24 @@ export function DemographicsTab({ patient, onUpdatePatient }: DemographicsTabPro
             <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
-                        <Label htmlFor="name">Full Name</Label>
+                        <Label htmlFor="name">Nombre Completo</Label>
                         <Input id="name" value={patient.name} readOnly disabled className="mt-1" />
                     </div>
                     <div>
-                        <Label htmlFor="dob">Date of Birth</Label>
+                        <Label htmlFor="dob">Fecha de Nacimiento</Label>
                         <Input id="dob" type="date" value={formData.dob} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
                     </div>
                     <div>
-                        <Label htmlFor="gender">Gender</Label>
+                        <Label htmlFor="gender">Género</Label>
                         {isEditing ? (
                              <Select onValueChange={handleGenderChange} value={formData.gender}>
                                 <SelectTrigger className="mt-1">
-                                    <SelectValue placeholder="Select gender" />
+                                    <SelectValue placeholder="Seleccionar género" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Male">Male</SelectItem>
-                                    <SelectItem value="Female">Female</SelectItem>
-                                    <SelectItem value="Other">Other</SelectItem>
+                                    <SelectItem value="Masculino">Masculino</SelectItem>
+                                    <SelectItem value="Femenino">Femenino</SelectItem>
+                                    <SelectItem value="Otro">Otro</SelectItem>
                                 </SelectContent>
                             </Select>
                         ) : (
@@ -82,7 +82,7 @@ export function DemographicsTab({ patient, onUpdatePatient }: DemographicsTabPro
                         )}
                     </div>
                      <div>
-                        <Label htmlFor="phone">Phone</Label>
+                        <Label htmlFor="phone">Teléfono</Label>
                         <Input id="phone" value={formData.phone} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
                     </div>
                     <div>
@@ -90,7 +90,7 @@ export function DemographicsTab({ patient, onUpdatePatient }: DemographicsTabPro
                         <Input id="email" type="email" value={formData.email} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
                     </div>
                      <div className="md:col-span-2">
-                        <Label htmlFor="address">Address</Label>
+                        <Label htmlFor="address">Dirección</Label>
                         <Input id="address" value={formData.address} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
                     </div>
                 </div>

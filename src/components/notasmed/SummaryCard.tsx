@@ -27,22 +27,22 @@ export function SummaryCard({
         <div className="space-y-1.5">
           <CardTitle className="flex items-center gap-2 text-base">
             <FileCheck className="h-4 w-4" />
-            Summary & Notes
+            Resumen y Notas
           </CardTitle>
         </div>
-        <Button onClick={onSummarize} disabled={isLoading || !transcription} size="sm" variant="ghost" aria-label="Generate Summary">
+        <Button onClick={onSummarize} disabled={isLoading || !transcription} size="sm" variant="ghost" aria-label="Generar Resumen">
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-           <span className="ml-2 hidden sm:inline">Generate</span>
+           <span className="ml-2 hidden sm:inline">Generar</span>
         </Button>
       </CardHeader>
       <CardContent className="flex-grow p-2">
         <Textarea
-          placeholder={isLoading ? "Generating summary..." : "AI summary and manual notes will appear here."}
+          placeholder={isLoading ? "Generando resumen..." : "El resumen de IA y las notas manuales aparecerán aquí."}
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
           className="h-full min-h-[150px] resize-none"
           readOnly={isLoading}
-          aria-label="Summary and notes text area"
+          aria-label="Área de texto de resumen y notas"
         />
       </CardContent>
     </Card>

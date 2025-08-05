@@ -26,7 +26,7 @@ interface AddPatientDialogProps {
 export function AddPatientDialog({ children, open, onOpenChange, onSave }: AddPatientDialogProps) {
     const [name, setName] = useState('');
     const [dob, setDob] = useState('');
-    const [gender, setGender] = useState<Demographics['gender']>('Other');
+    const [gender, setGender] = useState<Demographics['gender']>('Otro');
     const [address, setAddress] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
@@ -34,7 +34,7 @@ export function AddPatientDialog({ children, open, onOpenChange, onSave }: AddPa
     const handleSave = () => {
         if (!name || !dob) {
             // Add proper validation/toast later
-            console.error("Name and DOB are required");
+            console.error("Nombre y Fecha de Nacimiento son requeridos");
             return;
         }
         onSave({
@@ -44,7 +44,7 @@ export function AddPatientDialog({ children, open, onOpenChange, onSave }: AddPa
         // Reset form
         setName('');
         setDob('');
-        setGender('Other');
+        setGender('Otro');
         setAddress('');
         setPhone('');
         setEmail('');
@@ -57,48 +57,48 @@ export function AddPatientDialog({ children, open, onOpenChange, onSave }: AddPa
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Patient</DialogTitle>
+          <DialogTitle>Agregar Nuevo Paciente</DialogTitle>
           <DialogDescription>
-            Enter the details for the new patient. Click save when you're done.
+            Introduce los detalles del nuevo paciente. Haz clic en guardar cuando hayas terminado.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name" className="text-right">
-              Name
+              Nombre
             </Label>
             <Input id="name" value={name} onChange={e => setName(e.target.value)} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="dob" className="text-right">
-              Date of Birth
+              Fecha de Nac.
             </Label>
             <Input id="dob" type="date" value={dob} onChange={e => setDob(e.target.value)} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="gender" className="text-right">
-              Gender
+              Género
             </Label>
              <Select onValueChange={(value: Demographics['gender']) => setGender(value)} value={gender}>
                 <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select gender" />
+                    <SelectValue placeholder="Seleccionar género" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="Male">Male</SelectItem>
-                    <SelectItem value="Female">Female</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
+                    <SelectItem value="Masculino">Masculino</SelectItem>
+                    <SelectItem value="Femenino">Femenino</SelectItem>
+                    <SelectItem value="Otro">Otro</SelectItem>
                 </SelectContent>
             </Select>
           </div>
            <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="address" className="text-right">
-              Address
+              Dirección
             </Label>
             <Input id="address" value={address} onChange={e => setAddress(e.target.value)} className="col-span-3" />
           </div>
            <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="phone" className="text-right">
-              Phone
+              Teléfono
             </Label>
             <Input id="phone" value={phone} onChange={e => setPhone(e.target.value)} className="col-span-3" />
           </div>
@@ -110,7 +110,7 @@ export function AddPatientDialog({ children, open, onOpenChange, onSave }: AddPa
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit" onClick={handleSave}>Save Patient</Button>
+          <Button type="submit" onClick={handleSave}>Guardar Paciente</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

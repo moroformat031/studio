@@ -53,8 +53,8 @@ export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps
         if (!formData.date || !formData.hr || !formData.bp || !formData.temp || !formData.rr) {
             toast({
                 variant: 'destructive',
-                title: 'Missing Fields',
-                description: 'Please fill out all required fields.'
+                title: 'Campos Faltantes',
+                description: 'Por favor, complete todos los campos requeridos.'
             });
             return;
         }
@@ -74,8 +74,8 @@ export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps
         onSave(finalData);
         onClose();
         toast({
-            title: `Vitals ${vital ? 'Updated' : 'Saved'}`,
-            description: `The vital signs have been successfully ${vital ? 'updated' : 'saved'}.`
+            title: `Signos Vitales ${vital ? 'Actualizados' : 'Guardados'}`,
+            description: `Los signos vitales han sido ${vital ? 'actualizados' : 'guardados'} exitosamente.`
         })
     };
 
@@ -88,46 +88,46 @@ export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{vital ? 'Edit Vitals' : 'Add New Vitals'}</DialogTitle>
+          <DialogTitle>{vital ? 'Editar Signos Vitales' : 'Agregar Nuevos Signos Vitales'}</DialogTitle>
           <DialogDescription>
-            {vital ? 'Update the details for this vital signs entry.' : 'Enter the details for the new vital signs entry.'}
+            {vital ? 'Actualice los detalles de esta entrada de signos vitales.' : 'Introduzca los detalles de la nueva entrada de signos vitales.'}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="date" className="text-right">
-              Date
+              Fecha
             </Label>
             <Input id="date" type="date" value={formData.date} onChange={handleInputChange} className="col-span-3" />
           </div>
            <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="bp" className="text-right">
-              Blood Pressure
+              Presión Arterial
             </Label>
-            <Input id="bp" placeholder="e.g. 120/80" value={formData.bp} onChange={handleInputChange} className="col-span-3" />
+            <Input id="bp" placeholder="p.ej. 120/80" value={formData.bp} onChange={handleInputChange} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="hr" className="text-right">
-              Heart Rate
+              Frec. Cardíaca
             </Label>
-            <Input id="hr" type="number" placeholder="e.g. 75" value={formData.hr} onChange={handleInputChange} className="col-span-3" />
+            <Input id="hr" type="number" placeholder="p.ej. 75" value={formData.hr} onChange={handleInputChange} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="temp" className="text-right">
               Temp (°C)
             </Label>
-            <Input id="temp" type="number" placeholder="e.g. 36.8" step="0.1" value={formData.temp} onChange={handleInputChange} className="col-span-3" />
+            <Input id="temp" type="number" placeholder="p.ej. 36.8" step="0.1" value={formData.temp} onChange={handleInputChange} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="rr" className="text-right">
-             Resp. Rate
+             Frec. Resp.
             </Label>
-            <Input id="rr" type="number" placeholder="e.g. 16" value={formData.rr} onChange={handleInputChange} className="col-span-3" />
+            <Input id="rr" type="number" placeholder="p.ej. 16" value={formData.rr} onChange={handleInputChange} className="col-span-3" />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="submit" onClick={handleSave}>Save Vitals</Button>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" onClick={handleSave}>Guardar Signos Vitales</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

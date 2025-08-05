@@ -25,15 +25,15 @@ export function SettingsDialog({ children }: SettingsDialogProps) {
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Settings</DialogTitle>
+          <DialogTitle>Configuración</DialogTitle>
           <DialogDescription>
-            Adjust your preferences for the application.
+            Ajusta tus preferencias para la aplicación.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="font-size" className="text-right">
-              Font Size
+              Tamaño de Fuente
             </Label>
             <div className="col-span-3 flex items-center gap-4">
               <Slider

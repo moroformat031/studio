@@ -59,13 +59,13 @@ export function VitalsTab({ patient, onUpdateVitals }: VitalsTabProps) {
             <CardHeader>
                  <div className="flex justify-between items-center">
                     <div>
-                        <CardTitle>Vitals</CardTitle>
-                        <CardDescription>Patient's recorded vital signs.</CardDescription>
+                        <CardTitle>Signos Vitales</CardTitle>
+                        <CardDescription>Signos vitales registrados del paciente.</CardDescription>
                     </div>
                     <PlanGate allowedPlans={['Pro', 'Admin']}>
                         <Button onClick={handleAddClick} size="sm">
                             <PlusCircle className="mr-2 h-4 w-4" />
-                            Add Vital
+                            Agregar Signos Vitales
                         </Button>
                     </PlanGate>
                  </div>
@@ -74,12 +74,12 @@ export function VitalsTab({ patient, onUpdateVitals }: VitalsTabProps) {
                  <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>HR</TableHead>
-                            <TableHead>BP</TableHead>
+                            <TableHead>Fecha</TableHead>
+                            <TableHead>FC</TableHead>
+                            <TableHead>PA</TableHead>
                             <TableHead>Temp (°C)</TableHead>
-                            <TableHead>RR</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead>FR</TableHead>
+                            <TableHead className="text-right">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -98,18 +98,18 @@ export function VitalsTab({ patient, onUpdateVitals }: VitalsTabProps) {
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" className="h-8 w-8 p-0">
-                                                    <span className="sr-only">Open menu</span>
+                                                    <span className="sr-only">Abrir menú</span>
                                                     <MoreHorizontal className="h-4 w-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem onClick={() => handleEditClick(vital)}>
                                                     <Edit className="mr-2 h-4 w-4" />
-                                                    <span>Edit</span>
+                                                    <span>Editar</span>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem onClick={() => handleDeleteClick(vital.id)} className="text-destructive">
                                                     <Trash2 className="mr-2 h-4 w-4" />
-                                                    <span>Delete</span>
+                                                    <span>Eliminar</span>
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
@@ -118,7 +118,7 @@ export function VitalsTab({ patient, onUpdateVitals }: VitalsTabProps) {
                             </TableRow>
                         ))): (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center">No vital signs recorded.</TableCell>
+                                <TableCell colSpan={6} className="text-center">No hay signos vitales registrados.</TableCell>
                             </TableRow>
                         )}
                     </TableBody>

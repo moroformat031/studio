@@ -56,7 +56,7 @@ export function EHRApp() {
                 <div className="flex flex-col gap-8">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div className="flex-1">
-                            <h2 className="text-lg font-semibold mb-2">Select Patient</h2>
+                            <h2 className="text-lg font-semibold mb-2">Seleccionar Paciente</h2>
                              <div className="w-full md:w-[300px]">
                                 <PatientCombobox
                                     patients={patients}
@@ -73,7 +73,7 @@ export function EHRApp() {
                             >
                                 <Button size="sm" variant="outline" className="w-full md:w-auto">
                                     <Plus className="h-4 w-4 mr-2" />
-                                    Add Patient
+                                    Agregar Paciente
                                 </Button>
                             </AddPatientDialog>
                         </PlanGate>
@@ -91,7 +91,7 @@ export function EHRApp() {
                             />
                         ) : (
                             <div className="flex items-center justify-center h-[400px] text-muted-foreground border-2 border-dashed rounded-lg">
-                                Select a patient to view their details or add a new patient.
+                                Seleccione un paciente para ver sus detalles o agregue un nuevo paciente.
                             </div>
                         )}
                     </div>

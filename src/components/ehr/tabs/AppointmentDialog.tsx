@@ -29,7 +29,7 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
         date: new Date().toISOString().split('T')[0],
         time: '',
         reason: '',
-        status: 'Scheduled' as const
+        status: 'Programada' as const
     }), []);
 
     const [formData, setFormData] = useState(initialState);
@@ -50,8 +50,8 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
         if (!formData.date || !formData.time || !formData.reason) {
             toast({
                 variant: 'destructive',
-                title: 'Missing Fields',
-                description: 'Please fill out all required fields.'
+                title: 'Campos Faltantes',
+                description: 'Por favor, complete todos los campos requeridos.'
             });
             return;
         }
@@ -63,8 +63,8 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
         onSave(dataToSave);
         onClose();
         toast({
-            title: `Appointment ${appointment ? 'Updated' : 'Scheduled'}`,
-            description: `The appointment has been successfully ${appointment ? 'updated' : 'saved'}.`
+            title: `Cita ${appointment ? 'Actualizada' : 'Programada'}`,
+            description: `La cita ha sido ${appointment ? 'actualizada' : 'guardada'} exitosamente.`
         })
     };
 
@@ -81,49 +81,49 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{appointment ? 'Edit Appointment' : 'Schedule New Appointment'}</DialogTitle>
+          <DialogTitle>{appointment ? 'Editar Cita' : 'Programar Nueva Cita'}</DialogTitle>
           <DialogDescription>
-            {appointment ? 'Update the details for this appointment.' : 'Enter the details for the new appointment.'}
+            {appointment ? 'Actualice los detalles de esta cita.' : 'Introduzca los detalles de la nueva cita.'}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="date" className="text-right">
-              Date
+              Fecha
             </Label>
             <Input id="date" type="date" value={formData.date} onChange={handleInputChange} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="time" className="text-right">
-              Time
+              Hora
             </Label>
             <Input id="time" type="time" value={formData.time} onChange={handleInputChange} className="col-span-3" />
           </div>
            <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="reason" className="text-right">
-              Reason
+              Motivo
             </Label>
             <Input id="reason" value={formData.reason} onChange={handleInputChange} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="status" className="text-right">
-              Status
+              Estado
             </Label>
              <Select onValueChange={handleStatusChange} value={formData.status}>
                 <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder="Seleccionar estado" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="Scheduled">Scheduled</SelectItem>
-                    <SelectItem value="Completed">Completed</SelectItem>
-                    <SelectItem value="Canceled">Canceled</SelectItem>
+                    <SelectItem value="Programada">Programada</SelectItem>
+                    <SelectItem value="Completada">Completada</SelectItem>
+                    <SelectItem value="Cancelada">Cancelada</SelectItem>
                 </SelectContent>
             </Select>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="submit" onClick={handleSave}>Save Appointment</Button>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" onClick={handleSave}>Guardar Cita</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

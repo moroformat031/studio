@@ -60,13 +60,13 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
                 <CardHeader>
                     <div className="flex justify-between items-center">
                         <div>
-                            <CardTitle>Appointments</CardTitle>
-                            <CardDescription>Scheduled and past appointments.</CardDescription>
+                            <CardTitle>Citas</CardTitle>
+                            <CardDescription>Citas programadas y pasadas.</CardDescription>
                         </div>
                         <PlanGate allowedPlans={['Pro', 'Admin']}>
                             <Button onClick={handleAddClick} size="sm">
                                 <PlusCircle className="mr-2 h-4 w-4" />
-                                Add Appointment
+                                Agregar Cita
                             </Button>
                         </PlanGate>
                     </div>
@@ -75,11 +75,11 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Time</TableHead>
-                                <TableHead>Reason</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead>Fecha</TableHead>
+                                <TableHead>Hora</TableHead>
+                                <TableHead>Motivo</TableHead>
+                                <TableHead>Estado</TableHead>
+                                <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -92,7 +92,7 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
                                     <TableCell>{appt.time}</TableCell>
                                     <TableCell>{appt.reason}</TableCell>
                                     <TableCell>
-                                        <Badge variant={appt.status === 'Completed' ? 'default' : appt.status === 'Canceled' ? 'destructive' : 'secondary'}>
+                                        <Badge variant={appt.status === 'Completada' ? 'default' : appt.status === 'Cancelada' ? 'destructive' : 'secondary'}>
                                             {appt.status}
                                         </Badge>
                                     </TableCell>
@@ -101,18 +101,18 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" className="h-8 w-8 p-0">
-                                                    <span className="sr-only">Open menu</span>
+                                                    <span className="sr-only">Abrir menú</span>
                                                     <MoreHorizontal className="h-4 w-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem onClick={() => handleEditClick(appt)}>
                                                     <Edit className="mr-2 h-4 w-4" />
-                                                    <span>Edit</span>
+                                                    <span>Editar</span>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem onClick={() => handleDeleteClick(appt.id)} className="text-destructive">
                                                     <Trash2 className="mr-2 h-4 w-4" />
-                                                    <span>Delete</span>
+                                                    <span>Eliminar</span>
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
@@ -121,7 +121,7 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
                                 </TableRow>
                             ))): (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center">No appointments scheduled.</TableCell>
+                                    <TableCell colSpan={5} className="text-center">No hay citas programadas.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
