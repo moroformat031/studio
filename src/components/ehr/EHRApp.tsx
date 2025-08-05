@@ -6,14 +6,14 @@ import { PatientDetail } from './PatientDetail';
 import { Header } from '../notasmed/Header';
 import { AddPatientDialog } from './AddPatientDialog';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { Patient, Appointment, Vital } from '@/types/ehr';
+import { Patient, Appointment, Vital, Medication } from '@/types/ehr';
 import { Button } from '../ui/button';
 import { Plus } from 'lucide-react';
 import { PlanGate } from '../notasmed/PlanGate';
 import { PatientCombobox } from './PatientCombobox';
 
 export function EHRApp() {
-    const { patients, addPatient, updatePatient, addNoteToPatient, updatePatientAppointments, updatePatientVitals } = usePatientData();
+    const { patients, addPatient, updatePatient, addNoteToPatient, updatePatientAppointments, updatePatientVitals, updatePatientMedications } = usePatientData();
     const [selectedPatientId, setSelectedPatientId] = useState<string | null>(patients[0]?.id || null);
     const [fontSize] = useLocalStorage('notasmed-fontSize', 16);
     const [isAddPatientDialogOpen, setIsAddPatientDialogOpen] = useState(false);
@@ -41,6 +41,10 @@ export function EHRApp() {
     const handleUpdateVitals = (patientId: string, vitals: Vital[]) => {
         updatePatientVitals(patientId, vitals);
     };
+
+    const handleUpdateMedications = (patientId: string, medications: Medication[]) => {
+        updatePatientMedications(patientId, medications);
+    }
 
     return (
         <div className="flex flex-col min-h-screen bg-background text-foreground font-body">
@@ -83,6 +87,7 @@ export function EHRApp() {
                                 onAddNote={addNoteToPatient}
                                 onUpdateAppointments={handleUpdateAppointments}
                                 onUpdateVitals={handleUpdateVitals}
+                                onUpdateMedications={handleUpdateMedications}
                             />
                         ) : (
                             <div className="flex items-center justify-center h-[400px] text-muted-foreground border-2 border-dashed rounded-lg">
