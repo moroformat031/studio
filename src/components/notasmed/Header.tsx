@@ -1,7 +1,7 @@
 
 "use client";
 
-import { LogOut, Settings, Stethoscope } from 'lucide-react';
+import { LogOut, Settings, Stethoscope, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SettingsDialog } from './SettingsDialog';
 import { useAuth } from '@/context/AuthContext';
@@ -44,6 +44,12 @@ export function Header() {
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">{user?.username}</p>
+                   {user?.clinicName && (
+                     <p className="text-xs leading-none text-muted-foreground flex items-center gap-1">
+                        <Building className="h-3 w-3" />
+                        {user.clinicName}
+                    </p>
+                  )}
                   <p className="text-xs leading-none text-muted-foreground">Plan {user?.plan}</p>
                 </div>
               </DropdownMenuLabel>

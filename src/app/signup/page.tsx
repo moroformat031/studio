@@ -6,36 +6,43 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Stethoscope, Check } from 'lucide-react';
+import { Stethoscope, Check, Building } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Plan } from '@/types/ehr';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 export default function SignupPage() {
-  const [selectedPlan, setSelectedPlan] = useState<Plan>('Free');
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [clinicName, setClinicName] = useState('');
+
   const { signup } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedPlan) {
+        toast({
+            variant: "destructive",
+            title: "Plan no seleccionado",
+            description: "Por favor, elija un plan para continuar.",
+        });
+        return;
+    }
     setIsLoading(true);
 
     try {
-      // Since we removed username/password fields, we'll need to adjust how signup works.
-      // For now, let's generate a placeholder user or adjust the auth context.
-      // For this example, we'll just use the plan name as a user differentiator.
-      const tempUsername = `${selectedPlan.toLowerCase()}-user-${Math.floor(Math.random() * 1000)}`;
-      const tempPassword = 'password';
-
-      await signup(tempUsername, tempPassword, selectedPlan);
+      await signup(username, password, selectedPlan, clinicName);
       toast({
         title: "¡Cuenta Creada!",
-        description: `Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesión. Tu usuario es: ${tempUsername}`,
+        description: `Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesión.`,
       });
       router.push('/login');
     } catch (error) {
@@ -70,9 +77,9 @@ export default function SignupPage() {
         <CardContent>
           <form onSubmit={handleSignup} className="space-y-6">
             <div className="space-y-2">
-              <Label>Selecciona tu Plan</Label>
+              <Label>Paso 1: Selecciona tu Plan</Label>
                <RadioGroup
-                    value={selectedPlan}
+                    value={selectedPlan ?? undefined}
                     onValueChange={(value: Plan) => setSelectedPlan(value)}
                     className="grid grid-cols-1 md:grid-cols-3 gap-4"
                 >
@@ -97,7 +104,55 @@ export default function SignupPage() {
                 </RadioGroup>
             </div>
             
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            {selectedPlan && (
+                <div className="space-y-4 pt-4 border-t">
+                    <h3 className="text-lg font-semibold">Paso 2: Completa tu Registro</h3>
+                     <div className="space-y-2">
+                        <Label htmlFor="username">Usuario</Label>
+                        <Input
+                            id="username"
+                            type="text"
+                            placeholder="p.ej. drasmith"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                            disabled={isLoading}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="password">Contraseña</Label>
+                        <Input
+                            id="password"
+                            type="password"
+                            placeholder="Tu contraseña segura"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            disabled={isLoading}
+                        />
+                    </div>
+                    {(selectedPlan === 'Free' || selectedPlan === 'Clinica') && (
+                        <div className="space-y-2">
+                            <Label htmlFor="clinicName">Nombre de la Clínica</Label>
+                            <div className="relative">
+                               <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                               <Input
+                                    id="clinicName"
+                                    type="text"
+                                    placeholder="p.ej. Clínica del Sol"
+                                    value={clinicName}
+                                    onChange={(e) => setClinicName(e.target.value)}
+                                    required
+                                    disabled={isLoading}
+                                    className="pl-10"
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+            
+            <Button type="submit" className="w-full" disabled={isLoading || !selectedPlan}>
               {isLoading ? 'Creando Cuenta...' : 'Registrarse'}
             </Button>
           </form>

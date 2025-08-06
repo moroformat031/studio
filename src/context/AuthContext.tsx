@@ -9,13 +9,14 @@ import { useLocalStorage } from '@/hooks/use-local-storage';
 interface User {
   username: string;
   plan: Plan;
+  clinicName?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (username: string, password?: string) => Promise<void>;
-  signup: (username: string, password?: string, plan?: Plan) => Promise<void>;
+  signup: (username: string, password?: string, plan?: Plan, clinicName?: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -23,10 +24,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const FAKE_USERS_KEY = "notasmed-fake-users";
 
-const initialUsers: { [key: string]: { password?: string; plan: Plan } } = {
+const initialUsers: { [key: string]: { password?: string; plan: Plan, clinicName?: string } } = {
   'victor': { password: 'codigo', plan: 'Hospital' },
-  'clinica-user': { password: 'clinica', plan: 'Clinica' },
-  'free-user': { password: 'free', plan: 'Free' },
+  'clinica-user': { password: 'clinica', plan: 'Clinica', clinicName: 'Clínica Central' },
+  'free-user': { password: 'free', plan: 'Free', clinicName: 'Consultorio Dr. Ejemplo' },
 };
 
 
@@ -54,7 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (username: string, password?: string) => {
     const userData = fakeUsers[username.toLowerCase()];
     if (userData && (!userData.password || userData.password === password)) {
-      const newUser: User = { username: username, plan: userData.plan };
+      const newUser: User = { username: username, plan: userData.plan, clinicName: userData.clinicName };
       localStorage.setItem('notasmed-user', JSON.stringify(newUser));
       setUser(newUser);
     } else {
@@ -62,17 +63,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signup = async (username: string, password?: string, plan: Plan = 'Free') => {
+  const signup = async (username: string, password?: string, plan: Plan = 'Free', clinicName?: string) => {
+      if (!username || !password) {
+          throw new Error('El nombre de usuario y la contraseña son requeridos.');
+      }
       if (fakeUsers[username.toLowerCase()]) {
           throw new Error('El nombre de usuario ya existe.');
-      }
-      if (!password) {
-          throw new Error('La contraseña es requerida.');
       }
       
       const newUsers = {
           ...fakeUsers,
-          [username.toLowerCase()]: { password, plan }
+          [username.toLowerCase()]: { password, plan, clinicName }
       };
       setFakeUsers(newUsers);
   }
