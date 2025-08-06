@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Medication } from '@/types/ehr';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface MedicationDialogProps {
     isOpen: boolean;
@@ -21,6 +22,17 @@ interface MedicationDialogProps {
     onSave: (medication: Omit<Medication, 'id'> | Medication) => void;
     medication: Medication | null;
 }
+
+const sampleMedications = [
+    'Lisinopril',
+    'Metformina',
+    'Atorvastatina',
+    'Amoxicilina',
+    'Ibuprofeno',
+    'Omeprazol',
+    'Paracetamol',
+    'Salbutamol'
+];
 
 export function MedicationDialog({ isOpen, onClose, onSave, medication }: MedicationDialogProps) {
     const { toast } = useToast();
@@ -71,6 +83,10 @@ export function MedicationDialog({ isOpen, onClose, onSave, medication }: Medica
         const { id, value } = e.target;
         setFormData(prev => ({ ...prev, [id]: value }));
     }
+    
+    const handleSelectChange = (id: string, value: string) => {
+        setFormData(prev => ({ ...prev, [id]: value }));
+    }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -92,7 +108,16 @@ export function MedicationDialog({ isOpen, onClose, onSave, medication }: Medica
             <Label htmlFor="name" className="text-right">
               Medicamento
             </Label>
-            <Input id="name" placeholder="p.ej. Lisinopril" value={formData.name} onChange={handleInputChange} className="col-span-3" />
+            <Select onValueChange={(value) => handleSelectChange('name', value)} value={formData.name}>
+                <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Seleccionar medicamento" />
+                </SelectTrigger>
+                <SelectContent>
+                    {sampleMedications.map(med => (
+                        <SelectItem key={med} value={med}>{med}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
           </div>
            <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="dosage" className="text-right">

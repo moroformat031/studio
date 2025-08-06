@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from '@/components/ui/textarea';
 import { Procedure } from '@/types/ehr';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ProcedureDialogProps {
     isOpen: boolean;
@@ -22,6 +23,16 @@ interface ProcedureDialogProps {
     onSave: (procedure: Omit<Procedure, 'id'> | Procedure) => void;
     procedure: Procedure | null;
 }
+
+const sampleProcedures = [
+    'Biopsia de piel',
+    'Colonoscopia',
+    'Endoscopia',
+    'Electrocardiograma (ECG)',
+    'Radiografía de tórax',
+    'Ultrasonido abdominal',
+    'Sutura de herida'
+];
 
 export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: ProcedureDialogProps) {
     const { toast } = useToast();
@@ -72,6 +83,10 @@ export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: Procedur
         setFormData(prev => ({ ...prev, [id]: value }));
     }
 
+    const handleSelectChange = (id: string, value: string) => {
+        setFormData(prev => ({ ...prev, [id]: value }));
+    }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
@@ -92,7 +107,16 @@ export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: Procedur
             <Label htmlFor="name" className="text-right">
               Nombre
             </Label>
-            <Input id="name" placeholder="p.ej. Biopsia de piel" value={formData.name} onChange={handleInputChange} className="col-span-3" />
+            <Select onValueChange={(value) => handleSelectChange('name', value)} value={formData.name}>
+                <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Seleccionar procedimiento" />
+                </SelectTrigger>
+                <SelectContent>
+                    {sampleProcedures.map(proc => (
+                        <SelectItem key={proc} value={proc}>{proc}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
           </div>
            <div className="grid grid-cols-4 items-start gap-4">
             <Label htmlFor="notes" className="text-right pt-2">
