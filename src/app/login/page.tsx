@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -27,7 +28,7 @@ export default function LoginPage() {
 
     try {
       await login(username, password);
-      router.push('/');
+      router.push('/dashboard');
     } catch (error) {
         const e = error as Error;
       toast({
