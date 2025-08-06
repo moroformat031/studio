@@ -29,6 +29,8 @@ export interface Appointment {
     time: string;
     reason: string;
     status: 'Programada' | 'Completada' | 'Cancelada';
+    visitProvider: string;
+    billingProvider: string;
 }
 
 export interface Procedure {

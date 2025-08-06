@@ -29,7 +29,9 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
         date: new Date().toISOString().split('T')[0],
         time: '',
         reason: '',
-        status: 'Programada' as const
+        status: 'Programada' as const,
+        visitProvider: '',
+        billingProvider: ''
     }), []);
 
     const [formData, setFormData] = useState(initialState);
@@ -104,6 +106,18 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
               Motivo
             </Label>
             <Input id="reason" value={formData.reason} onChange={handleInputChange} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="visitProvider" className="text-right">
+              Prov. Visita
+            </Label>
+            <Input id="visitProvider" value={formData.visitProvider} onChange={handleInputChange} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="billingProvider" className="text-right">
+              Prov. Factura
+            </Label>
+            <Input id="billingProvider" value={formData.billingProvider} onChange={handleInputChange} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="status" className="text-right">

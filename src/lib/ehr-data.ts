@@ -19,7 +19,7 @@ export const initialPatients: Patient[] = [
             { id: 'med-1', name: 'Lisinopril', dosage: '10mg', frequency: 'Una vez al día', prescribedDate: '2024-07-15' }
         ],
         appointments: [
-            { id: 'apt-1', date: '2024-08-01', time: '11:00', reason: 'Seguimiento', status: 'Programada'}
+            { id: 'apt-1', date: '2024-08-01', time: '11:00', reason: 'Seguimiento', status: 'Programada', visitProvider: 'Dr. Smith', billingProvider: 'Clínica General'}
         ],
         procedures: [],
         notes: [
@@ -48,8 +48,8 @@ export const initialPatients: Patient[] = [
             { id: 'med-2', name: 'Metformina', dosage: '500mg', frequency: 'Dos veces al día', prescribedDate: '2024-07-18' }
         ],
         appointments: [
-            { id: 'apt-2', date: '2024-07-18', time: '09:30', reason: 'Chequeo de rutina', status: 'Completada'},
-            { id: 'apt-3', date: '2025-01-18', time: '09:30', reason: 'Seguimiento de 6 meses', status: 'Programada'}
+            { id: 'apt-2', date: '2024-07-18', time: '09:30', reason: 'Chequeo de rutina', status: 'Completada', visitProvider: 'Dra. Jones', billingProvider: 'Hospital Central'},
+            { id: 'apt-3', date: '2025-01-18', time: '09:30', reason: 'Seguimiento de 6 meses', status: 'Programada', visitProvider: 'Dra. Jones', billingProvider: 'Hospital Central'}
         ],
         procedures: [],
         notes: []

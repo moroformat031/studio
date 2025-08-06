@@ -45,8 +45,13 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
         } else {
             // Adding new appointment
             const newAppointment: Appointment = {
-                ...appointmentData,
-                id: `appt-${Date.now()}`
+                id: `appt-${Date.now()}`,
+                date: appointmentData.date,
+                time: appointmentData.time,
+                reason: appointmentData.reason,
+                status: appointmentData.status,
+                visitProvider: appointmentData.visitProvider,
+                billingProvider: appointmentData.billingProvider
             };
             updatedAppointments = [...patient.appointments, newAppointment];
         }
@@ -78,6 +83,8 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
                                 <TableHead>Fecha</TableHead>
                                 <TableHead>Hora</TableHead>
                                 <TableHead>Motivo</TableHead>
+                                <TableHead>Prov. Visita</TableHead>
+                                <TableHead>Prov. Factura</TableHead>
                                 <TableHead>Estado</TableHead>
                                 <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
@@ -91,6 +98,8 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
                                     <TableCell>{new Date(appt.date).toLocaleDateString()}</TableCell>
                                     <TableCell>{appt.time}</TableCell>
                                     <TableCell>{appt.reason}</TableCell>
+                                    <TableCell>{appt.visitProvider}</TableCell>
+                                    <TableCell>{appt.billingProvider}</TableCell>
                                     <TableCell>
                                         <Badge variant={appt.status === 'Completada' ? 'default' : appt.status === 'Cancelada' ? 'destructive' : 'secondary'}>
                                             {appt.status}
@@ -121,7 +130,7 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
                                 </TableRow>
                             ))): (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center">No hay citas programadas.</TableCell>
+                                    <TableCell colSpan={7} className="text-center">No hay citas programadas.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
