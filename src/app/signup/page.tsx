@@ -13,9 +13,12 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Plan } from '@/types/ehr';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 export default function SignupPage() {
   const [selectedPlan, setSelectedPlan] = useState<Plan>('Free');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useAuth();
   const router = useRouter();
@@ -25,16 +28,21 @@ export default function SignupPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      // Since we removed username/password fields, we'll generate them.
-      // For a real app, you'd handle this differently (e.g., email-based signup).
-      const tempUsername = `user${Date.now()}`;
-      const tempPassword = "password"; 
+    if (!username || !password) {
+        toast({
+            variant: "destructive",
+            title: "Campos Requeridos",
+            description: "Por favor, introduzca un nombre de usuario y una contraseña.",
+        });
+        setIsLoading(false);
+        return;
+    }
 
-      await signup(tempUsername, tempPassword, selectedPlan);
+    try {
+      await signup(username, password, selectedPlan);
       toast({
         title: "¡Cuenta Creada!",
-        description: `Tu cuenta ha sido creada exitosamente. Tu usuario es: ${tempUsername}. Ahora puedes iniciar sesión.`,
+        description: `Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesión.`,
       });
       router.push('/login');
     } catch (error) {
@@ -96,6 +104,33 @@ export default function SignupPage() {
                 </RadioGroup>
             </div>
             
+             <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Usuario</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="p.ej. drsmith"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Contraseña</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="********"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Creando Cuenta...' : 'Registrarse'}
             </Button>
