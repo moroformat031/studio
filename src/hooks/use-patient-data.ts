@@ -1,81 +1,113 @@
 
 "use client";
 
-import { useLocalStorage } from "./use-local-storage";
+import { useState, useEffect, useCallback } from 'react';
 import { Patient, Appointment, Vital, Medication, Procedure, PatientNote } from "@/types/ehr";
-import { initialPatients } from "@/lib/ehr-data";
-
-const PATIENT_DATA_KEY = "notasmed-patient-data";
 
 export function usePatientData() {
-    const [patients, setPatients] = useLocalStorage<Patient[]>(PATIENT_DATA_KEY, initialPatients);
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const getPatient = (id: string | null) => {
+    const fetchPatients = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await fetch('/api/patients');
+            if (!response.ok) {
+                throw new Error('Failed to fetch patients');
+            }
+            const data = await response.json();
+            setPatients(data);
+        } catch (error) {
+            console.error(error);
+            // Handle error (e.g., show toast)
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchPatients();
+    }, [fetchPatients]);
+
+    const getPatient = useCallback((id: string | null) => {
         if (!id) return null;
         return patients.find(p => p.id === id) || null;
-    };
+    }, [patients]);
 
-    const addPatient = (patient: Omit<Patient, 'id'>) => {
-        const newPatient: Patient = {
-            ...patient,
-            id: `pat-${Date.now()}`
-        };
+    const addPatient = async (patient: Omit<Patient, 'id'>) => {
+        const response = await fetch('/api/patients', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(patient),
+        });
+        const newPatient = await response.json();
         setPatients(prev => [...prev, newPatient]);
         return newPatient;
     };
 
-    const updatePatient = (id: string, updatedData: Partial<Patient>) => {
-        setPatients(prev => prev.map(p => p.id === id ? { ...p, ...updatedData } : p));
+    const updatePatient = async (id: string, updatedData: Partial<Patient>) => {
+        const response = await fetch(`/api/patients/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedData),
+        });
+        const updatedPatient = await response.json();
+        setPatients(prev => prev.map(p => p.id === id ? updatedPatient : p));
     };
 
-    const addNoteToPatient = (patientId: string, note: Omit<PatientNote, 'id'>) => {
-        const newNote = { ...note, id: `note-${Date.now()}` };
-        setPatients(prev => prev.map(p => {
-            if (p.id === patientId) {
-                return { ...p, notes: [...p.notes, newNote] };
-            }
-            return p;
-        }));
+    const addNoteToPatient = async (patientId: string, note: Omit<PatientNote, 'id'>) => {
+        const response = await fetch(`/api/patients/${patientId}/notes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(note),
+        });
+        const updatedPatient = await response.json();
+        setPatients(prev => prev.map(p => p.id === patientId ? updatedPatient : p));
     };
     
-    const updatePatientAppointments = (patientId: string, appointments: Appointment[]) => {
-        setPatients(prev => prev.map(p => {
-            if (p.id === patientId) {
-                return { ...p, appointments: appointments };
-            }
-            return p;
-        }));
+    const updatePatientAppointments = async (patientId: string, appointments: Appointment[]) => {
+        const response = await fetch(`/api/patients/${patientId}/appointments`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(appointments),
+        });
+        const updatedPatient = await response.json();
+        setPatients(prev => prev.map(p => p.id === patientId ? updatedPatient : p));
     };
 
-    const updatePatientVitals = (patientId: string, vitals: Vital[]) => {
-        setPatients(prev => prev.map(p => {
-            if (p.id === patientId) {
-                return { ...p, vitals };
-            }
-            return p;
-        }));
+    const updatePatientVitals = async (patientId: string, vitals: Vital[]) => {
+        const response = await fetch(`/api/patients/${patientId}/vitals`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(vitals),
+        });
+        const updatedPatient = await response.json();
+        setPatients(prev => prev.map(p => p.id === patientId ? updatedPatient : p));
     };
     
-    const updatePatientMedications = (patientId: string, medications: Medication[]) => {
-        setPatients(prev => prev.map(p => {
-            if (p.id === patientId) {
-                return { ...p, medications };
-            }
-            return p;
-        }));
+    const updatePatientMedications = async (patientId: string, medications: Medication[]) => {
+        const response = await fetch(`/api/patients/${patientId}/medications`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(medications),
+        });
+        const updatedPatient = await response.json();
+        setPatients(prev => prev.map(p => p.id === patientId ? updatedPatient : p));
     };
 
-    const updatePatientProcedures = (patientId: string, procedures: Procedure[]) => {
-        setPatients(prev => prev.map(p => {
-            if (p.id === patientId) {
-                return { ...p, procedures };
-            }
-            return p;
-        }));
+    const updatePatientProcedures = async (patientId: string, procedures: Procedure[]) => {
+         const response = await fetch(`/api/patients/${patientId}/procedures`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(procedures),
+        });
+        const updatedPatient = await response.json();
+        setPatients(prev => prev.map(p => p.id === patientId ? updatedPatient : p));
     };
 
     return {
         patients,
+        loading,
         getPatient,
         addPatient,
         updatePatient,

@@ -11,16 +11,24 @@ import { Button } from '../ui/button';
 import { Plus } from 'lucide-react';
 import { PlanGate } from '../notasmed/PlanGate';
 import { PatientCombobox } from './PatientCombobox';
+import { Skeleton } from '../ui/skeleton';
 
 export function EHRApp() {
-    const { patients, addPatient, updatePatient, addNoteToPatient, updatePatientAppointments, updatePatientVitals, updatePatientMedications, updatePatientProcedures } = usePatientData();
-    const [selectedPatientId, setSelectedPatientId] = useState<string | null>(patients[0]?.id || null);
+    const { patients, addPatient, updatePatient, addNoteToPatient, updatePatientAppointments, updatePatientVitals, updatePatientMedications, updatePatientProcedures, loading } = usePatientData();
+    const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
     const [fontSize] = useLocalStorage('notasmed-fontSize', 16);
     const [isAddPatientDialogOpen, setIsAddPatientDialogOpen] = useState(false);
     
     const selectedPatient = patients.find(p => p.id === selectedPatientId) || null;
 
-    const handleAddPatient = (patient: Omit<Patient, 'id' | 'vitals' | 'medications' | 'appointments' | 'procedures' | 'notes'>) => {
+    // Set initial patient selection once data loads
+    useState(() => {
+        if (!loading && patients.length > 0 && !selectedPatientId) {
+            setSelectedPatientId(patients[0].id);
+        }
+    });
+
+    const handleAddPatient = async (patient: Omit<Patient, 'id' | 'vitals' | 'medications' | 'appointments' | 'procedures' | 'notes'>) => {
         const newPatientData: Omit<Patient, 'id'> = {
             ...patient,
             vitals: [],
@@ -29,7 +37,7 @@ export function EHRApp() {
             procedures: [],
             notes: []
         };
-        const newPatient = addPatient(newPatientData);
+        const newPatient = await addPatient(newPatientData);
         setSelectedPatientId(newPatient.id);
         setIsAddPatientDialogOpen(false);
     };
@@ -62,11 +70,15 @@ export function EHRApp() {
                         <div className="flex-1">
                             <h2 className="text-lg font-semibold mb-2">Seleccionar Paciente</h2>
                              <div className="w-full md:w-[300px]">
-                                <PatientCombobox
-                                    patients={patients}
-                                    selectedPatientId={selectedPatientId}
-                                    onSelectPatient={setSelectedPatientId}
-                                />
+                                {loading ? (
+                                    <Skeleton className="h-10 w-full" />
+                                ) : (
+                                    <PatientCombobox
+                                        patients={patients}
+                                        selectedPatientId={selectedPatientId}
+                                        onSelectPatient={setSelectedPatientId}
+                                    />
+                                )}
                              </div>
                         </div>
                          <PlanGate allowedPlans={['Clinica', 'Hospital']}>
@@ -84,8 +96,11 @@ export function EHRApp() {
                     </div>
                     
                     <div>
-                        {selectedPatient ? (
+                        {loading ? (
+                             <Skeleton className="h-[600px] w-full" />
+                        ) : selectedPatient ? (
                             <PatientDetail
+                                key={selectedPatient.id} // Add key to force re-render on patient change
                                 patient={selectedPatient}
                                 onUpdatePatient={updatePatient}
                                 onAddNote={addNoteToPatient}

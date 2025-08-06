@@ -3,14 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plan } from '@/types/ehr';
-import { useLocalStorage } from '@/hooks/use-local-storage';
-
-interface User {
-  username: string;
-  plan: Plan;
-  clinicName?: string;
-}
+import { Plan, User } from '@/types/ehr';
 
 interface AuthContextType {
   user: User | null;
@@ -22,30 +15,21 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const FAKE_USERS_KEY = "notasmed-fake-users";
-
-const initialUsers: { [key: string]: { password?: string; plan: Plan, clinicName?: string } } = {
-  'victor': { password: 'codigo', plan: 'Hospital' },
-  'clinica-user': { password: 'clinica', plan: 'Clinica', clinicName: 'Clínica Central' },
-  'free-user': { password: 'free', plan: 'Free', clinicName: 'Consultorio Dr. Ejemplo' },
-};
-
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [fakeUsers, setFakeUsers] = useLocalStorage(FAKE_USERS_KEY, initialUsers);
   const router = useRouter();
 
   useEffect(() => {
-    // Check for user in localStorage on initial load
+    // Check for user in localStorage on initial load to persist session
+    // This part remains to keep the user logged in across page reloads
     try {
       const storedUser = localStorage.getItem('notasmed-user');
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
-      console.error("Error al analizar el usuario desde localStorage", error);
+      console.error("Error parsing user from localStorage", error);
       localStorage.removeItem('notasmed-user');
     } finally {
         setLoading(false);
@@ -53,32 +37,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (username: string, password?: string) => {
-    const userData = fakeUsers[username.toLowerCase()];
-    if (userData && (!userData.password || userData.password === password)) {
-      const newUser: User = { username: username, plan: userData.plan, clinicName: userData.clinicName };
-      localStorage.setItem('notasmed-user', JSON.stringify(newUser));
-      setUser(newUser);
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (response.ok) {
+      const { user: loggedInUser } = await response.json();
+      localStorage.setItem('notasmed-user', JSON.stringify(loggedInUser));
+      setUser(loggedInUser);
     } else {
-      throw new Error('Usuario o contraseña inválidos.');
+      const { message } = await response.json();
+      throw new Error(message || 'Invalid username or password.');
     }
   };
 
   const signup = async (username: string, password?: string, plan: Plan = 'Free', clinicName?: string) => {
       if (!username || !password) {
-          throw new Error('El nombre de usuario y la contraseña son requeridos.');
-      }
-      if (fakeUsers[username.toLowerCase()]) {
-          throw new Error('El nombre de usuario ya existe.');
+          throw new Error('Username and password are required.');
       }
       
-      const newUsers = {
-          ...fakeUsers,
-          [username.toLowerCase()]: { password, plan, clinicName }
-      };
-      setFakeUsers(newUsers);
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, plan, clinicName }),
+      });
+      
+      if (!response.ok) {
+        const { message } = await response.json();
+        throw new Error(message || 'Failed to sign up.');
+      }
   }
 
-  const logout = () => {
+  const logout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
     localStorage.removeItem('notasmed-user');
     setUser(null);
     router.push('/login');
@@ -94,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
