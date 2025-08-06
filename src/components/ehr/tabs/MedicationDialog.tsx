@@ -33,8 +33,14 @@ const sampleMedications = [
     'Paracetamol',
     'Salbutamol'
 ];
-
 const medicationOptions = sampleMedications.map(m => ({ label: m, value: m }));
+
+const sampleProviders = [
+    'Dr. Smith',
+    'Dra. Jones',
+    'Dr. Martinez',
+];
+const providerOptions = sampleProviders.map(p => ({label: p, value: p}));
 
 export function MedicationDialog({ isOpen, onClose, onSave, medication }: MedicationDialogProps) {
     const { toast } = useToast();
@@ -42,7 +48,8 @@ export function MedicationDialog({ isOpen, onClose, onSave, medication }: Medica
         prescribedDate: new Date().toISOString().split('T')[0],
         name: '',
         dosage: '',
-        frequency: ''
+        frequency: '',
+        prescribingProvider: '',
     }), []);
 
     const [formData, setFormData] = useState(initialState);
@@ -60,7 +67,7 @@ export function MedicationDialog({ isOpen, onClose, onSave, medication }: Medica
 
 
     const handleSave = () => {
-        if (!formData.prescribedDate || !formData.name || !formData.dosage || !formData.frequency) {
+        if (!formData.prescribedDate || !formData.name || !formData.dosage || !formData.frequency || !formData.prescribingProvider) {
             toast({
                 variant: 'destructive',
                 title: 'Campos Faltantes',
@@ -132,6 +139,21 @@ export function MedicationDialog({ isOpen, onClose, onSave, medication }: Medica
               Frecuencia
             </Label>
             <Input id="frequency" placeholder="p.ej. Una vez al día" value={formData.frequency} onChange={handleInputChange} className="col-span-3" />
+          </div>
+           <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="prescribingProvider" className="text-right">
+              Proveedor
+            </Label>
+             <div className="col-span-3">
+                <Combobox
+                    options={providerOptions}
+                    value={formData.prescribingProvider}
+                    onChange={(value) => handleSelectChange('prescribingProvider', value)}
+                    placeholder="Seleccionar proveedor"
+                    searchPlaceholder="Buscar proveedor..."
+                    emptyMessage="No se encontró proveedor."
+                />
+            </div>
           </div>
         </div>
         <DialogFooter>

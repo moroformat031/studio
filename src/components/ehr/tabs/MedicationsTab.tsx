@@ -80,6 +80,7 @@ export function MedicationsTab({ patient, onUpdateMedications }: MedicationsTabP
                                 <TableHead>Medicamento</TableHead>
                                 <TableHead>Dosis</TableHead>
                                 <TableHead>Frecuencia</TableHead>
+                                <TableHead>Proveedor</TableHead>
                                 <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -93,6 +94,7 @@ export function MedicationsTab({ patient, onUpdateMedications }: MedicationsTabP
                                         <TableCell>{med.name}</TableCell>
                                         <TableCell>{med.dosage}</TableCell>
                                         <TableCell>{med.frequency}</TableCell>
+                                        <TableCell>{med.prescribingProvider}</TableCell>
                                         <TableCell className="text-right">
                                             <PlanGate allowedPlans={['Pro', 'Admin']}>
                                                 <DropdownMenu>
@@ -118,7 +120,7 @@ export function MedicationsTab({ patient, onUpdateMedications }: MedicationsTabP
                                     </TableRow>
                             ))): (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center">No hay medicamentos prescritos.</TableCell>
+                                    <TableCell colSpan={6} className="text-center">No hay medicamentos prescritos.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>

@@ -2,7 +2,7 @@
 "use client";
 
 import { useLocalStorage } from "./use-local-storage";
-import { Patient, Appointment, Vital, Medication, Procedure } from "@/types/ehr";
+import { Patient, Appointment, Vital, Medication, Procedure, PatientNote } from "@/types/ehr";
 import { initialPatients } from "@/lib/ehr-data";
 
 const PATIENT_DATA_KEY = "notasmed-patient-data";
@@ -28,7 +28,7 @@ export function usePatientData() {
         setPatients(prev => prev.map(p => p.id === id ? { ...p, ...updatedData } : p));
     };
 
-    const addNoteToPatient = (patientId: string, note: Omit<Patient['notes'][0], 'id'>) => {
+    const addNoteToPatient = (patientId: string, note: Omit<PatientNote, 'id'>) => {
         const newNote = { ...note, id: `note-${Date.now()}` };
         setPatients(prev => prev.map(p => {
             if (p.id === patientId) {

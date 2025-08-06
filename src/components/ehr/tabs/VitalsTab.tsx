@@ -79,6 +79,7 @@ export function VitalsTab({ patient, onUpdateVitals }: VitalsTabProps) {
                             <TableHead>PA</TableHead>
                             <TableHead>Temp (°C)</TableHead>
                             <TableHead>FR</TableHead>
+                            <TableHead>Proveedor</TableHead>
                             <TableHead className="text-right">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -93,6 +94,7 @@ export function VitalsTab({ patient, onUpdateVitals }: VitalsTabProps) {
                                 <TableCell>{vital.bp}</TableCell>
                                 <TableCell>{vital.temp}</TableCell>
                                 <TableCell>{vital.rr}</TableCell>
+                                <TableCell>{vital.provider}</TableCell>
                                 <TableCell className="text-right">
                                     <PlanGate allowedPlans={['Pro', 'Admin']}>
                                         <DropdownMenu>
@@ -118,7 +120,7 @@ export function VitalsTab({ patient, onUpdateVitals }: VitalsTabProps) {
                             </TableRow>
                         ))): (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center">No hay signos vitales registrados.</TableCell>
+                                <TableCell colSpan={7} className="text-center">No hay signos vitales registrados.</TableCell>
                             </TableRow>
                         )}
                     </TableBody>

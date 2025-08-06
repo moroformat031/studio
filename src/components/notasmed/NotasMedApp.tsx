@@ -14,9 +14,10 @@ import { Separator } from '../ui/separator';
 interface NotasMedAppProps {
     onSave: (note: { transcription: string; summary: string; date: string }) => void;
     onCancel: () => void;
+    isProviderSelected: boolean;
 }
 
-export function NotasMedApp({ onSave, onCancel }: NotasMedAppProps) {
+export function NotasMedApp({ onSave, onCancel, isProviderSelected }: NotasMedAppProps) {
   const [transcription, setTranscription] = useState<string>('');
   const [summary, setSummary] = useState<string>('');
   const [isLoadingTranscription, setIsLoadingTranscription] = useState<boolean>(false);
@@ -96,7 +97,7 @@ export function NotasMedApp({ onSave, onCancel }: NotasMedAppProps) {
 
   return (
     <div className="space-y-4 border rounded-lg p-4">
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-4" style={{ opacity: isProviderSelected ? 1 : 0.5, pointerEvents: isProviderSelected ? 'auto' : 'none' }}>
             <PlanGate allowedPlans={['Free', 'Pro', 'Admin']}>
                 <TranscriptionCard
                     transcription={transcription}
@@ -118,7 +119,7 @@ export function NotasMedApp({ onSave, onCancel }: NotasMedAppProps) {
         <Separator />
         <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={onCancel}>Cancelar</Button>
-            <Button onClick={handleSaveNote}>Guardar Nota</Button>
+            <Button onClick={handleSaveNote} disabled={!isProviderSelected}>Guardar Nota</Button>
         </div>
     </div>
   );

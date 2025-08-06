@@ -13,10 +13,10 @@ export const initialPatients: Patient[] = [
             email: 'ana.garcia@example.com'
         },
         vitals: [
-            { id: 'vital-1', date: '2024-07-15T10:00:00Z', hr: 75, bp: '120/80', temp: 36.8, rr: 16 }
+            { id: 'vital-1', date: '2024-07-15T10:00:00Z', hr: 75, bp: '120/80', temp: 36.8, rr: 16, provider: 'Dr. Smith' }
         ],
         medications: [
-            { id: 'med-1', name: 'Lisinopril', dosage: '10mg', frequency: 'Una vez al día', prescribedDate: '2024-07-15' }
+            { id: 'med-1', name: 'Lisinopril', dosage: '10mg', frequency: 'Una vez al día', prescribedDate: '2024-07-15', prescribingProvider: 'Dr. Smith' }
         ],
         appointments: [
             { id: 'apt-1', date: '2024-08-01', time: '11:00', reason: 'Seguimiento', status: 'Programada', visitProvider: 'Dr. Smith', billingProvider: 'Clínica General'}
@@ -26,6 +26,7 @@ export const initialPatients: Patient[] = [
             { 
                 id: 'note-1',
                 date: '2024-07-15T10:00:00Z',
+                provider: 'Dr. Smith',
                 transcription: 'La paciente informa que se siente bien, sin nuevas quejas. La presión arterial está bien controlada con la medicación actual.',
                 summary: 'Paciente estable, continuar con el plan de tratamiento actual.'
             }
@@ -42,10 +43,10 @@ export const initialPatients: Patient[] = [
             email: 'carlos.r@example.com'
         },
         vitals: [
-             { id: 'vital-2', date: '2024-07-18T09:30:00Z', hr: 82, bp: '130/85', temp: 37.0, rr: 18 }
+             { id: 'vital-2', date: '2024-07-18T09:30:00Z', hr: 82, bp: '130/85', temp: 37.0, rr: 18, provider: 'Dra. Jones' }
         ],
         medications: [
-            { id: 'med-2', name: 'Metformina', dosage: '500mg', frequency: 'Dos veces al día', prescribedDate: '2024-07-18' }
+            { id: 'med-2', name: 'Metformina', dosage: '500mg', frequency: 'Dos veces al día', prescribedDate: '2024-07-18', prescribingProvider: 'Dra. Jones' }
         ],
         appointments: [
             { id: 'apt-2', date: '2024-07-18', time: '09:30', reason: 'Chequeo de rutina', status: 'Completada', visitProvider: 'Dra. Jones', billingProvider: 'Hospital Central'},

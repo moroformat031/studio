@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Vital } from '@/types/ehr';
 import { useToast } from '@/hooks/use-toast';
+import { Combobox } from '@/components/ui/combobox';
 
 interface VitalDialogProps {
     isOpen: boolean;
@@ -22,6 +23,15 @@ interface VitalDialogProps {
     vital: Vital | null;
 }
 
+const sampleProviders = [
+    'Dr. Smith',
+    'Dra. Jones',
+    'Dr. Martinez',
+    'Enfermera (o) García',
+    'Técnico de Lab.'
+];
+const providerOptions = sampleProviders.map(p => ({label: p, value: p}));
+
 export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps) {
     const { toast } = useToast();
     const initialState = useMemo(() => ({
@@ -29,7 +39,8 @@ export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps
         hr: '',
         bp: '',
         temp: '',
-        rr: ''
+        rr: '',
+        provider: ''
     }), []);
 
     const [formData, setFormData] = useState(initialState);
@@ -50,7 +61,7 @@ export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps
 
 
     const handleSave = () => {
-        if (!formData.date || !formData.hr || !formData.bp || !formData.temp || !formData.rr) {
+        if (!formData.date || !formData.hr || !formData.bp || !formData.temp || !formData.rr || !formData.provider) {
             toast({
                 variant: 'destructive',
                 title: 'Campos Faltantes',
@@ -65,6 +76,7 @@ export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps
             bp: formData.bp,
             temp: Number(formData.temp),
             rr: Number(formData.rr),
+            provider: formData.provider,
         };
 
         const finalData = vital 
@@ -81,6 +93,9 @@ export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
+        setFormData(prev => ({ ...prev, [id]: value }));
+    }
+     const handleSelectChange = (id: string, value: string) => {
         setFormData(prev => ({ ...prev, [id]: value }));
     }
 
@@ -123,6 +138,21 @@ export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps
              Frec. Resp.
             </Label>
             <Input id="rr" type="number" placeholder="p.ej. 16" value={formData.rr} onChange={handleInputChange} className="col-span-3" />
+          </div>
+           <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="provider" className="text-right">
+              Proveedor
+            </Label>
+             <div className="col-span-3">
+                <Combobox
+                    options={providerOptions}
+                    value={formData.provider}
+                    onChange={(value) => handleSelectChange('provider', value)}
+                    placeholder="Seleccionar proveedor"
+                    searchPlaceholder="Buscar proveedor..."
+                    emptyMessage="No se encontró proveedor."
+                />
+            </div>
           </div>
         </div>
         <DialogFooter>

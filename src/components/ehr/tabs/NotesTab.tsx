@@ -7,18 +7,40 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { NotasMedApp } from '@/components/notasmed/NotasMedApp';
+import { Combobox } from '@/components/ui/combobox';
+import { Label } from '@/components/ui/label';
 
 interface NotesTabProps {
     patient: Patient;
     onAddNote: (patientId: string, note: Omit<PatientNote, 'id'>) => void;
 }
 
+const sampleProviders = [
+    'Dr. Smith',
+    'Dra. Jones',
+    'Dr. Martinez',
+    'Enfermera (o) García',
+    'Residente de Turno'
+];
+const providerOptions = sampleProviders.map(p => ({label: p, value: p}));
+
 export function NotesTab({ patient, onAddNote }: NotesTabProps) {
     const [isCreatingNote, setIsCreatingNote] = useState(false);
+    const [provider, setProvider] = useState('');
     
     const handleSaveNote = (note: { transcription: string; summary: string; date: string }) => {
-        onAddNote(patient.id, note);
+        onAddNote(patient.id, { ...note, provider });
         setIsCreatingNote(false);
+        setProvider('');
+    }
+
+    const handleCancel = () => {
+        setIsCreatingNote(false);
+        setProvider('');
+    }
+
+    const handleStartNewNote = () => {
+        setIsCreatingNote(true);
     }
 
     return (
@@ -29,7 +51,7 @@ export function NotesTab({ patient, onAddNote }: NotesTabProps) {
                         <CardTitle>Notas de Consulta</CardTitle>
                         <CardDescription>Transcripciones y resúmenes de las consultas.</CardDescription>
                     </div>
-                     <Button onClick={() => setIsCreatingNote(prev => !prev)} variant="outline">
+                     <Button onClick={() => isCreatingNote ? handleCancel() : handleStartNewNote()} variant="outline">
                         <PlusCircle className="mr-2 h-4 w-4" />
                         {isCreatingNote ? 'Cancelar' : 'Nueva Nota'}
                     </Button>
@@ -37,8 +59,27 @@ export function NotesTab({ patient, onAddNote }: NotesTabProps) {
             </CardHeader>
             <CardContent>
                 {isCreatingNote && (
-                    <div className="mb-6">
-                        <NotasMedApp onSave={handleSaveNote} onCancel={() => setIsCreatingNote(false)} />
+                    <div className="mb-6 space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-2">
+                             <Label htmlFor="provider" className="md:text-right">
+                                Proveedor de la Nota
+                            </Label>
+                            <div className="md:col-span-2">
+                                <Combobox
+                                    options={providerOptions}
+                                    value={provider}
+                                    onChange={setProvider}
+                                    placeholder="Seleccionar proveedor"
+                                    searchPlaceholder="Buscar proveedor..."
+                                    emptyMessage="No se encontró proveedor."
+                                />
+                            </div>
+                        </div>
+                        <NotasMedApp 
+                            onSave={handleSaveNote} 
+                            onCancel={handleCancel}
+                            isProviderSelected={!!provider}
+                        />
                     </div>
                 )}
 
@@ -48,7 +89,10 @@ export function NotesTab({ patient, onAddNote }: NotesTabProps) {
                             <AccordionItem value={note.id} key={note.id}>
                                 <AccordionTrigger>
                                     <div className="flex justify-between w-full pr-4">
-                                        <span>Nota de Consulta</span>
+                                        <div className="flex flex-col text-left">
+                                            <span>Nota de Consulta</span>
+                                            <span className="text-xs font-normal text-muted-foreground">{note.provider}</span>
+                                        </div>
                                         <span className="text-muted-foreground font-normal">{new Date(note.date).toLocaleString()}</span>
                                     </div>
                                 </AccordionTrigger>

@@ -76,6 +76,7 @@ export function ProceduresTab({ patient, onUpdateProcedures }: ProceduresTabProp
                             <TableRow>
                                 <TableHead>Fecha</TableHead>
                                 <TableHead>Nombre</TableHead>
+                                <TableHead>Proveedor</TableHead>
                                 <TableHead>Notas</TableHead>
                                 <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
@@ -88,6 +89,7 @@ export function ProceduresTab({ patient, onUpdateProcedures }: ProceduresTabProp
                                     <TableRow key={proc.id}>
                                         <TableCell>{new Date(proc.date).toLocaleDateString()}</TableCell>
                                         <TableCell>{proc.name}</TableCell>
+                                        <TableCell>{proc.performingProvider}</TableCell>
                                         <TableCell className="max-w-[300px] truncate">{proc.notes}</TableCell>
                                         <TableCell className="text-right">
                                             <PlanGate allowedPlans={['Pro', 'Admin']}>
@@ -114,7 +116,7 @@ export function ProceduresTab({ patient, onUpdateProcedures }: ProceduresTabProp
                                     </TableRow>
                             ))): (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center">No hay procedimientos registrados.</TableCell>
+                                    <TableCell colSpan={5} className="text-center">No hay procedimientos registrados.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>

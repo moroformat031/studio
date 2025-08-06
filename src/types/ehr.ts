@@ -2,6 +2,7 @@
 export interface PatientNote {
     id: string;
     date: string;
+    provider: string;
     transcription: string;
     summary: string;
 }
@@ -13,6 +14,7 @@ export interface Vital {
     bp: string;
     temp: number;
     rr: number;
+    provider: string;
 }
 
 export interface Medication {
@@ -21,6 +23,7 @@ export interface Medication {
     dosage: string;
     frequency: string;
     prescribedDate: string;
+    prescribingProvider: string;
 }
 
 export interface Appointment {
@@ -38,6 +41,7 @@ export interface Procedure {
     date: string;
     name: string;
     notes: string;
+    performingProvider: string;
 }
 
 export interface Demographics {

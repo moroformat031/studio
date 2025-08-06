@@ -35,12 +35,22 @@ const sampleProcedures = [
 ];
 const procedureOptions = sampleProcedures.map(p => ({ label: p, value: p }));
 
+const sampleProviders = [
+    'Dr. Smith',
+    'Dra. Jones',
+    'Dr. Martinez',
+    'Técnico Radiólogo',
+    'Cirujano General'
+];
+const providerOptions = sampleProviders.map(p => ({label: p, value: p}));
+
 export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: ProcedureDialogProps) {
     const { toast } = useToast();
     const initialState = useMemo(() => ({
         date: new Date().toISOString().split('T')[0],
         name: '',
-        notes: ''
+        notes: '',
+        performingProvider: ''
     }), []);
 
     const [formData, setFormData] = useState(initialState);
@@ -58,11 +68,11 @@ export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: Procedur
 
 
     const handleSave = () => {
-        if (!formData.date || !formData.name) {
+        if (!formData.date || !formData.name || !formData.performingProvider) {
             toast({
                 variant: 'destructive',
                 title: 'Campos Faltantes',
-                description: 'Por favor, complete la fecha y el nombre del procedimiento.'
+                description: 'Por favor, complete todos los campos requeridos.'
             });
             return;
         }
@@ -116,6 +126,21 @@ export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: Procedur
                     placeholder="Seleccionar procedimiento"
                     searchPlaceholder="Buscar procedimiento..."
                     emptyMessage="No se encontró procedimiento."
+                />
+            </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="performingProvider" className="text-right">
+              Proveedor
+            </Label>
+             <div className="col-span-3">
+                <Combobox
+                    options={providerOptions}
+                    value={formData.performingProvider}
+                    onChange={(value) => handleSelectChange('performingProvider', value)}
+                    placeholder="Seleccionar proveedor"
+                    searchPlaceholder="Buscar proveedor..."
+                    emptyMessage="No se encontró proveedor."
                 />
             </div>
           </div>
