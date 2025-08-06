@@ -23,6 +23,15 @@ interface AppointmentDialogProps {
     appointment: Appointment | null;
 }
 
+const sampleProviders = [
+    'Dr. Smith',
+    'Dra. Jones',
+    'Dr. Martinez',
+    'Clínica General',
+    'Hospital Central',
+    'Laboratorio Clínico XYZ'
+];
+
 export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: AppointmentDialogProps) {
     const { toast } = useToast();
     const initialState = useMemo(() => ({
@@ -49,7 +58,7 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
 
 
     const handleSave = () => {
-        if (!formData.date || !formData.time || !formData.reason) {
+        if (!formData.date || !formData.time || !formData.reason || !formData.visitProvider || !formData.billingProvider) {
             toast({
                 variant: 'destructive',
                 title: 'Campos Faltantes',
@@ -74,6 +83,11 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
         const { id, value } = e.target;
         setFormData(prev => ({ ...prev, [id]: value }));
     }
+    
+    const handleSelectChange = (id: string, value: string) => {
+        setFormData(prev => ({ ...prev, [id]: value }));
+    }
+
 
     const handleStatusChange = (value: Appointment['status']) => {
         setFormData(prev => ({ ...prev, status: value }));
@@ -111,13 +125,31 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
             <Label htmlFor="visitProvider" className="text-right">
               Prov. Visita
             </Label>
-            <Input id="visitProvider" value={formData.visitProvider} onChange={handleInputChange} className="col-span-3" />
+            <Select onValueChange={(value) => handleSelectChange('visitProvider', value)} value={formData.visitProvider}>
+                <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Seleccionar proveedor" />
+                </SelectTrigger>
+                <SelectContent>
+                    {sampleProviders.map(provider => (
+                        <SelectItem key={provider} value={provider}>{provider}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="billingProvider" className="text-right">
               Prov. Factura
             </Label>
-            <Input id="billingProvider" value={formData.billingProvider} onChange={handleInputChange} className="col-span-3" />
+             <Select onValueChange={(value) => handleSelectChange('billingProvider', value)} value={formData.billingProvider}>
+                <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Seleccionar proveedor" />
+                </SelectTrigger>
+                <SelectContent>
+                    {sampleProviders.map(provider => (
+                        <SelectItem key={provider} value={provider}>{provider}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="status" className="text-right">
