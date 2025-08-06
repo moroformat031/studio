@@ -1,4 +1,7 @@
 
+
+export type Plan = 'Free' | 'Pro' | 'Admin';
+
 export interface PatientNote {
     id: string;
     date: string;

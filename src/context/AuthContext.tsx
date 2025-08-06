@@ -1,9 +1,10 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-
-type Plan = 'Free' | 'Pro' | 'Admin';
+import { Plan } from '@/types/ehr';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface User {
   username: string;
@@ -14,20 +15,25 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (username: string, password?: string) => Promise<void>;
+  signup: (username: string, password?: string, plan?: Plan) => Promise<void>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const FAKE_USERS: { [key: string]: { password?: string; plan: Plan } } = {
+const FAKE_USERS_KEY = "notasmed-fake-users";
+
+const initialUsers: { [key: string]: { password?: string; plan: Plan } } = {
   'victor': { password: 'codigo', plan: 'Admin' },
   'pro-user': { password: 'pro', plan: 'Pro' },
   'free-user': { password: 'free', plan: 'Free' },
 };
 
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fakeUsers, setFakeUsers] = useLocalStorage(FAKE_USERS_KEY, initialUsers);
   const router = useRouter();
 
   useEffect(() => {
@@ -46,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (username: string, password?: string) => {
-    const userData = FAKE_USERS[username.toLowerCase()];
+    const userData = fakeUsers[username.toLowerCase()];
     if (userData && (!userData.password || userData.password === password)) {
       const newUser: User = { username: username, plan: userData.plan };
       localStorage.setItem('notasmed-user', JSON.stringify(newUser));
@@ -56,6 +62,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const signup = async (username: string, password?: string, plan: Plan = 'Free') => {
+      if (fakeUsers[username.toLowerCase()]) {
+          throw new Error('El nombre de usuario ya existe.');
+      }
+      if (!password) {
+          throw new Error('La contraseña es requerida.');
+      }
+      
+      const newUsers = {
+          ...fakeUsers,
+          [username.toLowerCase()]: { password, plan }
+      };
+      setFakeUsers(newUsers);
+  }
+
   const logout = () => {
     localStorage.removeItem('notasmed-user');
     setUser(null);
@@ -63,7 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );

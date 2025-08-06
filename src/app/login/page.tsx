@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Stethoscope } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -22,9 +23,6 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
 
     try {
       await login(username, password);
@@ -58,7 +56,7 @@ export default function LoginPage() {
               <Input
                 id="username"
                 type="text"
-                placeholder="victor"
+                placeholder="p.ej. victor"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -70,7 +68,7 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="codigo"
+                placeholder="p.ej. codigo"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -81,6 +79,12 @@ export default function LoginPage() {
               {isLoading ? 'Iniciando Sesión...' : 'Iniciar Sesión'}
             </Button>
           </form>
+            <div className="mt-4 text-center text-sm">
+                ¿No tienes una cuenta?{' '}
+                <Link href="/signup" className="underline">
+                    Regístrate
+                </Link>
+            </div>
         </CardContent>
       </Card>
     </div>
