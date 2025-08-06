@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Appointment } from '@/types/ehr';
 import { useToast } from '@/hooks/use-toast';
+import { Combobox } from '@/components/ui/combobox';
 
 interface AppointmentDialogProps {
     isOpen: boolean;
@@ -31,6 +32,8 @@ const sampleProviders = [
     'Hospital Central',
     'Laboratorio Clínico XYZ'
 ];
+
+const providerOptions = sampleProviders.map(p => ({label: p, value: p}));
 
 export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: AppointmentDialogProps) {
     const { toast } = useToast();
@@ -125,31 +128,31 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
             <Label htmlFor="visitProvider" className="text-right">
               Prov. Visita
             </Label>
-            <Select onValueChange={(value) => handleSelectChange('visitProvider', value)} value={formData.visitProvider}>
-                <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Seleccionar proveedor" />
-                </SelectTrigger>
-                <SelectContent>
-                    {sampleProviders.map(provider => (
-                        <SelectItem key={provider} value={provider}>{provider}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+             <div className="col-span-3">
+                <Combobox
+                    options={providerOptions}
+                    value={formData.visitProvider}
+                    onChange={(value) => handleSelectChange('visitProvider', value)}
+                    placeholder="Seleccionar proveedor"
+                    searchPlaceholder="Buscar proveedor..."
+                    emptyMessage="No se encontró proveedor."
+                />
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="billingProvider" className="text-right">
               Prov. Factura
             </Label>
-             <Select onValueChange={(value) => handleSelectChange('billingProvider', value)} value={formData.billingProvider}>
-                <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Seleccionar proveedor" />
-                </SelectTrigger>
-                <SelectContent>
-                    {sampleProviders.map(provider => (
-                        <SelectItem key={provider} value={provider}>{provider}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+             <div className="col-span-3">
+                <Combobox
+                    options={providerOptions}
+                    value={formData.billingProvider}
+                    onChange={(value) => handleSelectChange('billingProvider', value)}
+                    placeholder="Seleccionar proveedor"
+                    searchPlaceholder="Buscar proveedor..."
+                    emptyMessage="No se encontró proveedor."
+                />
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="status" className="text-right">

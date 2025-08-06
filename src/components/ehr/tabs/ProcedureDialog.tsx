@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from '@/components/ui/textarea';
 import { Procedure } from '@/types/ehr';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 
 interface ProcedureDialogProps {
     isOpen: boolean;
@@ -33,6 +33,7 @@ const sampleProcedures = [
     'Ultrasonido abdominal',
     'Sutura de herida'
 ];
+const procedureOptions = sampleProcedures.map(p => ({ label: p, value: p }));
 
 export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: ProcedureDialogProps) {
     const { toast } = useToast();
@@ -107,16 +108,16 @@ export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: Procedur
             <Label htmlFor="name" className="text-right">
               Nombre
             </Label>
-            <Select onValueChange={(value) => handleSelectChange('name', value)} value={formData.name}>
-                <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Seleccionar procedimiento" />
-                </SelectTrigger>
-                <SelectContent>
-                    {sampleProcedures.map(proc => (
-                        <SelectItem key={proc} value={proc}>{proc}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+            <div className="col-span-3">
+                <Combobox
+                    options={procedureOptions}
+                    value={formData.name}
+                    onChange={(value) => handleSelectChange('name', value)}
+                    placeholder="Seleccionar procedimiento"
+                    searchPlaceholder="Buscar procedimiento..."
+                    emptyMessage="No se encontró procedimiento."
+                />
+            </div>
           </div>
            <div className="grid grid-cols-4 items-start gap-4">
             <Label htmlFor="notes" className="text-right pt-2">

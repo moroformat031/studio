@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Medication } from '@/types/ehr';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 
 interface MedicationDialogProps {
     isOpen: boolean;
@@ -33,6 +33,8 @@ const sampleMedications = [
     'Paracetamol',
     'Salbutamol'
 ];
+
+const medicationOptions = sampleMedications.map(m => ({ label: m, value: m }));
 
 export function MedicationDialog({ isOpen, onClose, onSave, medication }: MedicationDialogProps) {
     const { toast } = useToast();
@@ -108,16 +110,16 @@ export function MedicationDialog({ isOpen, onClose, onSave, medication }: Medica
             <Label htmlFor="name" className="text-right">
               Medicamento
             </Label>
-            <Select onValueChange={(value) => handleSelectChange('name', value)} value={formData.name}>
-                <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Seleccionar medicamento" />
-                </SelectTrigger>
-                <SelectContent>
-                    {sampleMedications.map(med => (
-                        <SelectItem key={med} value={med}>{med}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+            <div className="col-span-3">
+                <Combobox
+                    options={medicationOptions}
+                    value={formData.name}
+                    onChange={(value) => handleSelectChange('name', value)}
+                    placeholder="Seleccionar medicamento"
+                    searchPlaceholder="Buscar medicamento..."
+                    emptyMessage="No se encontró medicamento."
+                />
+            </div>
           </div>
            <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="dosage" className="text-right">
