@@ -5,8 +5,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Stethoscope, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -14,10 +12,9 @@ import Link from 'next/link';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Plan } from '@/types/ehr';
 import { cn } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
 
 export default function SignupPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [selectedPlan, setSelectedPlan] = useState<Plan>('Free');
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useAuth();
@@ -29,10 +26,15 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      await signup(username, password, selectedPlan);
+      // Since we removed username/password fields, we'll generate them.
+      // For a real app, you'd handle this differently (e.g., email-based signup).
+      const tempUsername = `user${Date.now()}`;
+      const tempPassword = "password"; 
+
+      await signup(tempUsername, tempPassword, selectedPlan);
       toast({
         title: "¡Cuenta Creada!",
-        description: "Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesión.",
+        description: `Tu cuenta ha sido creada exitosamente. Tu usuario es: ${tempUsername}. Ahora puedes iniciar sesión.`,
       });
       router.push('/login');
     } catch (error) {
@@ -66,33 +68,6 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignup} className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                <Label htmlFor="username">Usuario</Label>
-                <Input
-                    id="username"
-                    type="text"
-                    placeholder="Elige un nombre de usuario"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    disabled={isLoading}
-                />
-                </div>
-                <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <Input
-                    id="password"
-                    type="password"
-                    placeholder="Crea una contraseña segura"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={isLoading}
-                />
-                </div>
-            </div>
-
             <div className="space-y-2">
               <Label>Selecciona tu Plan</Label>
                <RadioGroup
