@@ -131,15 +131,17 @@ export default function SignupPage() {
                             disabled={isLoading}
                         />
                     </div>
-                    {(selectedPlan === 'Free' || selectedPlan === 'Clinica') && (
+                    {(selectedPlan === 'Free' || selectedPlan === 'Clinica' || selectedPlan === 'Hospital') && (
                         <div className="space-y-2">
-                            <Label htmlFor="clinicName">Nombre de la Clínica</Label>
+                            <Label htmlFor="clinicName">
+                                {selectedPlan === 'Hospital' ? 'Nombre del Hospital' : 'Nombre de la Clínica'}
+                            </Label>
                             <div className="relative">
                                <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                <Input
                                     id="clinicName"
                                     type="text"
-                                    placeholder="p.ej. Clínica del Sol"
+                                    placeholder={selectedPlan === 'Hospital' ? 'p.ej. Hospital Central' : 'p.ej. Clínica del Sol'}
                                     value={clinicName}
                                     onChange={(e) => setClinicName(e.target.value)}
                                     required
