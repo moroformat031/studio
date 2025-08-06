@@ -98,7 +98,7 @@ export function NotasMedApp({ onSave, onCancel, isProviderSelected }: NotasMedAp
   return (
     <div className="space-y-4 border rounded-lg p-4">
         <div className="grid grid-cols-1 gap-4" style={{ opacity: isProviderSelected ? 1 : 0.5, pointerEvents: isProviderSelected ? 'auto' : 'none' }}>
-            <PlanGate allowedPlans={['Free', 'Pro', 'Admin']}>
+            <PlanGate allowedPlans={['Free', 'Clinica', 'Hospital']}>
                 <TranscriptionCard
                     transcription={transcription}
                     setTranscription={setTranscription}
@@ -106,7 +106,7 @@ export function NotasMedApp({ onSave, onCancel, isProviderSelected }: NotasMedAp
                     onTranscribe={handleTranscribe}
                 />
             </PlanGate>
-            <PlanGate allowedPlans={['Pro', 'Admin']}>
+            <PlanGate allowedPlans={['Clinica', 'Hospital']}>
                 <SummaryCard
                     transcription={transcription}
                     summary={summary}

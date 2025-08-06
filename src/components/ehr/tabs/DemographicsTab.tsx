@@ -42,7 +42,7 @@ export function DemographicsTab({ patient, onUpdatePatient }: DemographicsTabPro
                         <CardTitle>Información del Paciente</CardTitle>
                         <CardDescription>Información personal del paciente.</CardDescription>
                     </div>
-                    <PlanGate allowedPlans={['Pro', 'Admin']}>
+                    <PlanGate allowedPlans={['Clinica', 'Hospital']}>
                         {!isEditing ? (
                             <Button variant="outline" onClick={() => setIsEditing(true)}>Editar</Button>
                         ) : (

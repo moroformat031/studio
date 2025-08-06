@@ -62,7 +62,7 @@ export function ProceduresTab({ patient, onUpdateProcedures }: ProceduresTabProp
                             <CardTitle>Procedimientos</CardTitle>
                             <CardDescription>Procedimientos realizados al paciente.</CardDescription>
                         </div>
-                         <PlanGate allowedPlans={['Pro', 'Admin']}>
+                         <PlanGate allowedPlans={['Clinica', 'Hospital']}>
                             <Button onClick={handleAddClick} size="sm">
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Agregar Procedimiento
@@ -92,7 +92,7 @@ export function ProceduresTab({ patient, onUpdateProcedures }: ProceduresTabProp
                                         <TableCell>{proc.performingProvider}</TableCell>
                                         <TableCell className="max-w-[300px] truncate">{proc.notes}</TableCell>
                                         <TableCell className="text-right">
-                                            <PlanGate allowedPlans={['Pro', 'Admin']}>
+                                            <PlanGate allowedPlans={['Clinica', 'Hospital']}>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button variant="ghost" className="h-8 w-8 p-0">

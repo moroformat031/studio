@@ -1,6 +1,6 @@
 
 
-export type Plan = 'Free' | 'Pro' | 'Admin';
+export type Plan = 'Free' | 'Clinica' | 'Hospital';
 
 export interface PatientNote {
     id: string;

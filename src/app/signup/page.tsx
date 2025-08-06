@@ -51,8 +51,8 @@ export default function SignupPage() {
 
   const plans = [
     { name: 'Free', price: '$0/mes', description: 'Funcionalidad básica para empezar.', features: ['Transcripción IA', 'Gestión de Pacientes (limitado)'] },
-    { name: 'Pro', price: '$49/mes', description: 'Funciones avanzadas para profesionales.', features: ['Todo en Free', 'Resumen IA', 'Soporte prioritario'] },
-    { name: 'Admin', price: 'Personalizado', description: 'Control total para organizaciones.', features: ['Todo en Pro', 'Gestión de usuarios', 'Auditoría avanzada'] },
+    { name: 'Clinica', price: '$49/mes', description: 'Funciones avanzadas para clínicas.', features: ['Todo en Free', 'Resumen IA', 'Soporte prioritario'] },
+    { name: 'Hospital', price: 'Personalizado', description: 'Control total para hospitales.', features: ['Todo en Clinica', 'Gestión de usuarios', 'Auditoría avanzada'] },
   ];
 
   return (

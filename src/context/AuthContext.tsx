@@ -24,8 +24,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const FAKE_USERS_KEY = "notasmed-fake-users";
 
 const initialUsers: { [key: string]: { password?: string; plan: Plan } } = {
-  'victor': { password: 'codigo', plan: 'Admin' },
-  'pro-user': { password: 'pro', plan: 'Pro' },
+  'victor': { password: 'codigo', plan: 'Hospital' },
+  'clinica-user': { password: 'clinica', plan: 'Clinica' },
   'free-user': { password: 'free', plan: 'Free' },
 };
 

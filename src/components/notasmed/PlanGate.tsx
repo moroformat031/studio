@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { ReactNode } from 'react';
@@ -5,8 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lock } from 'lucide-react';
 import { Button } from '../ui/button';
-
-type Plan = 'Free' | 'Pro' | 'Admin';
+import { Plan } from '@/types/ehr';
 
 interface PlanGateProps {
   allowedPlans: Plan[];

@@ -62,7 +62,7 @@ export function VitalsTab({ patient, onUpdateVitals }: VitalsTabProps) {
                         <CardTitle>Signos Vitales</CardTitle>
                         <CardDescription>Signos vitales registrados del paciente.</CardDescription>
                     </div>
-                    <PlanGate allowedPlans={['Pro', 'Admin']}>
+                    <PlanGate allowedPlans={['Clinica', 'Hospital']}>
                         <Button onClick={handleAddClick} size="sm">
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Agregar Signos Vitales
@@ -96,7 +96,7 @@ export function VitalsTab({ patient, onUpdateVitals }: VitalsTabProps) {
                                 <TableCell>{vital.rr}</TableCell>
                                 <TableCell>{vital.provider}</TableCell>
                                 <TableCell className="text-right">
-                                    <PlanGate allowedPlans={['Pro', 'Admin']}>
+                                    <PlanGate allowedPlans={['Clinica', 'Hospital']}>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" className="h-8 w-8 p-0">
