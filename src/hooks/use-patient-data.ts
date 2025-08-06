@@ -2,7 +2,7 @@
 "use client";
 
 import { useLocalStorage } from "./use-local-storage";
-import { Patient, Appointment, Vital, Medication } from "@/types/ehr";
+import { Patient, Appointment, Vital, Medication, Procedure } from "@/types/ehr";
 import { initialPatients } from "@/lib/ehr-data";
 
 const PATIENT_DATA_KEY = "notasmed-patient-data";
@@ -65,6 +65,15 @@ export function usePatientData() {
         }));
     };
 
+    const updatePatientProcedures = (patientId: string, procedures: Procedure[]) => {
+        setPatients(prev => prev.map(p => {
+            if (p.id === patientId) {
+                return { ...p, procedures };
+            }
+            return p;
+        }));
+    };
+
     return {
         patients,
         getPatient,
@@ -74,5 +83,6 @@ export function usePatientData() {
         updatePatientAppointments,
         updatePatientVitals,
         updatePatientMedications,
+        updatePatientProcedures,
     };
 }

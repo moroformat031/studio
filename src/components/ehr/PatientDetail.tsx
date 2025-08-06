@@ -1,11 +1,12 @@
 
 "use client";
-import { Patient, PatientNote, Appointment, Vital, Medication } from '@/types/ehr';
+import { Patient, PatientNote, Appointment, Vital, Medication, Procedure } from '@/types/ehr';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DemographicsTab } from './tabs/DemographicsTab';
 import { VitalsTab } from './tabs/VitalsTab';
 import { AppointmentsTab } from './tabs/AppointmentsTab';
 import { MedicationsTab } from './tabs/MedicationsTab';
+import { ProceduresTab } from './tabs/ProceduresTab';
 import { NotesTab } from './tabs/NotesTab';
 
 interface PatientDetailProps {
@@ -15,9 +16,18 @@ interface PatientDetailProps {
     onUpdateAppointments: (patientId: string, appointments: Appointment[]) => void;
     onUpdateVitals: (patientId: string, vitals: Vital[]) => void;
     onUpdateMedications: (patientId: string, medications: Medication[]) => void;
+    onUpdateProcedures: (patientId: string, procedures: Procedure[]) => void;
 }
 
-export function PatientDetail({ patient, onUpdatePatient, onAddNote, onUpdateAppointments, onUpdateVitals, onUpdateMedications }: PatientDetailProps) {
+export function PatientDetail({ 
+    patient, 
+    onUpdatePatient, 
+    onAddNote, 
+    onUpdateAppointments, 
+    onUpdateVitals, 
+    onUpdateMedications,
+    onUpdateProcedures
+}: PatientDetailProps) {
 
     return (
         <Tabs defaultValue="demographics" className="w-full">
@@ -27,6 +37,7 @@ export function PatientDetail({ patient, onUpdatePatient, onAddNote, onUpdateApp
                     <TabsTrigger value="vitals">Signos Vitales</TabsTrigger>
                     <TabsTrigger value="appointments">Citas</TabsTrigger>
                     <TabsTrigger value="medications">Medicamentos</TabsTrigger>
+                    <TabsTrigger value="procedures">Procedimientos</TabsTrigger>
                     <TabsTrigger value="notes">Notas</TabsTrigger>
                 </TabsList>
             </div>
@@ -41,6 +52,9 @@ export function PatientDetail({ patient, onUpdatePatient, onAddNote, onUpdateApp
             </TabsContent>
             <TabsContent value="medications">
                 <MedicationsTab patient={patient} onUpdateMedications={onUpdateMedications} />
+            </TabsContent>
+             <TabsContent value="procedures">
+                <ProceduresTab patient={patient} onUpdateProcedures={onUpdateProcedures} />
             </TabsContent>
             <TabsContent value="notes">
                 <NotesTab patient={patient} onAddNote={onAddNote} />
