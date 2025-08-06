@@ -35,7 +35,7 @@ export default function LandingPage() {
               </p>
               <div className="mt-10">
                 <Button size="lg" asChild>
-                  <Link href="/login">Comienza Ahora</Link>
+                  <Link href="/signup">Comienza Ahora</Link>
                 </Button>
               </div>
             </div>
