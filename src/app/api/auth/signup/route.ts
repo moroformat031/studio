@@ -21,3 +21,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'An error occurred during signup' }, { status: 500 });
   }
 }
+
