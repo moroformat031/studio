@@ -16,7 +16,27 @@ interface PlanGateProps {
 export function PlanGate({ allowedPlans, children }: PlanGateProps) {
   const { user } = useAuth();
 
-  if (!user || !allowedPlans.includes(user.plan)) {
+  const userRoles: Record<Plan, Plan[]> = {
+    Free: ['Free', 'Medico'],
+    Clinica: ['Clinica', 'Medico'],
+    Hospital: ['Hospital', 'Admin', 'Medico'],
+    Medico: [],
+    Admin: [],
+  };
+
+  const userPlan: Plan = user?.plan ?? 'Free';
+  
+  const hasAccess = allowedPlans.some(plan => userRoles[userPlan]?.includes(plan));
+
+  if (!user || !hasAccess) {
+    // Hide the gate for plans that should have access, but the feature is admin-only.
+    // E.g. A "Medico" shouldn't see an "Upgrade to Admin" message for an admin-only feature.
+    const isAdminFeature = allowedPlans.includes('Admin') && !allowedPlans.includes('Medico');
+    if (isAdminFeature && user?.plan !== 'Hospital') {
+        return null;
+    }
+    
+    // For other cases, show the upgrade message
     return (
       <Card className="flex flex-col items-center justify-center text-center bg-muted/40">
         <CardHeader>

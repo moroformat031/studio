@@ -64,7 +64,7 @@ export function MedicationsTab({ patient, onUpdateMedications }: MedicationsTabP
                             <CardTitle>Medicamentos</CardTitle>
                             <CardDescription>Medicamentos actuales y pasados.</CardDescription>
                         </div>
-                         <PlanGate allowedPlans={['Clinica', 'Hospital']}>
+                         <PlanGate allowedPlans={['Admin']}>
                             <Button onClick={handleAddClick} size="sm">
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Agregar Medicamento
@@ -96,7 +96,7 @@ export function MedicationsTab({ patient, onUpdateMedications }: MedicationsTabP
                                         <TableCell>{med.frequency}</TableCell>
                                         <TableCell>{med.prescribingProvider}</TableCell>
                                         <TableCell className="text-right">
-                                            <PlanGate allowedPlans={['Clinica', 'Hospital']}>
+                                            <PlanGate allowedPlans={['Admin']}>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button variant="ghost" className="h-8 w-8 p-0">

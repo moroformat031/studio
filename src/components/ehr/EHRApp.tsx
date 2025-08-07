@@ -81,7 +81,7 @@ export function EHRApp() {
                                 )}
                              </div>
                         </div>
-                         <PlanGate allowedPlans={['Clinica', 'Hospital']}>
+                         <PlanGate allowedPlans={['Admin']}>
                             <AddPatientDialog
                                 open={isAddPatientDialogOpen}
                                 onOpenChange={setIsAddPatientDialogOpen}

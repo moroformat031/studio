@@ -68,7 +68,7 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
                             <CardTitle>Citas</CardTitle>
                             <CardDescription>Citas programadas y pasadas.</CardDescription>
                         </div>
-                        <PlanGate allowedPlans={['Clinica', 'Hospital']}>
+                        <PlanGate allowedPlans={['Admin']}>
                             <Button onClick={handleAddClick} size="sm">
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Agregar Cita
@@ -106,7 +106,7 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                     <PlanGate allowedPlans={['Clinica', 'Hospital']}>
+                                     <PlanGate allowedPlans={['Admin']}>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" className="h-8 w-8 p-0">
