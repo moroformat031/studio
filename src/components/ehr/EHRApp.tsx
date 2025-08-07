@@ -8,7 +8,7 @@ import { AddPatientDialog } from './AddPatientDialog';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { Patient, Appointment, Vital, Medication, Procedure } from '@/types/ehr';
 import { Button } from '../ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Home } from 'lucide-react';
 import { PlanGate } from '../notasmed/PlanGate';
 import { PatientCombobox } from './PatientCombobox';
 import { Skeleton } from '../ui/skeleton';
@@ -82,16 +82,22 @@ export function EHRApp() {
                              </div>
                         </div>
                          <PlanGate allowedPlans={['Admin']}>
-                            <AddPatientDialog
-                                open={isAddPatientDialogOpen}
-                                onOpenChange={setIsAddPatientDialogOpen}
-                                onSave={handleAddPatient}
-                            >
-                                <Button size="sm" variant="outline" className="w-full md:w-auto">
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Agregar Paciente
+                            <div className="flex gap-2">
+                                <Button size="sm" variant="outline">
+                                    <Home className="h-4 w-4 mr-2" />
+                                    Agregar Clínica
                                 </Button>
-                            </AddPatientDialog>
+                                <AddPatientDialog
+                                    open={isAddPatientDialogOpen}
+                                    onOpenChange={setIsAddPatientDialogOpen}
+                                    onSave={handleAddPatient}
+                                >
+                                    <Button size="sm" variant="outline" className="w-full md:w-auto">
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Agregar Paciente
+                                    </Button>
+                                </AddPatientDialog>
+                            </div>
                         </PlanGate>
                     </div>
                     
