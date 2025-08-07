@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Plan, User } from '@/types/ehr';
-import { PlusCircle, Building, User as UserIcon } from 'lucide-react';
+import { PlusCircle, Building, User as UserIcon, Eye, EyeOff } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
@@ -32,6 +32,7 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
     // Add user form state
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [plan, setPlan] = useState<Plan>('Medico');
     const [clinicName, setClinicName] = useState('');
 
@@ -80,6 +81,7 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
             // Reset form
             setUsername('');
             setPassword('');
+            setShowPassword(false);
             setPlan('Medico');
             setClinicName('');
             // Refresh user list
@@ -151,7 +153,17 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="new-password">Contraseña</Label>
-                         <Input id="new-password" type="password" value={password} onChange={e => setPassword(e.target.value)} required disabled={isLoading} />
+                         <div className="relative">
+                            <Input id="new-password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required disabled={isLoading} className="pr-10" />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                                >
+                                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+                         </div>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="new-plan">Plan</Label>
