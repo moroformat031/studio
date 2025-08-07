@@ -21,6 +21,7 @@ export default function SignupPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [clinicName, setClinicName] = useState('');
+  const [hospitalName, setHospitalName] = useState('');
 
   const { signup } = useAuth();
   const router = useRouter();
@@ -39,7 +40,8 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      await signup(username, password, selectedPlan, clinicName);
+      const clinicNameToSubmit = selectedPlan === 'Hospital' ? hospitalName : clinicName;
+      await signup(username, password, selectedPlan, clinicNameToSubmit);
       toast({
         title: "¡Cuenta Creada!",
         description: `Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesión.`,
@@ -131,7 +133,7 @@ export default function SignupPage() {
                             disabled={isLoading}
                         />
                     </div>
-                    {(selectedPlan === 'Free' || selectedPlan === 'Clinica' || selectedPlan === 'Hospital') && (
+                    {(selectedPlan === 'Free' || selectedPlan === 'Clinica') && (
                         <div className="space-y-2">
                             <Label htmlFor="clinicName">
                                 Nombre de la Clínica
@@ -141,7 +143,7 @@ export default function SignupPage() {
                                <Input
                                     id="clinicName"
                                     type="text"
-                                    placeholder={selectedPlan === 'Hospital' ? 'p.ej. Hospital Central' : 'p.ej. Clínica del Sol'}
+                                    placeholder='p.ej. Clínica del Sol'
                                     value={clinicName}
                                     onChange={(e) => setClinicName(e.target.value)}
                                     required
@@ -150,6 +152,46 @@ export default function SignupPage() {
                                 />
                             </div>
                         </div>
+                    )}
+                     {selectedPlan === 'Hospital' && (
+                       <>
+                        <div className="space-y-2">
+                            <Label htmlFor="hospitalName">
+                                Nombre del Hospital
+                            </Label>
+                            <div className="relative">
+                               <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                               <Input
+                                    id="hospitalName"
+                                    type="text"
+                                    placeholder='p.ej. Hospital Central'
+                                    value={hospitalName}
+                                    onChange={(e) => setHospitalName(e.target.value)}
+                                    required
+                                    disabled={isLoading}
+                                    className="pl-10"
+                                />
+                            </div>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="clinicName">
+                                Nombre de la Clínica
+                            </Label>
+                            <div className="relative">
+                               <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                               <Input
+                                    id="clinicName"
+                                    type="text"
+                                    placeholder='p.ej. Clínica del Sol'
+                                    value={clinicName}
+                                    onChange={(e) => setClinicName(e.target.value)}
+                                    required
+                                    disabled={isLoading}
+                                    className="pl-10"
+                                />
+                            </div>
+                        </div>
+                       </>
                     )}
                 </div>
             )}
