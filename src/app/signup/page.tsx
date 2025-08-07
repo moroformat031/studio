@@ -134,7 +134,7 @@ export default function SignupPage() {
                     {(selectedPlan === 'Free' || selectedPlan === 'Clinica' || selectedPlan === 'Hospital') && (
                         <div className="space-y-2">
                             <Label htmlFor="clinicName">
-                                {selectedPlan === 'Hospital' ? 'Nombre del Hospital' : 'Nombre de la Clínica'}
+                                Nombre de la Clínica
                             </Label>
                             <div className="relative">
                                <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
