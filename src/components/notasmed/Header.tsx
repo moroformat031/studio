@@ -1,7 +1,7 @@
 
 "use client";
 
-import { LogOut, Settings, Stethoscope, Building } from 'lucide-react';
+import { LogOut, Settings, Stethoscope, Building, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SettingsDialog } from './SettingsDialog';
 import { useAuth } from '@/context/AuthContext';
@@ -14,11 +14,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
+import { PlanGate } from './PlanGate';
+import { UserManagementDialog } from './UserManagementDialog';
+import { useState } from 'react';
 
 export function Header() {
   const { user, logout } = useAuth();
+  const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
 
   return (
+    <>
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 md:px-8">
         <div className="flex items-center gap-2">
@@ -54,6 +59,12 @@ export function Header() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <PlanGate allowedPlans={['Admin']}>
+                 <DropdownMenuItem onSelect={() => setIsUserManagementOpen(true)}>
+                    <Users className="mr-2 h-4 w-4" />
+                    <span>Gestionar Usuarios</span>
+                 </DropdownMenuItem>
+              </PlanGate>
               <DropdownMenuItem onClick={logout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Cerrar Sesión</span>
@@ -63,5 +74,7 @@ export function Header() {
         </div>
       </div>
     </header>
+    <UserManagementDialog open={isUserManagementOpen} onOpenChange={setIsUserManagementOpen} />
+    </>
   );
 }

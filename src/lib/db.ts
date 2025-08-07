@@ -14,8 +14,12 @@ let patients: Patient[] = initialPatients;
 // This is a simplified in-memory "database"
 export const db = {
   // User operations
+  getAllUsers: () => users,
   findUser: (username: string) => users.find(u => u.username.toLowerCase() === username.toLowerCase()),
   createUser: (userData: Omit<User, 'id'>) => {
+    if (db.findUser(userData.username)) {
+      return null; // User already exists
+    }
     const newUser: User = { ...userData, id: `user-${Date.now()}` };
     users.push(newUser);
     return newUser;
