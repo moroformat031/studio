@@ -13,12 +13,13 @@ export interface User {
 export interface Clinic {
     id: string;
     name: string;
-    address?: string;
-    phone?: string;
+    address: string;
+    phone: string;
 }
 
 export interface PatientNote {
     id: string;
+    patient_id: string;
     date: string;
     provider: string;
     transcription: string;
@@ -27,6 +28,7 @@ export interface PatientNote {
 
 export interface Vital {
     id: string;
+    patient_id: string;
     date: string;
     hr: number;
     bp: string;
@@ -37,6 +39,7 @@ export interface Vital {
 
 export interface Medication {
     id: string;
+    patient_id: string;
     name: string;
     dosage: string;
     frequency: string;
@@ -46,6 +49,7 @@ export interface Medication {
 
 export interface Appointment {
     id: string;
+    patient_id: string;
     date: string;
     time: string;
     reason: string;
@@ -56,6 +60,7 @@ export interface Appointment {
 
 export interface Procedure {
     id: string;
+    patient_id: string;
     date: string;
     name: string;
     notes: string;
