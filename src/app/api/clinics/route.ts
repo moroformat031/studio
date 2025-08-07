@@ -14,7 +14,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { name } = (await request.json()) as Omit<Clinic, 'id'>;
+    const { name, address, phone } = (await request.json()) as Omit<Clinic, 'id'>;
 
     if (!name) {
          return NextResponse.json({ message: 'Clinic name is required' }, { status: 400 });
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Clinic with that name already exists' }, { status: 409 });
     }
 
-    const newClinic = db.createClinic({ name });
+    const newClinic = db.createClinic({ name, address, phone });
 
     return NextResponse.json(newClinic, { status: 201 });
 

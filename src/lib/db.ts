@@ -11,9 +11,9 @@ let users: User[] = [
 
 let patients: Patient[] = initialPatients;
 let clinics: Clinic[] = [
-    { id: 'clinic-1', name: "Victor's Clinic" },
-    { id: 'clinic-2', name: 'Clínica Central' },
-    { id: 'clinic-3', name: 'Consultorio Dr. Ejemplo' },
+    { id: 'clinic-1', name: "Victor's Clinic", address: '123 Main St', phone: '555-1111' },
+    { id: 'clinic-2', name: 'Clínica Central', address: '456 Oak Ave', phone: '555-2222' },
+    { id: 'clinic-3', name: 'Consultorio Dr. Ejemplo', address: '789 Pine Ln', phone: '555-3333' },
 ];
 
 

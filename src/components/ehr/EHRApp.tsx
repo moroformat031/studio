@@ -6,7 +6,7 @@ import { PatientDetail } from './PatientDetail';
 import { Header } from '../notasmed/Header';
 import { AddPatientDialog } from './AddPatientDialog';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { Patient, Appointment, Vital, Medication, Procedure } from '@/types/ehr';
+import { Patient, Appointment, Vital, Medication, Procedure, Clinic } from '@/types/ehr';
 import { Button } from '../ui/button';
 import { Plus, Home } from 'lucide-react';
 import { PlanGate } from '../notasmed/PlanGate';
@@ -46,12 +46,12 @@ export function EHRApp() {
         setIsAddPatientDialogOpen(false);
     };
 
-    const handleAddClinic = async (clinicName: string) => {
+    const handleAddClinic = async (clinicData: Omit<Clinic, 'id'>) => {
         try {
             const response = await fetch('/api/clinics', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: clinicName }),
+                body: JSON.stringify(clinicData),
             });
 
             if (!response.ok) {
@@ -59,9 +59,11 @@ export function EHRApp() {
                 throw new Error(message || 'Failed to add clinic');
             }
 
+            const newClinic = await response.json();
+
             toast({
                 title: 'Clínica Agregada',
-                description: `La clínica "${clinicName}" ha sido creada exitosamente.`,
+                description: `La clínica "${newClinic.name}" ha sido creada exitosamente.`,
             });
             setIsAddClinicDialogOpen(false);
         } catch (error) {
