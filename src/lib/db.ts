@@ -1,5 +1,5 @@
 
-import { Patient, User, PatientNote, Appointment, Vital, Medication, Procedure, Plan } from '@/types/ehr';
+import { Patient, User, PatientNote, Appointment, Vital, Medication, Procedure, Plan, Clinic } from '@/types/ehr';
 import { initialPatients } from './ehr-data';
 
 // --- Mock Database ---
@@ -10,6 +10,12 @@ let users: User[] = [
 ];
 
 let patients: Patient[] = initialPatients;
+let clinics: Clinic[] = [
+    { id: 'clinic-1', name: "Victor's Clinic" },
+    { id: 'clinic-2', name: 'Clínica Central' },
+    { id: 'clinic-3', name: 'Consultorio Dr. Ejemplo' },
+];
+
 
 // This is a simplified in-memory "database"
 export const db = {
@@ -20,7 +26,13 @@ export const db = {
     if (db.findUser(userData.username)) {
       return null; // User already exists
     }
-    const newUser: User = { id: `user-${Date.now()}`, ...userData };
+    const newUser: User = { 
+        id: `user-${Date.now()}`,
+        username: userData.username,
+        password: userData.password,
+        plan: userData.plan,
+        clinicName: userData.clinicName
+    };
     users.push(newUser);
     return newUser;
   },
@@ -67,4 +79,16 @@ export const db = {
   updatePatientProcedures: (patientId: string, procedures: Procedure[]) => {
     return db.updatePatient(patientId, { procedures });
   },
+
+  // Clinic operations
+  getAllClinics: () => clinics,
+  findClinicByName: (name: string) => clinics.find(c => c.name.toLowerCase() === name.toLowerCase()),
+  createClinic: (clinicData: Omit<Clinic, 'id'>) => {
+      if(db.findClinicByName(clinicData.name)) {
+          return null; // Clinic already exists
+      }
+      const newClinic: Clinic = { id: `clinic-${Date.now()}`, ...clinicData };
+      clinics.push(newClinic);
+      return newClinic;
+  }
 };

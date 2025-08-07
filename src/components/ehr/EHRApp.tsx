@@ -12,12 +12,16 @@ import { Plus, Home } from 'lucide-react';
 import { PlanGate } from '../notasmed/PlanGate';
 import { PatientCombobox } from './PatientCombobox';
 import { Skeleton } from '../ui/skeleton';
+import { AddClinicDialog } from './AddClinicDialog';
+import { useToast } from '@/hooks/use-toast';
 
 export function EHRApp() {
     const { patients, addPatient, updatePatient, addNoteToPatient, updatePatientAppointments, updatePatientVitals, updatePatientMedications, updatePatientProcedures, loading } = usePatientData();
     const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
     const [fontSize] = useLocalStorage('notasmed-fontSize', 16);
     const [isAddPatientDialogOpen, setIsAddPatientDialogOpen] = useState(false);
+    const [isAddClinicDialogOpen, setIsAddClinicDialogOpen] = useState(false);
+    const { toast } = useToast();
     
     const selectedPatient = patients.find(p => p.id === selectedPatientId) || null;
 
@@ -40,6 +44,34 @@ export function EHRApp() {
         const newPatient = await addPatient(newPatientData);
         setSelectedPatientId(newPatient.id);
         setIsAddPatientDialogOpen(false);
+    };
+
+    const handleAddClinic = async (clinicName: string) => {
+        try {
+            const response = await fetch('/api/clinics', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: clinicName }),
+            });
+
+            if (!response.ok) {
+                const { message } = await response.json();
+                throw new Error(message || 'Failed to add clinic');
+            }
+
+            toast({
+                title: 'Clínica Agregada',
+                description: `La clínica "${clinicName}" ha sido creada exitosamente.`,
+            });
+            setIsAddClinicDialogOpen(false);
+        } catch (error) {
+            const e = error as Error;
+            toast({
+                variant: 'destructive',
+                title: 'Error al Agregar Clínica',
+                description: e.message,
+            });
+        }
     };
 
     const handleUpdateAppointments = (patientId: string, appointments: Appointment[]) => {
@@ -83,10 +115,16 @@ export function EHRApp() {
                         </div>
                          <PlanGate allowedPlans={['Admin']}>
                             <div className="flex gap-2">
-                                <Button size="sm" variant="outline">
-                                    <Home className="h-4 w-4 mr-2" />
-                                    Agregar Clínica
-                                </Button>
+                                 <AddClinicDialog
+                                    open={isAddClinicDialogOpen}
+                                    onOpenChange={setIsAddClinicDialogOpen}
+                                    onSave={handleAddClinic}
+                                >
+                                    <Button size="sm" variant="outline">
+                                        <Home className="h-4 w-4 mr-2" />
+                                        Agregar Clínica
+                                    </Button>
+                                </AddClinicDialog>
                                 <AddPatientDialog
                                     open={isAddPatientDialogOpen}
                                     onOpenChange={setIsAddPatientDialogOpen}

@@ -1,6 +1,5 @@
 
 
-
 export type Plan = 'Free' | 'Clinica' | 'Hospital' | 'Medico' | 'Admin';
 
 export interface User {
@@ -9,6 +8,11 @@ export interface User {
   password?: string; // Keep optional for security, shouldn't be sent to client
   plan: Plan;
   clinicName?: string;
+}
+
+export interface Clinic {
+    id: string;
+    name: string;
 }
 
 export interface PatientNote {
