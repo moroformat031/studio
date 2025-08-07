@@ -4,7 +4,7 @@ import { initialPatients } from './ehr-data';
 
 // --- Mock Database ---
 let users: User[] = [
-  { id: 'user-1', username: 'victor', password: 'codigo', plan: 'Hospital' },
+  { id: 'user-1', username: 'victor', password: 'codigo', plan: 'Hospital', clinicName: "Victor's Clinic" },
   { id: 'user-2', username: 'clinica-user', password: 'clinica', plan: 'Clinica', clinicName: 'Clínica Central' },
   { id: 'user-3', username: 'free-user', password: 'free', plan: 'Free', clinicName: 'Consultorio Dr. Ejemplo' },
 ];
@@ -20,7 +20,7 @@ export const db = {
     if (db.findUser(userData.username)) {
       return null; // User already exists
     }
-    const newUser: User = { ...userData, id: `user-${Date.now()}` };
+    const newUser: User = { id: `user-${Date.now()}`, ...userData };
     users.push(newUser);
     return newUser;
   },
