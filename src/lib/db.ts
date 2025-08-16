@@ -77,10 +77,10 @@ export const db = {
         }
     },
     // --- Patient operations ---
-    getAllPatients: async (): Promise<Patient[]> => {
+    getAllPatients: async (clinicName: string): Promise<Patient[]> => {
         const connection = await getConnection();
         try {
-            const [rows] = await connection.execute('SELECT * FROM patients');
+            const [rows] = await connection.execute('SELECT * FROM patients WHERE clinicName = ?', [clinicName]);
             const patients = (rows as any[]).map(p => {
                 const { dob, ...rest } = p;
                 return {
@@ -155,11 +155,11 @@ export const db = {
     addPatient: async (patientData: Omit<Patient, 'id'>): Promise<Patient> => {
         const connection = await getConnection();
         try {
-            const { name, demographics } = patientData;
+            const { name, demographics, clinicName } = patientData;
             const newId = uuidv4();
             await connection.execute(
-                'INSERT INTO patients (id, name, dob, gender, address, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                [newId, name, demographics.dob, demographics.gender, demographics.address, demographics.phone, demographics.email]
+                'INSERT INTO patients (id, name, dob, gender, address, phone, email, clinicName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                [newId, name, demographics.dob, demographics.gender, demographics.address, demographics.phone, demographics.email, clinicName]
             );
             return { ...patientData, id: newId };
         } finally {

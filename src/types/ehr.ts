@@ -84,4 +84,5 @@ export interface Patient {
     appointments: Appointment[];
     procedures: Procedure[];
     notes: PatientNote[];
+    clinicName?: string;
 }

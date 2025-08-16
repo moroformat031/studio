@@ -3,15 +3,22 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Patient, Appointment, Vital, Medication, Procedure, PatientNote } from "@/types/ehr";
+import { useAuth } from '@/context/AuthContext';
 
 export function usePatientData() {
+    const { user } = useAuth();
     const [patients, setPatients] = useState<Patient[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchPatients = useCallback(async () => {
+        if (!user?.clinicName) {
+            setPatients([]);
+            setLoading(false);
+            return;
+        };
         try {
             setLoading(true);
-            const response = await fetch('/api/patients');
+            const response = await fetch(`/api/patients?clinicName=${encodeURIComponent(user.clinicName)}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch patients');
             }
@@ -23,7 +30,7 @@ export function usePatientData() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [user?.clinicName]);
 
     useEffect(() => {
         fetchPatients();
@@ -35,10 +42,11 @@ export function usePatientData() {
     }, [patients]);
 
     const addPatient = async (patient: Omit<Patient, 'id'>) => {
+        const patientWithClinic = { ...patient, clinicName: user?.clinicName };
         const response = await fetch('/api/patients', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(patient),
+            body: JSON.stringify(patientWithClinic),
         });
         const newPatient = await response.json();
         setPatients(prev => [...prev, newPatient]);

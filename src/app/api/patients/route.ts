@@ -1,11 +1,18 @@
 
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { Patient } from '@/types/ehr';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const patients = await db.getAllPatients();
+    const { searchParams } = new URL(request.url);
+    const clinicName = searchParams.get('clinicName');
+    
+    if (!clinicName) {
+      return NextResponse.json({ message: 'Clinic name is required' }, { status: 400 });
+    }
+
+    const patients = await db.getAllPatients(clinicName);
     return NextResponse.json(patients);
   } catch (error) {
     console.error("Error fetching patients:", error);
