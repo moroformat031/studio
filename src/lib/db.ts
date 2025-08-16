@@ -76,6 +76,54 @@ export const db = {
             connection.release();
         }
     },
+    updateUser: async (id: string, userData: Partial<Omit<User, 'id'>>): Promise<Omit<User, 'password'> | null> => {
+        const connection = await getConnection();
+        try {
+            const { username, password, plan, clinicName } = userData;
+            let query = 'UPDATE users SET ';
+            const params = [];
+            if (username) {
+                query += 'username = ?, ';
+                params.push(username);
+            }
+            if (password) {
+                const hashedPassword = await bcrypt.hash(password, 10);
+                query += 'password = ?, ';
+                params.push(hashedPassword);
+            }
+            if (plan) {
+                query += 'plan = ?, ';
+                params.push(plan);
+            }
+            if (clinicName) {
+                query += 'clinicName = ?, ';
+                params.push(clinicName);
+            }
+
+            query = query.slice(0, -2) + ' WHERE id = ?';
+            params.push(id);
+
+            const [result] = await connection.execute(query, params) as any;
+            if (result.affectedRows === 0) {
+                return null;
+            }
+            
+            const [rows] = await connection.execute('SELECT id, username, plan, clinicName FROM users WHERE id = ?', [id]);
+            return (rows as any)[0] || null;
+
+        } finally {
+            connection.release();
+        }
+    },
+    deleteUser: async (id: string): Promise<boolean> => {
+        const connection = await getConnection();
+        try {
+            const [result] = await connection.execute('DELETE FROM users WHERE id = ?', [id]) as any;
+            return result.affectedRows > 0;
+        } finally {
+            connection.release();
+        }
+    },
     // --- Patient operations ---
     getAllPatients: async (clinicName: string): Promise<Patient[]> => {
         const connection = await getConnection();
@@ -200,6 +248,52 @@ export const db = {
                 [newId, name, address, phone]
             );
             return { ...clinicData, id: newId };
+        } finally {
+            connection.release();
+        }
+    },
+    updateClinic: async(id: string, clinicData: Partial<Omit<Clinic, 'id'>>): Promise<Clinic | null> => {
+        const connection = await getConnection();
+        try {
+            const { name, address, phone } = clinicData;
+            
+            let query = 'UPDATE clinics SET ';
+            const params = [];
+
+            if (name) {
+                query += 'name = ?, ';
+                params.push(name);
+            }
+             if (address) {
+                query += 'address = ?, ';
+                params.push(address);
+            }
+             if (phone) {
+                query += 'phone = ?, ';
+                params.push(phone);
+            }
+
+            query = query.slice(0, -2) + ' WHERE id = ?';
+            params.push(id);
+
+            const [result] = await connection.execute(query, params) as any;
+
+            if (result.affectedRows === 0) {
+                return null;
+            }
+
+            const [rows] = await connection.execute('SELECT * FROM clinics WHERE id = ?', [id]);
+            return (rows as any)[0] || null;
+
+        } finally {
+            connection.release();
+        }
+    },
+    deleteClinic: async (id: string): Promise<boolean> => {
+        const connection = await getConnection();
+        try {
+            const [result] = await connection.execute('DELETE FROM clinics WHERE id = ?', [id]) as any;
+            return result.affectedRows > 0;
         } finally {
             connection.release();
         }

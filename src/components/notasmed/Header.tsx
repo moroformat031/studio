@@ -1,7 +1,7 @@
 
 "use client";
 
-import { LogOut, Settings, Stethoscope, Building, Users } from 'lucide-react';
+import { LogOut, Settings, Stethoscope, Building, Users, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SettingsDialog } from './SettingsDialog';
 import { useAuth } from '@/context/AuthContext';
@@ -15,12 +15,12 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { PlanGate } from './PlanGate';
-import { UserManagementDialog } from './UserManagementDialog';
+import { ManagementDialog } from './ManagementDialog';
 import { useState } from 'react';
 
 export function Header() {
   const { user, logout } = useAuth();
-  const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
+  const [isManagementOpen, setIsManagementOpen] = useState(false);
 
   return (
     <>
@@ -43,6 +43,12 @@ export function Header() {
               <Settings className="h-4 w-4" />
             </Button>
           </SettingsDialog>
+          <PlanGate allowedPlans={['Admin']}>
+            <Button variant="outline" size="sm" onClick={() => setIsManagementOpen(true)}>
+                <Briefcase className="h-4 w-4 mr-2" />
+                Gestionar
+            </Button>
+          </PlanGate>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="cursor-pointer h-9 w-9">
@@ -64,12 +70,6 @@ export function Header() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <PlanGate allowedPlans={['Admin']}>
-                 <DropdownMenuItem onSelect={() => setIsUserManagementOpen(true)}>
-                    <Users className="mr-2 h-4 w-4" />
-                    <span>Gestionar Usuarios</span>
-                 </DropdownMenuItem>
-              </PlanGate>
               <DropdownMenuItem onClick={logout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Cerrar Sesión</span>
@@ -79,7 +79,7 @@ export function Header() {
         </div>
       </div>
     </header>
-    <UserManagementDialog open={isUserManagementOpen} onOpenChange={setIsUserManagementOpen} />
+    <ManagementDialog open={isManagementOpen} onOpenChange={setIsManagementOpen} />
     </>
   );
 }
