@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  username   String   @unique
+  password   String
+  plan       Plan
+  clinicId   String?
+  clinic     Clinic?  @relation(fields: [clinicId], references: [id])
+}
+
+model Clinic {
+  id      String    @id @default(uuid())
+  name    String    @unique
+  address String?
+  phone   String?
+  users   User[]
+  patients Patient[]
+}
+
+model Patient {
+  id           String        @id @default(uuid())
+  name         String
+  dob          DateTime      @db.Date
+  gender       String
+  address      String?
+  phone        String?
+  email        String?
+  clinicId     String
+  clinic       Clinic        @relation(fields: [clinicId], references: [id])
+  vitals       Vital[]
+  medications  Medication[]
+  appointments Appointment[]
+  procedures   Procedure[]
+  notes        PatientNote[]
+}
+
+model Vital {
+  id         String   @id @default(uuid())
+  patientId  String
+  patient    Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  date       DateTime @db.Date
+  hr         Int
+  bp         String
+  temp       Float
+  rr         Int
+  provider   String
+}
+
+model Medication {
+  id                  String   @id @default(uuid())
+  patientId           String
+  patient             Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  name                String
+  dosage              String
+  frequency           String
+  prescribedDate      DateTime @db.Date
+  prescribingProvider String
+}
+
+model Appointment {
+  id               String   @id @default(uuid())
+  patientId        String
+  patient          Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  date             DateTime @db.Date
+  time             String
+  reason           String
+  status           String // Programada, Completada, Cancelada
+  visitProvider    String
+  billingProvider  String
+}
+
+model Procedure {
+  id                 String   @id @default(uuid())
+  patientId          String
+  patient            Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  date               DateTime @db.Date
+  name               String
+  notes              String?
+  performingProvider String
+}
+
+model PatientNote {
+  id            String   @id @default(uuid())
+  patientId     String
+  patient       Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  date          DateTime
+  provider      String
+  transcription String   @db.Text
+  summary       String   @db.Text
+}
+
+enum Plan {
+  Free
+  Clinica
+  Hospital
+  Medico
+  Admin
+}

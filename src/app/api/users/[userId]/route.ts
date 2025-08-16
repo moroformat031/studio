@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { User } from '@/types/ehr';
+import type { User } from '@/types/ehr';
 
 export async function PUT(
   request: Request,
@@ -11,7 +11,6 @@ export async function PUT(
     const userId = params.userId;
     const userData = (await request.json()) as Partial<User>;
     
-    // Don't allow changing ID, and handle password separately if needed
     delete userData.id;
 
     const updatedUser = await db.updateUser(userId, userData);

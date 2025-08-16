@@ -1,8 +1,10 @@
 
 import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import type { PatientNote } from '@/types/ehr';
 import { db } from '@/lib/db';
-import { PatientNote } from '@/types/ehr';
-import mysql from 'mysql2/promise';
+
+const prisma = new PrismaClient();
 
 export async function POST(
   request: Request,
@@ -12,19 +14,15 @@ export async function POST(
     const patientId = params.patientId;
     const note = (await request.json()) as Omit<PatientNote, 'id'>;
     
-    const connection = await mysql.createConnection({
-        host: process.env.DATABASE_HOST,
-        user: process.env.DATABASE_USER,
-        password: process.env.DATABASE_PASSWORD,
-        database: process.env.DATABASE_NAME,
+    await prisma.patientNote.create({
+        data: {
+            patientId: patientId,
+            date: new Date(note.date),
+            provider: note.provider,
+            transcription: note.transcription,
+            summary: note.summary
+        }
     });
-    
-    await connection.execute(
-        'INSERT INTO patient_notes (patient_id, date, provider, transcription, summary) VALUES (?, ?, ?, ?, ?)',
-        [patientId, new Date(note.date), note.provider, note.transcription, note.summary]
-    );
-
-    connection.end();
 
     const updatedPatient = await db.getPatient(patientId);
 

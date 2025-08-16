@@ -1,10 +1,8 @@
 
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { User } from '@/types/ehr';
-import bcrypt from 'bcryptjs';
+import type { User } from '@/types/ehr';
 
-// GET all users
 export async function GET() {
   try {
     const users = await db.getAllUsers();
@@ -15,7 +13,6 @@ export async function GET() {
   }
 }
 
-// POST a new user (simulates admin adding a user)
 export async function POST(request: Request) {
   try {
     const { username, password, plan, clinicName } = (await request.json()) as Omit<User, 'id' | 'clinicId'> & { password?: string, clinicName: string };

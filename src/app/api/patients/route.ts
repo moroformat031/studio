@@ -1,7 +1,7 @@
 
 import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/lib/db';
-import { Patient } from '@/types/ehr';
+import type { Patient } from '@/types/ehr';
 
 export async function GET(request: NextRequest) {
   try {

@@ -1,8 +1,10 @@
 
 import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import type { Procedure } from '@/types/ehr';
 import { db } from '@/lib/db';
-import { Procedure } from '@/types/ehr';
-import mysql from 'mysql2/promise';
+
+const prisma = new PrismaClient();
 
 export async function PUT(
   request: Request,
@@ -12,35 +14,25 @@ export async function PUT(
     const patientId = params.patientId;
     const procedures = (await request.json()) as Procedure[];
 
-    const connection = await mysql.createConnection({
-        host: process.env.DATABASE_HOST,
-        user: process.env.DATABASE_USER,
-        password: process.env.DATABASE_PASSWORD,
-        database: process.env.DATABASE_NAME,
+    await prisma.$transaction(async (tx) => {
+        await tx.procedure.deleteMany({
+            where: { patientId: patientId }
+        });
+
+        if (procedures.length > 0) {
+            await tx.procedure.createMany({
+                data: procedures.map(p => ({
+                    id: p.id,
+                    patientId: patientId,
+                    date: new Date(p.date),
+                    name: p.name,
+                    notes: p.notes,
+                    performingProvider: p.performingProvider
+                }))
+            });
+        }
     });
     
-    await connection.beginTransaction();
-
-    await connection.execute('DELETE FROM procedures WHERE patient_id = ?', [patientId]);
-
-    if (procedures.length > 0) {
-        const procedureValues = procedures.map(p => [
-            p.id,
-            patientId,
-            new Date(p.date),
-            p.name,
-            p.notes,
-            p.performingProvider
-        ]);
-        await connection.query(
-            'INSERT INTO procedures (id, patient_id, date, name, notes, performingProvider) VALUES ?',
-            [procedureValues]
-        );
-    }
-    
-    await connection.commit();
-    connection.end();
-
     const updatedPatient = await db.getPatient(patientId);
 
     if (updatedPatient) {

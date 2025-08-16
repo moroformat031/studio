@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { Clinic } from '@/types/ehr';
+import type { Clinic } from '@/types/ehr';
 
 export async function PUT(
   request: Request,
@@ -40,6 +40,7 @@ export async function DELETE(
     return NextResponse.json({ message: 'Clinic not found or could not be deleted' }, { status: 404 });
   } catch (error) {
     console.error("Error deleting clinic:", error);
-    return NextResponse.json({ message: 'An error occurred' }, { status: 500 });
+    const e = error as Error;
+    return NextResponse.json({ message: e.message, status: 500 });
   }
 }

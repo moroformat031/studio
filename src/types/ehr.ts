@@ -1,14 +1,15 @@
 
+import type { Plan as PrismaPlan } from '@prisma/client';
 
-export type Plan = 'Free' | 'Clinica' | 'Hospital' | 'Medico' | 'Admin';
+export type Plan = PrismaPlan;
 
 export interface User {
   id: string;
   username: string;
-  password?: string; // Keep optional for security, shouldn't be sent to client
+  password?: string;
   plan: Plan;
-  clinicId: string;
-  clinicName?: string; // Can be added for convenience, but ID is the source of truth
+  clinicId: string | null;
+  clinicName?: string;
 }
 
 export interface Clinic {
@@ -20,7 +21,7 @@ export interface Clinic {
 
 export interface PatientNote {
     id: string;
-    patient_id: string;
+    patientId: string;
     date: string;
     provider: string;
     transcription: string;
@@ -29,7 +30,7 @@ export interface PatientNote {
 
 export interface Vital {
     id: string;
-    patient_id: string;
+    patientId: string;
     date: string;
     hr: number;
     bp: string;
@@ -40,7 +41,7 @@ export interface Vital {
 
 export interface Medication {
     id: string;
-    patient_id: string;
+    patientId: string;
     name: string;
     dosage: string;
     frequency: string;
@@ -50,7 +51,7 @@ export interface Medication {
 
 export interface Appointment {
     id: string;
-    patient_id: string;
+    patientId: string;
     date: string;
     time: string;
     reason: string;
@@ -61,7 +62,7 @@ export interface Appointment {
 
 export interface Procedure {
     id: string;
-    patient_id: string;
+    patientId: string;
     date: string;
     name: string;
     notes: string;

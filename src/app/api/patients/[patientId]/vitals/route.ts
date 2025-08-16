@@ -1,8 +1,10 @@
 
 import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import type { Vital } from '@/types/ehr';
 import { db } from '@/lib/db';
-import { Vital } from '@/types/ehr';
-import mysql from 'mysql2/promise';
+
+const prisma = new PrismaClient();
 
 export async function PUT(
   request: Request,
@@ -12,36 +14,26 @@ export async function PUT(
     const patientId = params.patientId;
     const vitals = (await request.json()) as Vital[];
 
-    const connection = await mysql.createConnection({
-        host: process.env.DATABASE_HOST,
-        user: process.env.DATABASE_USER,
-        password: process.env.DATABASE_PASSWORD,
-        database: process.env.DATABASE_NAME,
+    await prisma.$transaction(async (tx) => {
+        await tx.vital.deleteMany({
+            where: { patientId: patientId }
+        });
+
+        if (vitals.length > 0) {
+            await tx.vital.createMany({
+                data: vitals.map(v => ({
+                    id: v.id,
+                    patientId: patientId,
+                    date: new Date(v.date),
+                    hr: Number(v.hr),
+                    bp: v.bp,
+                    temp: Number(v.temp),
+                    rr: Number(v.rr),
+                    provider: v.provider
+                }))
+            });
+        }
     });
-    
-    await connection.beginTransaction();
-
-    await connection.execute('DELETE FROM vitals WHERE patient_id = ?', [patientId]);
-
-    if (vitals.length > 0) {
-        const vitalValues = vitals.map(v => [
-            v.id,
-            patientId,
-            new Date(v.date),
-            v.hr,
-            v.bp,
-            v.temp,
-            v.rr,
-            v.provider
-        ]);
-        await connection.query(
-            'INSERT INTO vitals (id, patient_id, date, hr, bp, temp, rr, provider) VALUES ?',
-            [vitalValues]
-        );
-    }
-    
-    await connection.commit();
-    connection.end();
 
     const updatedPatient = await db.getPatient(patientId);
 

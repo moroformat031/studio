@@ -1,8 +1,10 @@
 
 import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import type { Medication } from '@/types/ehr';
 import { db } from '@/lib/db';
-import { Medication } from '@/types/ehr';
-import mysql from 'mysql2/promise';
+
+const prisma = new PrismaClient();
 
 export async function PUT(
   request: Request,
@@ -12,36 +14,25 @@ export async function PUT(
     const patientId = params.patientId;
     const medications = (await request.json()) as Medication[];
 
-     const connection = await mysql.createConnection({
-        host: process.env.DATABASE_HOST,
-        user: process.env.DATABASE_USER,
-        password: process.env.DATABASE_PASSWORD,
-        database: process.env.DATABASE_NAME,
+    await prisma.$transaction(async (tx) => {
+        await tx.medication.deleteMany({
+            where: { patientId: patientId }
+        });
+
+        if (medications.length > 0) {
+            await tx.medication.createMany({
+                data: medications.map(m => ({
+                    id: m.id,
+                    patientId: patientId,
+                    name: m.name,
+                    dosage: m.dosage,
+                    frequency: m.frequency,
+                    prescribedDate: new Date(m.prescribedDate),
+                    prescribingProvider: m.prescribingProvider
+                }))
+            });
+        }
     });
-    
-    await connection.beginTransaction();
-
-    await connection.execute('DELETE FROM medications WHERE patient_id = ?', [patientId]);
-
-    if (medications.length > 0) {
-        const medicationValues = medications.map(m => [
-            m.id,
-            patientId,
-            m.name,
-            m.dosage,
-            m.frequency,
-            new Date(m.prescribedDate),
-            m.prescribingProvider
-        ]);
-
-        await connection.query(
-            'INSERT INTO medications (id, patient_id, name, dosage, frequency, prescribedDate, prescribingProvider) VALUES ?',
-            [medicationValues]
-        );
-    }
-
-    await connection.commit();
-    connection.end();
 
     const updatedPatient = await db.getPatient(patientId);
     if (updatedPatient) {
