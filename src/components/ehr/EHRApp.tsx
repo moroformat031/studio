@@ -25,12 +25,7 @@ export function EHRApp() {
     const { toast } = useToast();
     const { user } = useAuth();
     
-    // Set initial patient selection once data loads
-    useEffect(() => {
-        if (!loading && patients.length > 0 && !selectedPatientId) {
-            setSelectedPatientId(patients[0].id);
-        }
-    }, [loading, patients, selectedPatientId]);
+    const selectedPatient = patients.find(p => p.id === selectedPatientId) || null;
 
     const handleAddPatient = async (patient: Omit<Patient, 'id' | 'vitals' | 'medications' | 'appointments' | 'procedures' | 'notes'>) => {
         const newPatientData: Omit<Patient, 'id'> = {
