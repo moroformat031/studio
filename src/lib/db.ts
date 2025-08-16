@@ -22,8 +22,34 @@ const getConnection = () => pool.getConnection();
 
 // This function will format the date to YYYY-MM-DD
 const formatDate = (date: Date): string => {
+    if (!date || !(date instanceof Date)) return '';
     return date.toISOString().split('T')[0];
 }
+
+const initializeAdmin = async () => {
+    const connection = await getConnection();
+    try {
+        const [rows] = await connection.execute('SELECT * FROM users WHERE username = ?', ['admin']);
+        const users = rows as User[];
+        if (users.length === 0) {
+            console.log('Admin user not found, creating one...');
+            const hashedPassword = await bcrypt.hash('code', 10);
+            const adminId = uuidv4();
+            await connection.execute(
+                'INSERT INTO users (id, username, password, plan, clinicName) VALUES (?, ?, ?, ?, ?)',
+                [adminId, 'admin', hashedPassword, 'Admin', 'Hospital Central']
+            );
+            console.log('Admin user created successfully.');
+        }
+    } catch (error) {
+        console.error("Error during admin initialization:", error);
+    } finally {
+        connection.release();
+    }
+};
+
+// Initialize admin user on startup
+initializeAdmin();
 
 
 // This object will now contain methods that interact with the MySQL database
@@ -76,31 +102,34 @@ export const db = {
             connection.release();
         }
     },
-    updateUser: async (id: string, userData: Partial<Omit<User, 'id'>>): Promise<Omit<User, 'password'> | null> => {
+    updateUser: async (id: string, userData: Partial<Omit<User, 'id' | 'password'>> & { password?: string }): Promise<Omit<User, 'password'> | null> => {
         const connection = await getConnection();
         try {
             const { username, password, plan, clinicName } = userData;
             let query = 'UPDATE users SET ';
-            const params = [];
-            if (username) {
-                query += 'username = ?, ';
-                params.push(username);
-            }
+            const params: (string | Plan)[] = [];
+            
+            const fieldsToUpdate: { [key: string]: any } = { username, plan, clinicName };
+
             if (password) {
-                const hashedPassword = await bcrypt.hash(password, 10);
-                query += 'password = ?, ';
-                params.push(hashedPassword);
-            }
-            if (plan) {
-                query += 'plan = ?, ';
-                params.push(plan);
-            }
-            if (clinicName) {
-                query += 'clinicName = ?, ';
-                params.push(clinicName);
+                 fieldsToUpdate.password = await bcrypt.hash(password, 10);
             }
 
-            query = query.slice(0, -2) + ' WHERE id = ?';
+            const queryParts = Object.keys(fieldsToUpdate)
+                .filter(key => fieldsToUpdate[key] !== undefined)
+                .map(key => {
+                    params.push(fieldsToUpdate[key]);
+                    return `${key} = ?`;
+                });
+            
+            if(queryParts.length === 0) {
+                // Nothing to update
+                const [currentRows] = await connection.execute('SELECT id, username, plan, clinicName FROM users WHERE id = ?', [id]);
+                return (currentRows as any)[0] || null;
+            }
+
+            query += queryParts.join(', ');
+            query += ' WHERE id = ?';
             params.push(id);
 
             const [result] = await connection.execute(query, params) as any;
@@ -188,11 +217,11 @@ export const db = {
             const [procedures] = await connection.execute('SELECT * FROM procedures WHERE patient_id = ?', [id]);
             const [notes] = await connection.execute('SELECT * FROM patient_notes WHERE patient_id = ?', [id]);
             
-            patient.vitals = vitals as Vital[];
-            patient.medications = medications as Medication[];
-            patient.appointments = appointments as Appointment[];
-            patient.procedures = procedures as Procedure[];
-            patient.notes = notes as PatientNote[];
+            patient.vitals = (vitals as Vital[]).map(v => ({...v, date: formatDate(new Date(v.date))}));
+            patient.medications = (medications as Medication[]).map(m => ({...m, prescribedDate: formatDate(new Date(m.prescribedDate))}));
+            patient.appointments = (appointments as Appointment[]).map(a => ({...a, date: formatDate(new Date(a.date))}));
+            patient.procedures = (procedures as Procedure[]).map(p => ({...p, date: formatDate(new Date(p.date))}));
+            patient.notes = (notes as PatientNote[]).map(n => ({...n, date: formatDate(new Date(n.date))}));
 
             return patient;
 
@@ -209,7 +238,7 @@ export const db = {
                 'INSERT INTO patients (id, name, dob, gender, address, phone, email, clinicName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 [newId, name, demographics.dob, demographics.gender, demographics.address, demographics.phone, demographics.email, clinicName]
             );
-            return { ...patientData, id: newId };
+            return { ...patientData, id: newId, vitals: [], medications: [], appointments: [], procedures: [], notes: [] };
         } finally {
             connection.release();
         }
@@ -257,24 +286,18 @@ export const db = {
         try {
             const { name, address, phone } = clinicData;
             
-            let query = 'UPDATE clinics SET ';
-            const params = [];
+            const fieldsToUpdate: { [key: string]: any } = { name, address, phone };
+            const queryParts = Object.keys(fieldsToUpdate)
+                .filter(key => fieldsToUpdate[key] !== undefined)
+                .map(key => `${key} = ?`);
 
-            if (name) {
-                query += 'name = ?, ';
-                params.push(name);
-            }
-             if (address) {
-                query += 'address = ?, ';
-                params.push(address);
-            }
-             if (phone) {
-                query += 'phone = ?, ';
-                params.push(phone);
+            if (queryParts.length === 0) {
+                 const [currentRows] = await connection.execute('SELECT * FROM clinics WHERE id = ?', [id]);
+                 return (currentRows as any)[0] || null;
             }
 
-            query = query.slice(0, -2) + ' WHERE id = ?';
-            params.push(id);
+            let query = `UPDATE clinics SET ${queryParts.join(', ')} WHERE id = ?`;
+            const params = [...Object.values(fieldsToUpdate).filter(v => v !== undefined), id];
 
             const [result] = await connection.execute(query, params) as any;
 
@@ -299,3 +322,5 @@ export const db = {
         }
     }
 };
+
+    
