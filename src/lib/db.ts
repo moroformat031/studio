@@ -40,8 +40,6 @@ const initializeAdmin = async () => {
         }
     } catch (error) {
         console.error("Error during admin initialization:", error);
-    } finally {
-        await prisma.$disconnect();
     }
 };
 
@@ -225,3 +223,5 @@ export const db = {
         return true;
     }
 };
+
+    

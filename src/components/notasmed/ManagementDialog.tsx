@@ -43,3 +43,5 @@ export function ManagementDialog({ open, onOpenChange }: ManagementDialogProps) 
     </Dialog>
   )
 }
+
+    

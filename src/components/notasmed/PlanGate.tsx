@@ -16,29 +16,13 @@ interface PlanGateProps {
 export function PlanGate({ allowedPlans, children }: PlanGateProps) {
   const { user } = useAuth();
   
-  // This is a simplified role mapping.
-  // In a real app, this might come from a config or an API.
-  const planRoles: Record<Plan, Plan[]> = {
-    'Free': ['Medico'],
-    'Clinica': ['Medico'],
-    'Hospital': ['Admin', 'Medico'],
-    'Medico': ['Medico'],
-    'Admin': ['Admin', 'Medico'],
-  };
+  const hasAccess = user && allowedPlans.includes(user.plan);
 
-  const userPlan = user?.plan || 'Free';
-  const rolesForUser = planRoles[userPlan] || [];
-
-  const hasAccess = allowedPlans.some(allowedPlan => rolesForUser.includes(allowedPlan));
-
-
-  if (!user || !hasAccess) {
-    // If the feature is admin-only and the user is not in a plan that can be an admin,
-    // it's better to just not render anything to avoid confusion.
-    if (allowedPlans.includes('Admin') && user?.plan !== 'Hospital') {
+  if (!hasAccess) {
+    if (allowedPlans.includes('Admin')) {
         return null;
     }
-
+    
     return (
       <Card className="flex flex-col items-center justify-center text-center bg-muted/40">
         <CardHeader>
@@ -57,3 +41,5 @@ export function PlanGate({ allowedPlans, children }: PlanGateProps) {
 
   return <>{children}</>;
 }
+
+    

@@ -95,3 +95,5 @@ export function DemographicsTab({ patient, onUpdatePatient }: DemographicsTabPro
         </Card>
     );
 }
+
+    

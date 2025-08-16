@@ -128,3 +128,5 @@ export function ProceduresTab({ patient, onUpdateProcedures }: ProceduresTabProp
         </>
     );
 }
+
+    

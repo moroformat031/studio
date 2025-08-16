@@ -131,3 +131,5 @@ export function VitalsTab({ patient, onUpdateVitals }: VitalsTabProps) {
         </>
     );
 }
+
+    

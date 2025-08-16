@@ -126,3 +126,5 @@ export function NotesTab({ patient, onAddNote }: NotesTabProps) {
         </Card>
     );
 }
+
+    

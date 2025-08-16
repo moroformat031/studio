@@ -37,3 +37,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: e.message || 'An error occurred during user creation' }, { status: 500 });
   }
 }
+
+    

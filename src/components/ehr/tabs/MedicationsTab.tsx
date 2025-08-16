@@ -132,3 +132,5 @@ export function MedicationsTab({ patient, onUpdateMedications }: MedicationsTabP
         </>
     );
 }
+
+    

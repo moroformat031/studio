@@ -163,3 +163,5 @@ export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps
     </Dialog>
   )
 }
+
+    
