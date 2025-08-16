@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, PlusCircle, Trash2, Edit } from 'lucide-react';
 import { AppointmentDialog } from './AppointmentDialog';
-import { PlanGate } from '@/components/notasmed/PlanGate';
 
 interface AppointmentsTabProps {
     patient: Patient;
@@ -68,12 +67,10 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
                             <CardTitle>Citas</CardTitle>
                             <CardDescription>Citas programadas y pasadas.</CardDescription>
                         </div>
-                        <PlanGate allowedPlans={['Admin']}>
-                            <Button onClick={handleAddClick} size="sm">
-                                <PlusCircle className="mr-2 h-4 w-4" />
-                                Agregar Cita
-                            </Button>
-                        </PlanGate>
+                        <Button onClick={handleAddClick} size="sm">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Agregar Cita
+                        </Button>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -106,7 +103,6 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                     <PlanGate allowedPlans={['Admin']}>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" className="h-8 w-8 p-0">
@@ -125,7 +121,6 @@ export function AppointmentsTab({ patient, onUpdateAppointments }: AppointmentsT
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
-                                       </PlanGate>
                                     </TableCell>
                                 </TableRow>
                             ))): (

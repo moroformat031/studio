@@ -7,7 +7,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, PlusCircle, Trash2, Edit } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { PlanGate } from '@/components/notasmed/PlanGate';
 import { VitalDialog } from './VitalDialog';
 
 interface VitalsTabProps {
@@ -62,12 +61,10 @@ export function VitalsTab({ patient, onUpdateVitals }: VitalsTabProps) {
                         <CardTitle>Signos Vitales</CardTitle>
                         <CardDescription>Signos vitales registrados del paciente.</CardDescription>
                     </div>
-                    <PlanGate allowedPlans={['Admin']}>
-                        <Button onClick={handleAddClick} size="sm">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Agregar Signos Vitales
-                        </Button>
-                    </PlanGate>
+                    <Button onClick={handleAddClick} size="sm">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Agregar Signos Vitales
+                    </Button>
                  </div>
             </CardHeader>
             <CardContent>
@@ -96,26 +93,24 @@ export function VitalsTab({ patient, onUpdateVitals }: VitalsTabProps) {
                                 <TableCell>{vital.rr}</TableCell>
                                 <TableCell>{vital.provider}</TableCell>
                                 <TableCell className="text-right">
-                                    <PlanGate allowedPlans={['Admin']}>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                                    <span className="sr-only">Abrir menú</span>
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => handleEditClick(vital)}>
-                                                    <Edit className="mr-2 h-4 w-4" />
-                                                    <span>Editar</span>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handleDeleteClick(vital.id)} className="text-destructive">
-                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                    <span>Eliminar</span>
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                       </PlanGate>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                                <span className="sr-only">Abrir menú</span>
+                                                <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={() => handleEditClick(vital)}>
+                                                <Edit className="mr-2 h-4 w-4" />
+                                                <span>Editar</span>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleDeleteClick(vital.id)} className="text-destructive">
+                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                <span>Eliminar</span>
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </TableCell>
                             </TableRow>
                         ))): (

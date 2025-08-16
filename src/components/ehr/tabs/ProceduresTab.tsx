@@ -7,7 +7,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, PlusCircle, Trash2, Edit } from 'lucide-react';
-import { PlanGate } from '@/components/notasmed/PlanGate';
 import { ProcedureDialog } from './ProcedureDialog';
 
 
@@ -62,12 +61,10 @@ export function ProceduresTab({ patient, onUpdateProcedures }: ProceduresTabProp
                             <CardTitle>Procedimientos</CardTitle>
                             <CardDescription>Procedimientos realizados al paciente.</CardDescription>
                         </div>
-                         <PlanGate allowedPlans={['Admin']}>
-                            <Button onClick={handleAddClick} size="sm">
-                                <PlusCircle className="mr-2 h-4 w-4" />
-                                Agregar Procedimiento
-                            </Button>
-                        </PlanGate>
+                        <Button onClick={handleAddClick} size="sm">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Agregar Procedimiento
+                        </Button>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -92,26 +89,24 @@ export function ProceduresTab({ patient, onUpdateProcedures }: ProceduresTabProp
                                         <TableCell>{proc.performingProvider}</TableCell>
                                         <TableCell className="max-w-[300px] truncate">{proc.notes}</TableCell>
                                         <TableCell className="text-right">
-                                            <PlanGate allowedPlans={['Admin']}>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" className="h-8 w-8 p-0">
-                                                            <span className="sr-only">Abrir menú</span>
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem onClick={() => handleEditClick(proc)}>
-                                                            <Edit className="mr-2 h-4 w-4" />
-                                                            <span>Editar</span>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => handleDeleteClick(proc.id)} className="text-destructive">
-                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                            <span>Eliminar</span>
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </PlanGate>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                        <span className="sr-only">Abrir menú</span>
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem onClick={() => handleEditClick(proc)}>
+                                                        <Edit className="mr-2 h-4 w-4" />
+                                                        <span>Editar</span>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleDeleteClick(proc.id)} className="text-destructive">
+                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                        <span>Eliminar</span>
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </TableCell>
                                     </TableRow>
                             ))): (

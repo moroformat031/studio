@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { PlanGate } from '@/components/notasmed/PlanGate';
 
 interface DemographicsTabProps {
     patient: Patient;
@@ -42,16 +41,14 @@ export function DemographicsTab({ patient, onUpdatePatient }: DemographicsTabPro
                         <CardTitle>Información del Paciente</CardTitle>
                         <CardDescription>Información personal del paciente.</CardDescription>
                     </div>
-                    <PlanGate allowedPlans={['Admin']}>
-                        {!isEditing ? (
-                            <Button variant="outline" onClick={() => setIsEditing(true)}>Editar</Button>
-                        ) : (
-                            <div className="flex gap-2">
-                                <Button variant="outline" onClick={() => { setIsEditing(false); setFormData(patient.demographics); }}>Cancelar</Button>
-                                <Button onClick={handleSave}>Guardar</Button>
-                            </div>
-                        )}
-                    </PlanGate>
+                    {!isEditing ? (
+                        <Button variant="outline" onClick={() => setIsEditing(true)}>Editar</Button>
+                    ) : (
+                        <div className="flex gap-2">
+                            <Button variant="outline" onClick={() => { setIsEditing(false); setFormData(patient.demographics); }}>Cancelar</Button>
+                            <Button onClick={handleSave}>Guardar</Button>
+                        </div>
+                    )}
                 </div>
             </CardHeader>
             <CardContent>
