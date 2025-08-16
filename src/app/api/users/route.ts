@@ -18,17 +18,17 @@ export async function GET() {
 // POST a new user (simulates admin adding a user)
 export async function POST(request: Request) {
   try {
-    const { username, password, plan, clinicName } = (await request.json()) as Omit<User, 'id'>;
+    const { username, password, plan, clinicName } = (await request.json()) as Omit<User, 'id'> & { password?: string };
 
     if (!username || !password || !plan) {
          return NextResponse.json({ message: 'Username, password, and plan are required' }, { status: 400 });
     }
-
-    const newUser = await db.createUser({ username, password, plan, clinicName });
-
-    if (!newUser) {
+    
+    if (await db.findUser(username)) {
        return NextResponse.json({ message: 'Username already exists' }, { status: 409 });
     }
+
+    const newUser = await db.createUser({ username, password, plan, clinicName });
     
     const { password: _, ...userWithoutPassword } = newUser;
 

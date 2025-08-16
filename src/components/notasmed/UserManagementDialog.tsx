@@ -26,7 +26,7 @@ interface UserManagementDialogProps {
 
 export function UserManagementDialog({ open, onOpenChange }: UserManagementDialogProps) {
     const { toast } = useToast();
-    const [users, setUsers] = useState<User[]>([]);
+    const [users, setUsers] = useState<Omit<User, 'password'>[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     
     // Add user form state
@@ -43,12 +43,15 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
             if(res.ok) {
                 const data = await res.json();
                 setUsers(data);
+            } else {
+                throw new Error("Failed to fetch users");
             }
         } catch (e) {
+            const err = e as Error;
             toast({
                 variant: 'destructive',
                 title: 'Error',
-                description: 'No se pudieron cargar los usuarios.'
+                description: err.message || 'No se pudieron cargar los usuarios.'
             })
         } finally {
             setIsLoading(false);
