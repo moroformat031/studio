@@ -57,6 +57,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!username || !password) {
           throw new Error('Username and password are required.');
       }
+      if (!clinicName) {
+        throw new Error('Clinic name is required.');
+      }
       
       const response = await fetch('/api/auth/signup', {
         method: 'POST',

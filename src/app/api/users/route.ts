@@ -18,10 +18,10 @@ export async function GET() {
 // POST a new user (simulates admin adding a user)
 export async function POST(request: Request) {
   try {
-    const { username, password, plan, clinicName } = (await request.json()) as Omit<User, 'id'> & { password?: string };
+    const { username, password, plan, clinicName } = (await request.json()) as Omit<User, 'id' | 'clinicId'> & { password?: string, clinicName: string };
 
-    if (!username || !password || !plan) {
-         return NextResponse.json({ message: 'Username, password, and plan are required' }, { status: 400 });
+    if (!username || !password || !plan || !clinicName) {
+         return NextResponse.json({ message: 'Username, password, plan, and clinic name are required' }, { status: 400 });
     }
     
     if (await db.findUser(username)) {

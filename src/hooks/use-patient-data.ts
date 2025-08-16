@@ -11,14 +11,14 @@ export function usePatientData() {
     const [loading, setLoading] = useState(true);
 
     const fetchPatients = useCallback(async () => {
-        if (!user?.clinicName) {
+        if (!user?.clinicId) {
             setPatients([]);
             setLoading(false);
             return;
         };
         try {
             setLoading(true);
-            const response = await fetch(`/api/patients?clinicName=${encodeURIComponent(user.clinicName)}`);
+            const response = await fetch(`/api/patients?clinicId=${encodeURIComponent(user.clinicId)}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch patients');
             }
@@ -30,7 +30,7 @@ export function usePatientData() {
         } finally {
             setLoading(false);
         }
-    }, [user?.clinicName]);
+    }, [user?.clinicId]);
 
     useEffect(() => {
         fetchPatients();
@@ -42,7 +42,8 @@ export function usePatientData() {
     }, [patients]);
 
     const addPatient = async (patient: Omit<Patient, 'id'>) => {
-        const patientWithClinic = { ...patient, clinicName: user?.clinicName };
+        if (!user?.clinicId) throw new Error("User has no clinic assigned");
+        const patientWithClinic = { ...patient, clinicId: user.clinicId };
         const response = await fetch('/api/patients', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

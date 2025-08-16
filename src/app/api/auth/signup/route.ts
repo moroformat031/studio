@@ -6,10 +6,13 @@ import bcrypt from 'bcryptjs';
 
 export async function POST(request: Request) {
   try {
-    const { username, password, plan, clinicName } = (await request.json()) as Omit<User, 'id'> & { password?: string };
+    const { username, password, plan, clinicName } = (await request.json()) as Omit<User, 'id' | 'clinicId'> & { password?: string, clinicName?: string };
 
     if (!password) {
       return NextResponse.json({ message: 'Password is required' }, { status: 400 });
+    }
+     if (!clinicName) {
+      return NextResponse.json({ message: 'Clinic name is required' }, { status: 400 });
     }
 
     const existingUser = await db.findUser(username);

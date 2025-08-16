@@ -7,7 +7,8 @@ export interface User {
   username: string;
   password?: string; // Keep optional for security, shouldn't be sent to client
   plan: Plan;
-  clinicName?: string;
+  clinicId: string;
+  clinicName?: string; // Can be added for convenience, but ID is the source of truth
 }
 
 export interface Clinic {
@@ -84,5 +85,5 @@ export interface Patient {
     appointments: Appointment[];
     procedures: Procedure[];
     notes: PatientNote[];
-    clinicName?: string;
+    clinicId: string;
 }

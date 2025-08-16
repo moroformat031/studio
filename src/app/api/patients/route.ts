@@ -6,13 +6,13 @@ import { Patient } from '@/types/ehr';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const clinicName = searchParams.get('clinicName');
+    const clinicId = searchParams.get('clinicId');
     
-    if (!clinicName) {
-      return NextResponse.json({ message: 'Clinic name is required' }, { status: 400 });
+    if (!clinicId) {
+      return NextResponse.json({ message: 'Clinic ID is required' }, { status: 400 });
     }
 
-    const patients = await db.getAllPatients(clinicName);
+    const patients = await db.getAllPatients(clinicId);
     return NextResponse.json(patients);
   } catch (error) {
     console.error("Error fetching patients:", error);

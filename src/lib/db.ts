@@ -39,17 +39,21 @@ const initializeAdmin = async () => {
             // Ensure the 'Hospital Central' clinic exists
             let [clinicRows] = await connection.execute('SELECT * FROM clinics WHERE name = ?', ['Hospital Central']);
             let clinics = clinicRows as Clinic[];
+            let clinicId: string;
+
             if (clinics.length === 0) {
-                const clinicId = uuidv4();
+                clinicId = uuidv4();
                  await connection.execute(
                     'INSERT INTO clinics (id, name, address, phone) VALUES (?, ?, ?, ?)',
                     [clinicId, 'Hospital Central', '123 Admin Way', '555-0000']
                 );
+            } else {
+                clinicId = clinics[0].id;
             }
 
             await connection.execute(
-                'INSERT INTO users (id, username, password, plan, clinicName) VALUES (?, ?, ?, ?, ?)',
-                [adminId, 'admin', hashedPassword, 'Admin', 'Hospital Central']
+                'INSERT INTO users (id, username, password, plan, clinicId) VALUES (?, ?, ?, ?, ?)',
+                [adminId, 'admin', hashedPassword, 'Admin', clinicId]
             );
             console.log('Admin user created successfully.');
         }
@@ -70,7 +74,11 @@ export const db = {
     getAllUsers: async (): Promise<Omit<User, 'password'>[]> => {
         const connection = await getConnection();
         try {
-            const [rows] = await connection.execute('SELECT id, username, plan, clinicName FROM users');
+            const [rows] = await connection.execute(`
+                SELECT u.id, u.username, u.plan, u.clinicId, c.name as clinicName 
+                FROM users u 
+                LEFT JOIN clinics c ON u.clinicId = c.id
+            `);
             return rows as Omit<User, 'password'>[];
         } finally {
             connection.release();
@@ -79,14 +87,19 @@ export const db = {
     findUser: async (username: string): Promise<User | null> => {
         const connection = await getConnection();
         try {
-            const [rows] = await connection.execute('SELECT * FROM users WHERE username = ?', [username]);
+            const [rows] = await connection.execute(`
+                SELECT u.id, u.username, u.password, u.plan, u.clinicId, c.name as clinicName 
+                FROM users u
+                LEFT JOIN clinics c ON u.clinicId = c.id
+                WHERE u.username = ?
+            `, [username]);
             const users = rows as User[];
             return users.length > 0 ? users[0] : null;
         } finally {
             connection.release();
         }
     },
-    createUser: async (userData: Omit<User, 'id'>): Promise<Omit<User, 'password'>> => {
+    createUser: async (userData: { username: string, password?: string, plan: Plan, clinicName: string }): Promise<Omit<User, 'password'>> => {
         const connection = await getConnection();
         try {
             const existingUser = await db.findUser(userData.username);
@@ -106,37 +119,46 @@ export const db = {
 
             const hashedPassword = await bcrypt.hash(userData.password!, 10);
             const newUserId = uuidv4();
-            const newUser: User = {
+            
+            await connection.execute(
+                'INSERT INTO users (id, username, password, plan, clinicId) VALUES (?, ?, ?, ?, ?)',
+                [newUserId, userData.username, hashedPassword, userData.plan, clinic.id]
+            );
+            
+            const newUser: Omit<User, 'password'> = {
                 id: newUserId,
                 username: userData.username,
-                password: hashedPassword,
                 plan: userData.plan,
-                clinicName: clinic.name, // Use the definite clinic name
+                clinicId: clinic.id,
+                clinicName: clinic.name,
             };
 
-            await connection.execute(
-                'INSERT INTO users (id, username, password, plan, clinicName) VALUES (?, ?, ?, ?, ?)',
-                [newUser.id, newUser.username, newUser.password, newUser.plan, newUser.clinicName]
-            );
-
-            const { password, ...userWithoutPassword } = newUser;
-            return userWithoutPassword;
+            return newUser;
         } finally {
             connection.release();
         }
     },
-    updateUser: async (id: string, userData: Partial<Omit<User, 'id' | 'password'>> & { password?: string }): Promise<Omit<User, 'password'> | null> => {
+    updateUser: async (id: string, userData: Partial<Omit<User, 'id' | 'password'>> & { password?: string, clinicName?: string }): Promise<Omit<User, 'password'> | null> => {
         const connection = await getConnection();
         try {
             const { username, password, plan, clinicName } = userData;
             let query = 'UPDATE users SET ';
             const params: (string | Plan)[] = [];
             
-            const fieldsToUpdate: { [key: string]: any } = { username, plan, clinicName };
+            const fieldsToUpdate: { [key: string]: any } = { username, plan };
 
             if (password) {
                  fieldsToUpdate.password = await bcrypt.hash(password, 10);
             }
+            
+            if (clinicName) {
+                let clinic = await db.findClinicByName(clinicName);
+                if (!clinic) {
+                    clinic = await db.createClinic({ name: clinicName });
+                }
+                fieldsToUpdate.clinicId = clinic.id;
+            }
+
 
             const queryParts = Object.keys(fieldsToUpdate)
                 .filter(key => fieldsToUpdate[key] !== undefined)
@@ -147,7 +169,7 @@ export const db = {
             
             if(queryParts.length === 0) {
                 // Nothing to update
-                const [currentRows] = await connection.execute('SELECT id, username, plan, clinicName FROM users WHERE id = ?', [id]);
+                 const [currentRows] = await connection.execute('SELECT u.id, u.username, u.plan, u.clinicId, c.name as clinicName FROM users u LEFT JOIN clinics c ON u.clinicId = c.id WHERE u.id = ?', [id]);
                 return (currentRows as any)[0] || null;
             }
 
@@ -160,7 +182,7 @@ export const db = {
                 return null;
             }
             
-            const [rows] = await connection.execute('SELECT id, username, plan, clinicName FROM users WHERE id = ?', [id]);
+            const [rows] = await connection.execute('SELECT u.id, u.username, u.plan, u.clinicId, c.name as clinicName FROM users u LEFT JOIN clinics c ON u.clinicId = c.id WHERE u.id = ?', [id]);
             return (rows as any)[0] || null;
 
         } finally {
@@ -177,10 +199,10 @@ export const db = {
         }
     },
     // --- Patient operations ---
-    getAllPatients: async (clinicName: string): Promise<Patient[]> => {
+    getAllPatients: async (clinicId: string): Promise<Patient[]> => {
         const connection = await getConnection();
         try {
-            const [rows] = await connection.execute('SELECT * FROM patients WHERE clinicName = ?', [clinicName]);
+            const [rows] = await connection.execute('SELECT * FROM patients WHERE clinicId = ?', [clinicId]);
             const patients = (rows as any[]).map(p => {
                 const { dob, ...rest } = p;
                 return {
@@ -255,11 +277,11 @@ export const db = {
     addPatient: async (patientData: Omit<Patient, 'id'>): Promise<Patient> => {
         const connection = await getConnection();
         try {
-            const { name, demographics, clinicName } = patientData;
+            const { name, demographics, clinicId } = patientData;
             const newId = uuidv4();
             await connection.execute(
-                'INSERT INTO patients (id, name, dob, gender, address, phone, email, clinicName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                [newId, name, demographics.dob, demographics.gender, demographics.address, demographics.phone, demographics.email, clinicName]
+                'INSERT INTO patients (id, name, dob, gender, address, phone, email, clinicId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                [newId, name, demographics.dob, demographics.gender, demographics.address, demographics.phone, demographics.email, clinicId]
             );
             return { ...patientData, id: newId, vitals: [], medications: [], appointments: [], procedures: [], notes: [] };
         } finally {
@@ -287,7 +309,7 @@ export const db = {
             connection.release();
         }
     },
-    createClinic: async (clinicData: Omit<Clinic, 'id'>): Promise<Clinic> => {
+    createClinic: async (clinicData: Omit<Clinic, 'id'> & { name: string }): Promise<Clinic> => {
         const connection = await getConnection();
         try {
             const { name, address, phone } = clinicData;
@@ -299,7 +321,7 @@ export const db = {
                 'INSERT INTO clinics (id, name, address, phone) VALUES (?, ?, ?, ?)',
                 [newId, name, address, phone]
             );
-            return { ...clinicData, id: newId };
+            return { id: newId, name, address: address || '', phone: phone || '' };
         } finally {
             connection.release();
         }
@@ -338,6 +360,10 @@ export const db = {
     deleteClinic: async (id: string): Promise<boolean> => {
         const connection = await getConnection();
         try {
+            // Un-assign users from this clinic
+            await connection.execute('UPDATE users SET clinicId = NULL WHERE clinicId = ?', [id]);
+            // Re-assign patients or delete them? For now, let's just delete the clinic.
+            // In a real-world app, you'd need a more robust strategy for orphaned patients.
             const [result] = await connection.execute('DELETE FROM clinics WHERE id = ?', [id]) as any;
             return result.affectedRows > 0;
         } finally {
@@ -345,5 +371,3 @@ export const db = {
         }
     }
 };
-
-    
