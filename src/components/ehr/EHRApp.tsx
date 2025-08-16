@@ -1,6 +1,6 @@
 
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePatientData } from '@/hooks/use-patient-data';
 import { PatientDetail } from './PatientDetail';
 import { Header } from '../notasmed/Header';
@@ -9,11 +9,12 @@ import { useLocalStorage } from '@/hooks/use-local-storage';
 import { Patient, Appointment, Vital, Medication, Procedure, Clinic } from '@/types/ehr';
 import { Button } from '../ui/button';
 import { Plus, Home } from 'lucide-react';
-import { PlanGate } from '../notasmed/PlanGate';
 import { PatientCombobox } from './PatientCombobox';
 import { Skeleton } from '../ui/skeleton';
 import { AddClinicDialog } from './AddClinicDialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
+import { PlanGate } from '../notasmed/PlanGate';
 
 export function EHRApp() {
     const { patients, addPatient, updatePatient, addNoteToPatient, updatePatientAppointments, updatePatientVitals, updatePatientMedications, updatePatientProcedures, loading } = usePatientData();
@@ -22,15 +23,14 @@ export function EHRApp() {
     const [isAddPatientDialogOpen, setIsAddPatientDialogOpen] = useState(false);
     const [isAddClinicDialogOpen, setIsAddClinicDialogOpen] = useState(false);
     const { toast } = useToast();
+    const { user } = useAuth();
     
-    const selectedPatient = patients.find(p => p.id === selectedPatientId) || null;
-
     // Set initial patient selection once data loads
-    useState(() => {
+    useEffect(() => {
         if (!loading && patients.length > 0 && !selectedPatientId) {
             setSelectedPatientId(patients[0].id);
         }
-    });
+    }, [loading, patients, selectedPatientId]);
 
     const handleAddPatient = async (patient: Omit<Patient, 'id' | 'vitals' | 'medications' | 'appointments' | 'procedures' | 'notes'>) => {
         const newPatientData: Omit<Patient, 'id'> = {
@@ -116,7 +116,7 @@ export function EHRApp() {
                              </div>
                         </div>
                          <div className="flex gap-2">
-                             <PlanGate allowedPlans={['Admin']}>
+                             <PlanGate allowedPlans={['Hospital', 'Admin']}>
                                  <AddClinicDialog
                                     open={isAddClinicDialogOpen}
                                     onOpenChange={setIsAddClinicDialogOpen}

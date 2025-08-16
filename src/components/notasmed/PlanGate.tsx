@@ -15,28 +15,30 @@ interface PlanGateProps {
 
 export function PlanGate({ allowedPlans, children }: PlanGateProps) {
   const { user } = useAuth();
-
-  const userRoles: Record<Plan, Plan[]> = {
-    Free: ['Free', 'Medico'],
-    Clinica: ['Clinica', 'Medico'],
-    Hospital: ['Hospital', 'Admin', 'Medico'],
-    Medico: [],
-    Admin: [],
+  
+  // This is a simplified role mapping.
+  // In a real app, this might come from a config or an API.
+  const planRoles: Record<Plan, Plan[]> = {
+    'Free': ['Medico'],
+    'Clinica': ['Medico'],
+    'Hospital': ['Admin', 'Medico'],
+    'Medico': ['Medico'],
+    'Admin': ['Admin', 'Medico'],
   };
 
-  const userPlan: Plan = user?.plan ?? 'Free';
-  
-  const hasAccess = allowedPlans.some(plan => userRoles[userPlan]?.includes(plan));
+  const userPlan = user?.plan || 'Free';
+  const rolesForUser = planRoles[userPlan] || [];
+
+  const hasAccess = allowedPlans.some(allowedPlan => rolesForUser.includes(allowedPlan));
+
 
   if (!user || !hasAccess) {
-    // Hide the gate for plans that should have access, but the feature is admin-only.
-    // E.g. A "Medico" shouldn't see an "Upgrade to Admin" message for an admin-only feature.
-    const isAdminFeature = allowedPlans.includes('Admin') && !allowedPlans.includes('Medico');
-    if (isAdminFeature && user?.plan !== 'Hospital') {
+    // If the feature is admin-only and the user is not in a plan that can be an admin,
+    // it's better to just not render anything to avoid confusion.
+    if (allowedPlans.includes('Admin') && user?.plan !== 'Hospital') {
         return null;
     }
-    
-    // For other cases, show the upgrade message
+
     return (
       <Card className="flex flex-col items-center justify-center text-center bg-muted/40">
         <CardHeader>
@@ -46,7 +48,7 @@ export function PlanGate({ allowedPlans, children }: PlanGateProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground mb-4">Esta función está disponible para usuarios de {allowedPlans.join(' o ')}.</p>
+          <p className="text-muted-foreground mb-4">Esta función no está disponible en tu plan actual.</p>
           <Button>Actualizar Plan</Button>
         </CardContent>
       </Card>
