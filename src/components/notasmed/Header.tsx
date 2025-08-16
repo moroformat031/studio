@@ -28,9 +28,14 @@ export function Header() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 md:px-8">
         <div className="flex items-center gap-2">
           <Stethoscope className="h-7 w-7 text-primary" />
-          <h1 className="text-xl font-bold font-headline tracking-tight">
-            NotasMed EHR
-          </h1>
+          <div className="flex flex-col">
+            <h1 className="text-xl font-bold font-headline tracking-tight">
+                NotasMed EHR
+            </h1>
+            {user?.clinicName && (
+                <p className="text-xs text-muted-foreground -mt-1">{user.clinicName}</p>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <SettingsDialog>
