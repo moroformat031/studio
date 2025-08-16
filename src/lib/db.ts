@@ -35,6 +35,18 @@ const initializeAdmin = async () => {
             console.log('Admin user not found, creating one...');
             const hashedPassword = await bcrypt.hash('code', 10);
             const adminId = uuidv4();
+
+            // Ensure the 'Hospital Central' clinic exists
+            let [clinicRows] = await connection.execute('SELECT * FROM clinics WHERE name = ?', ['Hospital Central']);
+            let clinics = clinicRows as Clinic[];
+            if (clinics.length === 0) {
+                const clinicId = uuidv4();
+                 await connection.execute(
+                    'INSERT INTO clinics (id, name, address, phone) VALUES (?, ?, ?, ?)',
+                    [clinicId, 'Hospital Central', '123 Admin Way', '555-0000']
+                );
+            }
+
             await connection.execute(
                 'INSERT INTO users (id, username, password, plan, clinicName) VALUES (?, ?, ?, ?, ?)',
                 [adminId, 'admin', hashedPassword, 'Admin', 'Hospital Central']
@@ -81,6 +93,17 @@ export const db = {
             if (existingUser) {
                 throw new Error('Username already exists');
             }
+
+            if (!userData.clinicName) {
+                throw new Error('Clinic name is required to create a user.');
+            }
+
+            // Find or create clinic
+            let clinic = await db.findClinicByName(userData.clinicName);
+            if (!clinic) {
+                clinic = await db.createClinic({ name: userData.clinicName, address: '', phone: ''});
+            }
+
             const hashedPassword = await bcrypt.hash(userData.password!, 10);
             const newUserId = uuidv4();
             const newUser: User = {
@@ -88,7 +111,7 @@ export const db = {
                 username: userData.username,
                 password: hashedPassword,
                 plan: userData.plan,
-                clinicName: userData.clinicName,
+                clinicName: clinic.name, // Use the definite clinic name
             };
 
             await connection.execute(

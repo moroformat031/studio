@@ -22,7 +22,6 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [clinicName, setClinicName] = useState('');
-  const [hospitalName, setHospitalName] = useState('');
 
   const { signup, login } = useAuth();
   const router = useRouter();
@@ -38,11 +37,18 @@ export default function SignupPage() {
         });
         return;
     }
+     if (!clinicName.trim()) {
+        toast({
+            variant: "destructive",
+            title: "Nombre de Clínica Requerido",
+            description: "Por favor, ingrese el nombre de su clínica u hospital.",
+        });
+        return;
+    }
     setIsLoading(true);
 
     try {
-      const clinicNameToSubmit = selectedPlan === 'Hospital' ? hospitalName : clinicName;
-      await signup(username, password, selectedPlan, clinicNameToSubmit);
+      await signup(username, password, selectedPlan, clinicName);
       // Automatically log the user in after successful signup
       await login(username, password);
       toast({
@@ -147,66 +153,24 @@ export default function SignupPage() {
                             </button>
                         </div>
                     </div>
-                    {(selectedPlan === 'Free' || selectedPlan === 'Clinica') && (
-                        <div className="space-y-2">
-                            <Label htmlFor="clinicName">
-                                Nombre de la Clínica
-                            </Label>
-                            <div className="relative">
-                               <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                               <Input
-                                    id="clinicName"
-                                    type="text"
-                                    placeholder='p.ej. Clínica del Sol'
-                                    value={clinicName}
-                                    onChange={(e) => setClinicName(e.target.value)}
-                                    required
-                                    disabled={isLoading}
-                                    className="pl-10"
-                                />
-                            </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="clinicName">
+                            Nombre de la Clínica u Hospital
+                        </Label>
+                        <div className="relative">
+                            <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                id="clinicName"
+                                type="text"
+                                placeholder='p.ej. Clínica del Sol'
+                                value={clinicName}
+                                onChange={(e) => setClinicName(e.target.value)}
+                                required
+                                disabled={isLoading}
+                                className="pl-10"
+                            />
                         </div>
-                    )}
-                     {selectedPlan === 'Hospital' && (
-                       <>
-                        <div className="space-y-2">
-                            <Label htmlFor="hospitalName">
-                                Nombre del Hospital
-                            </Label>
-                            <div className="relative">
-                               <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                               <Input
-                                    id="hospitalName"
-                                    type="text"
-                                    placeholder='p.ej. Hospital Central'
-                                    value={hospitalName}
-                                    onChange={(e) => setHospitalName(e.target.value)}
-                                    required
-                                    disabled={isLoading}
-                                    className="pl-10"
-                                />
-                            </div>
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="clinicName">
-                                Nombre de la Clínica
-                            </Label>
-                            <div className="relative">
-                               <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                               <Input
-                                    id="clinicName"
-                                    type="text"
-                                    placeholder='p.ej. Clínica del Sol'
-                                    value={clinicName}
-                                    onChange={(e) => setClinicName(e.target.value)}
-                                    required
-                                    disabled={isLoading}
-                                    className="pl-10"
-                                />
-                            </div>
-                        </div>
-                       </>
-                    )}
+                    </div>
                 </div>
             )}
             
