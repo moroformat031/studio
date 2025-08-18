@@ -10,40 +10,206 @@ const formatDate = (date: Date | null): string => {
     return date.toISOString().split('T')[0];
 }
 
-const initializeAdmin = async () => {
+const initializeDatabase = async () => {
     try {
-        const adminUser = await prisma.user.findUnique({ where: { username: 'admin' } });
-        if (!adminUser) {
-            console.log('Admin user not found, creating one...');
-            const hashedPassword = await bcrypt.hash('code', 10);
+        console.log("Checking database initialization status...");
+        const userCount = await prisma.user.count();
 
-            let clinic = await prisma.clinic.findUnique({ where: { name: 'Hospital Central' } });
-            if (!clinic) {
-                clinic = await prisma.clinic.create({
-                    data: {
-                        name: 'Hospital Central',
-                        address: '123 Admin Way',
-                        phone: '555-0000'
-                    }
-                });
-            }
-
-            await prisma.user.create({
-                data: {
-                    username: 'admin',
-                    password: hashedPassword,
-                    plan: 'Admin',
-                    clinicId: clinic.id
-                }
-            });
-            console.log('Admin user created successfully.');
+        if (userCount > 1) { // Assuming admin is user 1
+            console.log("Database already seeded. Skipping initialization.");
+            return;
         }
+
+        console.log("Database is empty or only has admin. Seeding with initial data...");
+
+        // --- Clinics ---
+        console.log("Creating clinics...");
+        const hospitalCentral = await prisma.clinic.upsert({
+            where: { name: 'Hospital Central' },
+            update: {},
+            create: { name: 'Hospital Central', address: '123 Admin Way', phone: '555-0000' }
+        });
+        const clinicaDelSol = await prisma.clinic.upsert({
+            where: { name: 'Clínica del Sol' },
+            update: {},
+            create: { name: 'Clínica del Sol', address: '456 Sol Avenue', phone: '555-1111' }
+        });
+        const centroMedicoIntegral = await prisma.clinic.upsert({
+            where: { name: 'Centro Médico Integral' },
+            update: {},
+            create: { name: 'Centro Médico Integral', address: '789 Luna Street', phone: '555-2222' }
+        });
+
+        // --- Users (Admin, Doctors, Nurse) ---
+        console.log("Creating users...");
+        const adminUser = await prisma.user.upsert({
+            where: { username: 'admin' },
+            update: {},
+            create: {
+                username: 'admin',
+                password: await bcrypt.hash('code', 10),
+                plan: 'Admin',
+                clinicId: hospitalCentral.id
+            }
+        });
+
+        const draGarcia = await prisma.user.upsert({
+            where: { username: 'elenagarcia' },
+            update: {},
+            create: {
+                username: 'Dra. Elena Garcia',
+                password: await bcrypt.hash('code', 10),
+                plan: 'Medico',
+                clinicId: clinicaDelSol.id
+            }
+        });
+        
+        const drMartinez = await prisma.user.upsert({
+            where: { username: 'carlosmartinez' },
+            update: {},
+            create: {
+                username: 'Dr. Carlos Martinez',
+                password: await bcrypt.hash('code', 10),
+                plan: 'Medico',
+                clinicId: centroMedicoIntegral.id
+            }
+        });
+
+        const nurseJoy = await prisma.user.upsert({
+            where: { username: 'enfermerajoy' },
+            update: {},
+            create: {
+                username: 'Enfermera Joy',
+                password: await bcrypt.hash('code', 10),
+                plan: 'Nurse',
+                clinicId: clinicaDelSol.id
+            }
+        });
+
+        // --- Doctor Availability ---
+        console.log("Setting doctor availability...");
+        await prisma.doctorAvailability.createMany({
+            data: [
+                // Dra. Garcia Availability (Mon, Wed, Fri)
+                { userId: draGarcia.id, dayOfWeek: 0, startTime: '09:00', endTime: '17:00', isAvailable: true }, // Monday
+                { userId: draGarcia.id, dayOfWeek: 2, startTime: '09:00', endTime: '17:00', isAvailable: true }, // Wednesday
+                { userId: draGarcia.id, dayOfWeek: 4, startTime: '10:00', endTime: '15:00', isAvailable: true }, // Friday
+                // Dr. Martinez Availability (Tue, Thu)
+                { userId: drMartinez.id, dayOfWeek: 1, startTime: '08:00', endTime: '16:00', isAvailable: true }, // Tuesday
+                { userId: drMartinez.id, dayOfWeek: 3, startTime: '08:00', endTime: '16:00', isAvailable: true }, // Thursday
+            ],
+            skipDuplicates: true
+        });
+
+        // --- Patients ---
+        console.log("Creating patients...");
+        const patient1 = await prisma.patient.create({
+            data: {
+                name: 'Ana Pérez',
+                dob: new Date('1985-05-15'),
+                gender: 'Femenino',
+                address: 'Calle Falsa 123',
+                phone: '555-1234',
+                email: 'ana.perez@example.com',
+                clinicId: clinicaDelSol.id,
+            }
+        });
+        const patient2 = await prisma.patient.create({
+             data: {
+                name: 'Juan Rodríguez',
+                dob: new Date('1990-08-20'),
+                gender: 'Masculino',
+                address: 'Avenida Siempreviva 742',
+                phone: '555-5678',
+                email: 'juan.rodriguez@example.com',
+                clinicId: clinicaDelSol.id,
+            }
+        });
+         const patient3 = await prisma.patient.create({
+            data: {
+                name: 'Luisa Gomez',
+                dob: new Date('1978-11-30'),
+                gender: 'Femenino',
+                address: 'Boulevard de los Sueños Rotos 100',
+                phone: '555-9012',
+                email: 'luisa.gomez@example.com',
+                clinicId: centroMedicoIntegral.id,
+            }
+        });
+
+        // --- Pre-booked Appointments ---
+        console.log("Creating sample appointments...");
+        const today = new Date();
+        const nextMonday = new Date(today);
+        nextMonday.setDate(today.getDate() + (1 + 7 - today.getDay()) % 7);
+        if (nextMonday < today) nextMonday.setDate(nextMonday.getDate() + 7);
+        const nextTuesday = new Date(nextMonday);
+        nextTuesday.setDate(nextMonday.getDate() + 1);
+
+        await prisma.appointment.createMany({
+            data: [
+                {
+                    patientId: patient1.id,
+                    date: nextMonday,
+                    time: '10:00',
+                    reason: 'Consulta de seguimiento',
+                    status: 'Programada',
+                    visitProvider: draGarcia.id,
+                    billingProvider: draGarcia.id,
+                },
+                 {
+                    patientId: patient2.id,
+                    date: nextMonday,
+                    time: '11:30',
+                    reason: 'Revisión anual',
+                    status: 'Programada',
+                    visitProvider: draGarcia.id,
+                    billingProvider: draGarcia.id,
+                },
+                {
+                    patientId: patient3.id,
+                    date: nextTuesday,
+                    time: '09:00',
+                    reason: 'Dolor de cabeza crónico',
+                    status: 'Programada',
+                    visitProvider: drMartinez.id,
+                    billingProvider: drMartinez.id,
+                }
+            ]
+        });
+
+        // --- Master Data ---
+        console.log("Creating master data for medications and procedures...");
+        await prisma.masterMedication.createMany({
+            data: [
+                { name: 'Paracetamol 500mg' },
+                { name: 'Ibuprofeno 400mg' },
+                { name: 'Amoxicilina 250mg' },
+                { name: 'Loratadina 10mg' },
+                { name: 'Omeprazol 20mg' }
+            ],
+            skipDuplicates: true
+        });
+
+        await prisma.masterProcedure.createMany({
+            data: [
+                { name: 'Consulta General' },
+                { name: 'Consulta de Especialidad' },
+                { name: 'Radiografía de Tórax' },
+                { name: 'Análisis de Sangre Completo' },
+                { name: 'Sutura de Herida Simple' }
+            ],
+            skipDuplicates: true
+        });
+        
+        console.log('Database seeding completed successfully.');
+
     } catch (error) {
-        console.error("Error during admin initialization:", error);
+        console.error("Error during database initialization:", error);
     }
 };
 
-initializeAdmin();
+initializeDatabase();
 
 export const db = {
     // --- User operations ---
@@ -200,7 +366,8 @@ export const db = {
                 clinicId: clinicId!,
             }
         });
-        return { ...newPatient, demographics, vitals: [], medications: [], appointments: [], procedures: [], notes: [] };
+        const fullPatient = await db.getPatient(newPatient.id);
+        return fullPatient!;
     },
      deletePatient: async (id: string): Promise<boolean> => {
         await prisma.patient.delete({ where: { id } });
