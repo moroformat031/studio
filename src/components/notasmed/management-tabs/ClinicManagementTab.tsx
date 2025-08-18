@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { Clinic } from '@/types/ehr';
 import { PlusCircle, Building, MapPin, Phone, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
-import { Card, CardContent } from '../ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../ui/dropdown-menu';
+// Make sure the path is correct; adjust if your Card component is elsewhere
+import { Card, CardContent } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
