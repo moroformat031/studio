@@ -13,6 +13,8 @@ import { UserManagementTab } from './management-tabs/UserManagementTab';
 import { ClinicManagementTab } from './management-tabs/ClinicManagementTab';
 import { PatientManagementTab } from "./management-tabs/PatientManagementTab";
 import { ProviderManagementTab } from "./management-tabs/ProviderManagementTab";
+import { MedicationManagementTab } from "./management-tabs/MedicationManagementTab";
+import { ProcedureManagementTab } from "./management-tabs/ProcedureManagementTab";
 
 interface ManagementDialogProps {
   open: boolean;
@@ -35,8 +37,8 @@ export function ManagementDialog({ open, onOpenChange }: ManagementDialogProps) 
                 <TabsTrigger value="medicos">Medicos</TabsTrigger>
                 <TabsTrigger value="clinics">Clínicas</TabsTrigger>
                 <TabsTrigger value="patients">Pacientes</TabsTrigger>
-                <TabsTrigger value="medications" disabled>Medicamentos</TabsTrigger>
-                <TabsTrigger value="procedures" disabled>Procedimientos</TabsTrigger>
+                <TabsTrigger value="medications">Medicamentos</TabsTrigger>
+                <TabsTrigger value="procedures">Procedimientos</TabsTrigger>
             </TabsList>
             <div className="flex-grow overflow-hidden mt-4">
                 <TabsContent value="users" className="h-full">
@@ -51,11 +53,11 @@ export function ManagementDialog({ open, onOpenChange }: ManagementDialogProps) 
                 <TabsContent value="patients" className="h-full">
                     <PatientManagementTab />
                 </TabsContent>
-                <TabsContent value="medications">
-                    {/* Placeholder for future implementation */}
+                <TabsContent value="medications" className="h-full">
+                    <MedicationManagementTab />
                 </TabsContent>
-                 <TabsContent value="procedures">
-                    {/* Placeholder for future implementation */}
+                 <TabsContent value="procedures" className="h-full">
+                    <ProcedureManagementTab />
                 </TabsContent>
             </div>
         </Tabs>

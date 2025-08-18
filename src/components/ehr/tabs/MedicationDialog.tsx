@@ -23,18 +23,6 @@ interface MedicationDialogProps {
     medication: Medication | null;
 }
 
-const sampleMedications = [
-    'Lisinopril',
-    'Metformina',
-    'Atorvastatina',
-    'Amoxicilina',
-    'Ibuprofeno',
-    'Omeprazol',
-    'Paracetamol',
-    'Salbutamol'
-];
-const medicationOptions = sampleMedications.map(m => ({ label: m, value: m }));
-
 const sampleProviders = [
     'Dr. Smith',
     'Dra. Jones',
@@ -44,6 +32,26 @@ const providerOptions = sampleProviders.map(p => ({label: p, value: p}));
 
 export function MedicationDialog({ isOpen, onClose, onSave, medication }: MedicationDialogProps) {
     const { toast } = useToast();
+    const [medicationOptions, setMedicationOptions] = useState<{label: string, value: string}[]>([]);
+
+    useEffect(() => {
+        const fetchMedications = async () => {
+            try {
+                const res = await fetch('/api/master-data/medications');
+                if (res.ok) {
+                    const data = await res.json();
+                    setMedicationOptions(data.map((m: {id: string, name: string}) => ({ label: m.name, value: m.name })));
+                }
+            } catch (error) {
+                console.error("Failed to fetch master medications", error);
+                toast({ variant: "destructive", title: "Error", description: "No se pudo cargar la lista de medicamentos." });
+            }
+        };
+        if (isOpen) {
+            fetchMedications();
+        }
+    }, [isOpen, toast]);
+
     const initialState = useMemo(() => ({
         prescribedDate: new Date().toISOString().split('T')[0],
         name: '',
@@ -164,5 +172,3 @@ export function MedicationDialog({ isOpen, onClose, onSave, medication }: Medica
     </Dialog>
   )
 }
-
-    

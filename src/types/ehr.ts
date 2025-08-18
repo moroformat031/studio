@@ -98,3 +98,13 @@ export interface Patient {
     clinicId: string;
     clinicName?: string;
 }
+
+export interface MasterMedication {
+    id: string;
+    name: string;
+}
+
+export interface MasterProcedure {
+    id: string;
+    name: string;
+}

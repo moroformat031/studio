@@ -1,6 +1,6 @@
 
 import { PrismaClient, Prisma } from '@prisma/client';
-import type { Patient, User, Clinic, Plan, DoctorAvailability, Appointment } from '@/types/ehr';
+import type { Patient, User, Clinic, Plan, DoctorAvailability, Appointment, MasterMedication, MasterProcedure } from '@/types/ehr';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -282,5 +282,33 @@ export const db = {
             }
         });
         return { ...newAppointment, date: formatDate(newAppointment.date), status: newAppointment.status as 'Programada' | 'Completada' | 'Cancelada' };
-    }
+    },
+
+    // --- Master Data Operations ---
+    getAllMasterMedications: async (): Promise<MasterMedication[]> => {
+        return prisma.masterMedication.findMany({ orderBy: { name: 'asc' } });
+    },
+    createMasterMedication: async (data: { name: string }): Promise<MasterMedication> => {
+        return prisma.masterMedication.create({ data });
+    },
+    updateMasterMedication: async (id: string, data: { name: string }): Promise<MasterMedication> => {
+        return prisma.masterMedication.update({ where: { id }, data });
+    },
+    deleteMasterMedication: async (id: string): Promise<boolean> => {
+        await prisma.masterMedication.delete({ where: { id }});
+        return true;
+    },
+    getAllMasterProcedures: async (): Promise<MasterProcedure[]> => {
+        return prisma.masterProcedure.findMany({ orderBy: { name: 'asc' } });
+    },
+    createMasterProcedure: async (data: { name: string }): Promise<MasterProcedure> => {
+        return prisma.masterProcedure.create({ data });
+    },
+    updateMasterProcedure: async (id: string, data: { name: string }): Promise<MasterProcedure> => {
+        return prisma.masterProcedure.update({ where: { id }, data });
+    },
+    deleteMasterProcedure: async (id: string): Promise<boolean> => {
+        await prisma.masterProcedure.delete({ where: { id }});
+        return true;
+    },
 };

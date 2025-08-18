@@ -24,17 +24,6 @@ interface ProcedureDialogProps {
     procedure: Procedure | null;
 }
 
-const sampleProcedures = [
-    'Biopsia de piel',
-    'Colonoscopia',
-    'Endoscopia',
-    'Electrocardiograma (ECG)',
-    'Radiografía de tórax',
-    'Ultrasonido abdominal',
-    'Sutura de herida'
-];
-const procedureOptions = sampleProcedures.map(p => ({ label: p, value: p }));
-
 const sampleProviders = [
     'Dr. Smith',
     'Dra. Jones',
@@ -46,6 +35,26 @@ const providerOptions = sampleProviders.map(p => ({label: p, value: p}));
 
 export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: ProcedureDialogProps) {
     const { toast } = useToast();
+    const [procedureOptions, setProcedureOptions] = useState<{label: string, value: string}[]>([]);
+
+    useEffect(() => {
+        const fetchProcedures = async () => {
+             try {
+                const res = await fetch('/api/master-data/procedures');
+                if (res.ok) {
+                    const data = await res.json();
+                    setProcedureOptions(data.map((p: {id: string, name: string}) => ({ label: p.name, value: p.name })));
+                }
+            } catch (error) {
+                console.error("Failed to fetch master procedures", error);
+                toast({ variant: "destructive", title: "Error", description: "No se pudo cargar la lista de procedimientos." });
+            }
+        }
+        if (isOpen) {
+            fetchProcedures();
+        }
+    }, [isOpen, toast]);
+
     const initialState = useMemo(() => ({
         date: new Date().toISOString().split('T')[0],
         name: '',
@@ -159,5 +168,3 @@ export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: Procedur
     </Dialog>
   )
 }
-
-    
