@@ -234,6 +234,15 @@ export const db = {
         const { clinic, ...rest } = user;
         return { ...rest, plan: rest.plan as Plan, clinicName: clinic?.name || '' };
     },
+     findUserById: async (id: string): Promise<User | null> => {
+        const user = await prisma.user.findUnique({
+            where: { id },
+            include: { clinic: true },
+        });
+        if (!user) return null;
+        const { clinic, ...rest } = user;
+        return { ...rest, plan: rest.plan as Plan, clinicName: clinic?.name || '' };
+    },
     createUser: async (userData: { username: string, password?: string, plan: Plan, clinicName: string }): Promise<Omit<User, 'password'>> => {
         const existingUser = await db.findUser(userData.username);
         if (existingUser) {
@@ -425,7 +434,7 @@ export const db = {
         const appointments = await prisma.appointment.findMany({
             where: {
                 visitProvider: provider.username,
-                date: new Date(date)
+                date: new Date(`${date}T00:00:00Z`)
             }
         });
         return appointments.map(a => ({...a, date: formatDate(a.date), status: a.status as 'Programada' | 'Completada' | 'Cancelada' }));
