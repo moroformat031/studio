@@ -11,99 +11,130 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  username   String   @unique
-  password   String
-  plan       Plan
-  clinicId   String?
-  clinic     Clinic?  @relation(fields: [clinicId], references: [id])
+  id                 String               @id @default(uuid())
+  username           String               @unique
+  password           String
+  plan               Plan
+  clinicId           String?
+  clinic             Clinic?              @relation(fields: [clinicId], references: [id])
+  doctorAvailabilities DoctorAvailability[]
+
+  @@index([clinicId])
 }
 
 model Clinic {
-  id      String    @id @default(uuid())
-  name    String    @unique
-  address String?
-  phone   String?
-  users   User[]
+  id       String    @id @default(uuid())
+  name     String    @unique
+  address  String?
+  phone    String?
+  users    User[]
   patients Patient[]
 }
 
 model Patient {
-  id           String        @id @default(uuid())
-  name         String
-  dob          DateTime      @db.Date
-  gender       String
-  address      String?
-  phone        String?
-  email        String?
-  clinicId     String
-  clinic       Clinic        @relation(fields: [clinicId], references: [id])
-  vitals       Vital[]
-  medications  Medication[]
-  appointments Appointment[]
-  procedures   Procedure[]
-  notes        PatientNote[]
+  id            String         @id @default(uuid())
+  name          String
+  dob           DateTime
+  gender        String
+  address       String?
+  phone         String?
+  email         String?
+  clinicId      String
+  clinic        Clinic         @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  vitals        Vital[]
+  medications   Medication[]
+  appointments  Appointment[]
+  procedures    Procedure[]
+  notes         PatientNote[]
+
+  @@index([clinicId])
+}
+
+model DoctorAvailability {
+  id          String  @id @default(uuid())
+  dayOfWeek   Int // 0 for Monday, 6 for Sunday
+  startTime   String // "HH:mm"
+  endTime     String // "HH:mm"
+  isAvailable Boolean @default(false)
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dayOfWeek])
+  @@index([userId])
 }
 
 model Vital {
-  id         String   @id @default(uuid())
-  patientId  String
-  patient    Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  date       DateTime @db.Date
-  hr         Int
-  bp         String
-  temp       Float
-  rr         Int
-  provider   String
+  id        String   @id @default(uuid())
+  date      DateTime
+  hr        Float
+  bp        String
+  temp      Decimal
+  rr        Int
+  provider  String
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
 }
 
 model Medication {
   id                  String   @id @default(uuid())
-  patientId           String
-  patient             Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
   name                String
   dosage              String
   frequency           String
-  prescribedDate      DateTime @db.Date
+  prescribedDate      DateTime
   prescribingProvider String
+  patientId           String
+  patient             Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
 }
 
 model Appointment {
-  id               String   @id @default(uuid())
-  patientId        String
-  patient          Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  date             DateTime @db.Date
-  time             String
-  reason           String
-  status           String // Programada, Completada, Cancelada
-  visitProvider    String
-  billingProvider  String
+  id              String   @id @default(uuid())
+  date            DateTime
+  time            String
+  reason          String
+  status          String   // "Programada", "Completada", "Cancelada"
+  visitProvider   String
+  billingProvider String
+  patientId       String
+  patient         Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([visitProvider])
+  @@index([date])
 }
 
 model Procedure {
   id                 String   @id @default(uuid())
+  date               DateTime
+  name               String
+  notes              String?  @db.Text
+  performingProvider String
   patientId          String
   patient            Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  date               DateTime @db.Date
-  name               String
-  notes              String?
-  performingProvider String
+
+  @@index([patientId])
 }
 
 model PatientNote {
   id            String   @id @default(uuid())
-  patientId     String
-  patient       Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  date          DateTime
+  date          DateTime @default(now())
   provider      String
   transcription String   @db.Text
   summary       String   @db.Text
+  patientId     String
+  patient       Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
 }
 
 enum Plan {
   Free
   Clinica
   Hospital
-  Medico
   Admin
+  Medico
+  Nurse
 }

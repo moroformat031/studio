@@ -40,7 +40,7 @@ export function Combobox({
   const [open, setOpen] = React.useState(false)
   
   const selectedLabel = options.find(
-      (option) => option.value.toLowerCase() === value.toLowerCase()
+      (option) => option.value === value
     )?.label || placeholder;
 
   return (
@@ -75,7 +75,7 @@ export function Combobox({
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value.toLowerCase() === option.value.toLowerCase() ? "opacity-100" : "opacity-0"
+                      value === option.value ? "opacity-100" : "opacity-0"
                     )}
                   />
                   {option.label}
@@ -88,5 +88,3 @@ export function Combobox({
     </Popover>
   )
 }
-
-    

@@ -22,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function ClinicManagementTab() {
     const { toast } = useToast();
@@ -143,57 +144,59 @@ export function ClinicManagementTab() {
     }
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 h-full">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Clinic List */}
         <div className="lg:col-span-2 space-y-4">
             <h3 className="font-semibold text-lg">Clínicas Existentes</h3>
-            <Card className="h-[calc(100%-40px)]">
-                <CardContent className="p-0 h-full overflow-y-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Nombre</TableHead>
-                                <TableHead>Dirección</TableHead>
-                                <TableHead>Teléfono</TableHead>
-                                <TableHead className="text-right">Acciones</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {isLoading ? (
-                                     <TableRow><TableCell colSpan={4} className="text-center">Cargando...</TableCell></TableRow>
-                                ) : clinics.length > 0 ? (
-                                    clinics.map(clinic => (
-                                        <TableRow key={clinic.id}>
-                                            <TableCell className="font-medium">{clinic.name}</TableCell>
-                                            <TableCell>{clinic.address || 'N/A'}</TableCell>
-                                            <TableCell>{clinic.phone || 'N/A'}</TableCell>
-                                            <TableCell className="text-right">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" className="h-8 w-8 p-0">
-                                                            <span className="sr-only">Abrir menú</span>
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem onClick={() => handleEditClick(clinic)}>
-                                                            <Edit className="mr-2 h-4 w-4" />
-                                                            <span>Editar</span>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => handleDeleteClick(clinic)} className="text-destructive">
-                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                            <span>Eliminar</span>
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow><TableCell colSpan={4} className="text-center">No hay clínicas.</TableCell></TableRow>
-                                )}
-                        </TableBody>
-                    </Table>
+            <Card>
+                <CardContent className="p-0">
+                    <ScrollArea className="h-[400px]">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Nombre</TableHead>
+                                    <TableHead className="hidden md:table-cell">Dirección</TableHead>
+                                    <TableHead className="hidden md:table-cell">Teléfono</TableHead>
+                                    <TableHead className="text-right">Acciones</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {isLoading ? (
+                                        <TableRow><TableCell colSpan={4} className="text-center">Cargando...</TableCell></TableRow>
+                                    ) : clinics.length > 0 ? (
+                                        clinics.map(clinic => (
+                                            <TableRow key={clinic.id}>
+                                                <TableCell className="font-medium">{clinic.name}</TableCell>
+                                                <TableCell className="hidden md:table-cell">{clinic.address || 'N/A'}</TableCell>
+                                                <TableCell className="hidden md:table-cell">{clinic.phone || 'N/A'}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                                                <span className="sr-only">Abrir menú</span>
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem onClick={() => handleEditClick(clinic)}>
+                                                                <Edit className="mr-2 h-4 w-4" />
+                                                                <span>Editar</span>
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => handleDeleteClick(clinic)} className="text-destructive">
+                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                <span>Eliminar</span>
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow><TableCell colSpan={4} className="text-center">No hay clínicas.</TableCell></TableRow>
+                                    )}
+                            </TableBody>
+                        </Table>
+                    </ScrollArea>
                 </CardContent>
             </Card>
         </div>
@@ -249,5 +252,3 @@ export function ClinicManagementTab() {
     </div>
   )
 }
-
-    

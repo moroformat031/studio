@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plan, User } from '@/types/ehr';
+import { Plan, User, Clinic } from '@/types/ehr';
 import { PlusCircle, Building, User as UserIcon, Eye, EyeOff, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -21,13 +21,16 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { Combobox } from '@/components/ui/combobox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type OmittedUser = Omit<User, 'password'>;
 
 export function UserManagementTab() {
     const { toast } = useToast();
     const [users, setUsers] = useState<OmittedUser[]>([]);
+    const [clinics, setClinics] = useState<Clinic[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     
     // Form state
@@ -61,8 +64,25 @@ export function UserManagementTab() {
         }
     }
 
+     const fetchClinics = async () => {
+        try {
+            const res = await fetch('/api/clinics');
+            if(res.ok) {
+                const data = await res.json();
+                setClinics(data);
+            } else {
+                throw new Error("Failed to fetch clinics");
+            }
+        } catch (e) {
+            const err = e as Error;
+            toast({ variant: 'destructive', title: 'Error', description: err.message || 'No se pudieron cargar las clínicas.' })
+        }
+    }
+
+
     useEffect(() => {
         fetchUsers();
+        fetchClinics();
     }, []);
 
     const resetForm = () => {
@@ -110,12 +130,17 @@ export function UserManagementTab() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if(!clinicName){
+            toast({ variant: 'destructive', title: 'Clínica Requerida', description: 'Por favor, seleccione una clínica para el usuario.'});
+            return;
+        }
+
         setIsLoading(true);
 
         const url = isEditing && currentUser ? `/api/users/${currentUser.id}` : '/api/users';
         const method = isEditing ? 'PUT' : 'POST';
 
-        const body: Partial<User> & { password?: string } = {
+        const body: Partial<User> & { password?: string, clinicName?: string } = {
             username,
             plan,
             clinicName
@@ -152,59 +177,63 @@ export function UserManagementTab() {
             setIsLoading(false);
         }
     }
+
+    const clinicOptions = clinics.map(c => ({ label: c.name, value: c.name }));
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 h-full">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* User List */}
         <div className="lg:col-span-2 space-y-4">
             <h3 className="font-semibold text-lg">Usuarios Existentes</h3>
-            <Card className="h-[calc(100%-40px)]">
-                <CardContent className="p-0 h-full overflow-y-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Usuario</TableHead>
-                                <TableHead>Plan</TableHead>
-                                <TableHead>Clínica/Hospital</TableHead>
-                                <TableHead className="text-right">Acciones</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {isLoading ? (
-                                    <TableRow><TableCell colSpan={4} className="text-center">Cargando...</TableCell></TableRow>
-                            ) : users.length > 0 ? (
-                                users.map(user => (
-                                    <TableRow key={user.id}>
-                                        <TableCell className="font-medium">{user.username}</TableCell>
-                                        <TableCell>{user.plan}</TableCell>
-                                        <TableCell>{user.clinicName || 'N/A'}</TableCell>
-                                        <TableCell className="text-right">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="h-8 w-8 p-0">
-                                                        <span className="sr-only">Abrir menú</span>
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem onClick={() => handleEditClick(user)}>
-                                                        <Edit className="mr-2 h-4 w-4" />
-                                                        <span>Editar</span>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleDeleteClick(user)} className="text-destructive">
-                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                        <span>Eliminar</span>
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow><TableCell colSpan={4} className="text-center">No hay usuarios.</TableCell></TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+            <Card>
+                <CardContent className="p-0">
+                     <ScrollArea className="h-[400px]">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Usuario</TableHead>
+                                    <TableHead>Plan</TableHead>
+                                    <TableHead className="hidden md:table-cell">Clínica</TableHead>
+                                    <TableHead className="text-right">Acciones</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {isLoading ? (
+                                        <TableRow><TableCell colSpan={4} className="text-center">Cargando...</TableCell></TableRow>
+                                ) : users.length > 0 ? (
+                                    users.map(user => (
+                                        <TableRow key={user.id}>
+                                            <TableCell className="font-medium">{user.username}</TableCell>
+                                            <TableCell>{user.plan}</TableCell>
+                                            <TableCell className="hidden md:table-cell">{user.clinicName || 'N/A'}</TableCell>
+                                            <TableCell className="text-right">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                                            <span className="sr-only">Abrir menú</span>
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onClick={() => handleEditClick(user)}>
+                                                            <Edit className="mr-2 h-4 w-4" />
+                                                            <span>Editar</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleDeleteClick(user)} className="text-destructive">
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            <span>Eliminar</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow><TableCell colSpan={4} className="text-center">No hay usuarios.</TableCell></TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </ScrollArea>
                 </CardContent>
             </Card>
         </div>
@@ -241,16 +270,21 @@ export function UserManagementTab() {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Medico">Medico</SelectItem>
+                            <SelectItem value="Nurse">Nurse</SelectItem>
                             <SelectItem value="Admin">Admin</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
-                    <div className="space-y-2">
-                    <Label htmlFor="new-clinicname">Nombre Clínica/Hospital</Label>
-                    <div className="relative">
-                        <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="new-clinicname" value={clinicName} onChange={e => setClinicName(e.target.value)} disabled={isLoading} className="pl-10" placeholder="p. ej. Hospital Central" />
-                    </div>
+                <div className="space-y-2">
+                    <Label htmlFor="new-clinicname">Nombre Clinica</Label>
+                    <Combobox
+                        options={clinicOptions}
+                        value={clinicName}
+                        onChange={setClinicName}
+                        placeholder="Seleccionar clínica"
+                        searchPlaceholder="Buscar clínica..."
+                        emptyMessage="No se encontró clínica."
+                    />
                 </div>
                 <div className="flex gap-2">
                     {isEditing && <Button type="button" variant="outline" onClick={resetForm} disabled={isLoading}>Cancelar</Button>}
@@ -278,5 +312,3 @@ export function UserManagementTab() {
     </div>
   )
 }
-
-    
