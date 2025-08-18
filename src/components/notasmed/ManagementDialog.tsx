@@ -20,7 +20,7 @@ interface ManagementDialogProps {
 export function ManagementDialog({ open, onOpenChange }: ManagementDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[80vh]">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Panel de Administración</DialogTitle>
           <DialogDescription>
@@ -43,5 +43,3 @@ export function ManagementDialog({ open, onOpenChange }: ManagementDialogProps) 
     </Dialog>
   )
 }
-
-    
