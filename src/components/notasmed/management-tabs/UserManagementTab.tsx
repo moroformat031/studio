@@ -270,6 +270,7 @@ export function UserManagementTab() {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Medico">Medico</SelectItem>
+                            <SelectItem value="Nurse">Nurse</SelectItem>
                             <SelectItem value="Admin">Admin</SelectItem>
                         </SelectContent>
                     </Select>

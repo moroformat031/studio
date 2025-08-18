@@ -1,7 +1,7 @@
 
 import type { Plan as PrismaPlan } from '@prisma/client';
 
-export type Plan = PrismaPlan;
+export type Plan = PrismaPlan | 'Nurse';
 
 export interface User {
   id: string;

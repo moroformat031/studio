@@ -176,6 +176,7 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="Medico">Medico</SelectItem>
+                                <SelectItem value="Nurse">Nurse</SelectItem>
                                 <SelectItem value="Admin">Admin</SelectItem>
                             </SelectContent>
                         </Select>
