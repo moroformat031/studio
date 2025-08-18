@@ -1,6 +1,6 @@
 
-import { PrismaClient } from '@prisma/client';
-import type { Patient, User, Clinic, Plan } from '@/types/ehr';
+import { PrismaClient, Prisma } from '@prisma/client';
+import type { Patient, User, Clinic, Plan, DoctorAvailability, Appointment } from '@/types/ehr';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -53,6 +53,7 @@ export const db = {
         });
         return users.map(({ password, clinic, ...user }) => ({
             ...user,
+            plan: user.plan as Plan,
             clinicName: clinic?.name || '',
         }));
     },
@@ -63,7 +64,7 @@ export const db = {
         });
         if (!user) return null;
         const { clinic, ...rest } = user;
-        return { ...rest, clinicName: clinic?.name || '' };
+        return { ...rest, plan: rest.plan as Plan, clinicName: clinic?.name || '' };
     },
     createUser: async (userData: { username: string, password?: string, plan: Plan, clinicName: string }): Promise<Omit<User, 'password'>> => {
         const existingUser = await db.findUser(userData.username);
@@ -94,7 +95,7 @@ export const db = {
         return {
             id: newUser.id,
             username: newUser.username,
-            plan: newUser.plan,
+            plan: newUser.plan as Plan,
             clinicId: clinic.id,
             clinicName: clinic.name,
         };
@@ -122,9 +123,10 @@ export const db = {
         });
 
         const { password: _, clinic, ...userWithoutPassword } = updatedUser;
-        return { ...userWithoutPassword, clinicName: clinic?.name || '' };
+        return { ...userWithoutPassword, plan: userWithoutPassword.plan as Plan, clinicName: clinic?.name || '' };
     },
     deleteUser: async (id: string): Promise<boolean> => {
+        await prisma.doctorAvailability.deleteMany({ where: { userId: id } });
         await prisma.user.delete({ where: { id } });
         return true;
     },
@@ -201,7 +203,6 @@ export const db = {
         return { ...newPatient, demographics, vitals: [], medications: [], appointments: [], procedures: [], notes: [] };
     },
      deletePatient: async (id: string): Promise<boolean> => {
-        // Cascade delete is handled by prisma schema, so we just need to delete the patient
         await prisma.patient.delete({ where: { id } });
         return true;
     },
@@ -230,5 +231,56 @@ export const db = {
         await prisma.user.updateMany({ where: { clinicId: id }, data: { clinicId: null } });
         await prisma.clinic.delete({ where: { id } });
         return true;
+    },
+
+    // --- Availability operations ---
+    getDoctorAvailability: async (userId: string): Promise<DoctorAvailability[]> => {
+        return prisma.doctorAvailability.findMany({ where: { userId } });
+    },
+    updateDoctorAvailability: async (userId: string, availabilityData: DoctorAvailability[]): Promise<DoctorAvailability[]> => {
+        const transactions = availabilityData.map(avail => 
+            prisma.doctorAvailability.upsert({
+                where: { userId_dayOfWeek: { userId, dayOfWeek: avail.dayOfWeek } },
+                update: { startTime: avail.startTime, endTime: avail.endTime, isAvailable: avail.isAvailable },
+                create: { userId, ...avail }
+            })
+        );
+        return prisma.$transaction(transactions);
+    },
+
+    // --- Appointment operations ---
+    getAppointmentsForProviderOnDate: async (providerId: string, date: string): Promise<Appointment[]> => {
+        const appointments = await prisma.appointment.findMany({
+            where: {
+                visitProvider: providerId,
+                date: new Date(date)
+            }
+        });
+        return appointments.map(a => ({...a, date: formatDate(a.date), status: a.status as 'Programada' | 'Completada' | 'Cancelada' }));
+    },
+     getAppointmentsBetween: async (startDate: Date, endDate: Date): Promise<Appointment[]> => {
+        const appointments = await prisma.appointment.findMany({
+            where: {
+                date: {
+                    gte: startDate,
+                    lt: endDate,
+                }
+            }
+        });
+        return appointments.map(a => ({...a, date: formatDate(a.date), status: a.status as 'Programada' | 'Completada' | 'Cancelada' }));
+    },
+    createAppointment: async (appointmentData: Omit<Appointment, 'id'>): Promise<Appointment> => {
+        const newAppointment = await prisma.appointment.create({
+            data: {
+                patientId: appointmentData.patientId,
+                date: new Date(appointmentData.date),
+                time: appointmentData.time,
+                reason: appointmentData.reason,
+                status: appointmentData.status,
+                visitProvider: appointmentData.visitProvider,
+                billingProvider: appointmentData.billingProvider
+            }
+        });
+        return { ...newAppointment, date: formatDate(newAppointment.date), status: newAppointment.status as 'Programada' | 'Completada' | 'Cancelada' };
     }
 };

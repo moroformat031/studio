@@ -12,6 +12,15 @@ export interface User {
   clinicName?: string;
 }
 
+export interface DoctorAvailability {
+  id?: string;
+  userId: string;
+  dayOfWeek: number; // 0 = Lunes, 1 = Martes, ..., 6 = Domingo
+  startTime: string; // "HH:mm"
+  endTime: string; // "HH:mm"
+  isAvailable: boolean;
+}
+
 export interface Clinic {
     id: string;
     name: string;
@@ -52,12 +61,12 @@ export interface Medication {
 export interface Appointment {
     id: string;
     patientId: string;
-    date: string;
-    time: string;
+    date: string; // YYYY-MM-DD
+    time: string; // HH:mm
     reason: string;
     status: 'Programada' | 'Completada' | 'Cancelada';
-    visitProvider: string;
-    billingProvider: string;
+    visitProvider: string; // User ID
+    billingProvider: string; // User ID
 }
 
 export interface Procedure {
