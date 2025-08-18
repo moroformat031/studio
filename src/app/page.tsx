@@ -79,7 +79,7 @@ export default function LandingPage() {
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                     <div>
                         <Image 
-                            src="https://storage.googleapis.com/project-spark-b2489c632c2a417e9261c1b18d8fd744/2024-08-14T21:40:08.525Z.png"
+                            src="/images/Diagram.jpeg"
                             alt="Dashboard de NotasMed EHR"
                             width={600}
                             height={400}
