@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plan, User } from '@/types/ehr';
+import { Plan, User, Clinic } from '@/types/ehr';
 import { PlusCircle, Building, User as UserIcon, Eye, EyeOff, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../ui/dropdown-menu';
 import {
@@ -21,13 +21,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { Combobox } from '@/components/ui/combobox';
 
 type OmittedUser = Omit<User, 'password'>;
 
 export function UserManagementTab() {
     const { toast } = useToast();
     const [users, setUsers] = useState<OmittedUser[]>([]);
+    const [clinics, setClinics] = useState<Clinic[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     
     // Form state
@@ -61,8 +63,25 @@ export function UserManagementTab() {
         }
     }
 
+     const fetchClinics = async () => {
+        try {
+            const res = await fetch('/api/clinics');
+            if(res.ok) {
+                const data = await res.json();
+                setClinics(data);
+            } else {
+                throw new Error("Failed to fetch clinics");
+            }
+        } catch (e) {
+            const err = e as Error;
+            toast({ variant: 'destructive', title: 'Error', description: err.message || 'No se pudieron cargar las clínicas.' })
+        }
+    }
+
+
     useEffect(() => {
         fetchUsers();
+        fetchClinics();
     }, []);
 
     const resetForm = () => {
@@ -110,12 +129,17 @@ export function UserManagementTab() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if(!clinicName){
+            toast({ variant: 'destructive', title: 'Clínica Requerida', description: 'Por favor, seleccione una clínica para el usuario.'});
+            return;
+        }
+
         setIsLoading(true);
 
         const url = isEditing && currentUser ? `/api/users/${currentUser.id}` : '/api/users';
         const method = isEditing ? 'PUT' : 'POST';
 
-        const body: Partial<User> & { password?: string } = {
+        const body: Partial<User> & { password?: string, clinicName?: string } = {
             username,
             plan,
             clinicName
@@ -152,6 +176,8 @@ export function UserManagementTab() {
             setIsLoading(false);
         }
     }
+
+    const clinicOptions = clinics.map(c => ({ label: c.name, value: c.name }));
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 h-full">
@@ -245,12 +271,16 @@ export function UserManagementTab() {
                         </SelectContent>
                     </Select>
                 </div>
-                    <div className="space-y-2">
-                    <Label htmlFor="new-clinicname">Nombre Clínica/Hospital</Label>
-                    <div className="relative">
-                        <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="new-clinicname" value={clinicName} onChange={e => setClinicName(e.target.value)} disabled={isLoading} className="pl-10" placeholder="p. ej. Hospital Central" />
-                    </div>
+                <div className="space-y-2">
+                    <Label htmlFor="new-clinicname">Nombre Clinica</Label>
+                    <Combobox
+                        options={clinicOptions}
+                        value={clinicName}
+                        onChange={setClinicName}
+                        placeholder="Seleccionar clínica"
+                        searchPlaceholder="Buscar clínica..."
+                        emptyMessage="No se encontró clínica."
+                    />
                 </div>
                 <div className="flex gap-2">
                     {isEditing && <Button type="button" variant="outline" onClick={resetForm} disabled={isLoading}>Cancelar</Button>}
@@ -278,5 +308,3 @@ export function UserManagementTab() {
     </div>
   )
 }
-
-    
