@@ -54,7 +54,7 @@ const initializeDatabase = async () => {
         });
 
         const draGarcia = await prisma.user.upsert({
-            where: { username: 'elenagarcia' },
+            where: { username: 'Dra. Elena Garcia' },
             update: {},
             create: {
                 username: 'Dra. Elena Garcia',
@@ -65,7 +65,7 @@ const initializeDatabase = async () => {
         });
         
         const drMartinez = await prisma.user.upsert({
-            where: { username: 'carlosmartinez' },
+            where: { username: 'Dr. Carlos Martinez' },
             update: {},
             create: {
                 username: 'Dr. Carlos Martinez',
@@ -76,7 +76,7 @@ const initializeDatabase = async () => {
         });
 
         const nurseJoy = await prisma.user.upsert({
-            where: { username: 'enfermerajoy' },
+            where: { username: 'Enfermera Joy' },
             update: {},
             create: {
                 username: 'Enfermera Joy',
@@ -154,8 +154,8 @@ const initializeDatabase = async () => {
                     time: '10:00',
                     reason: 'Consulta de seguimiento',
                     status: 'Programada',
-                    visitProvider: draGarcia.id,
-                    billingProvider: draGarcia.id,
+                    visitProvider: draGarcia.username,
+                    billingProvider: draGarcia.username,
                 },
                  {
                     patientId: patient2.id,
@@ -163,8 +163,8 @@ const initializeDatabase = async () => {
                     time: '11:30',
                     reason: 'Revisión anual',
                     status: 'Programada',
-                    visitProvider: draGarcia.id,
-                    billingProvider: draGarcia.id,
+                    visitProvider: draGarcia.username,
+                    billingProvider: draGarcia.username,
                 },
                 {
                     patientId: patient3.id,
@@ -172,8 +172,8 @@ const initializeDatabase = async () => {
                     time: '09:00',
                     reason: 'Dolor de cabeza crónico',
                     status: 'Programada',
-                    visitProvider: drMartinez.id,
-                    billingProvider: drMartinez.id,
+                    visitProvider: drMartinez.username,
+                    billingProvider: drMartinez.username,
                 }
             ]
         });
@@ -213,8 +213,10 @@ initializeDatabase();
 
 export const db = {
     // --- User operations ---
-    getAllUsers: async (): Promise<Omit<User, 'password'>[]> => {
+    getAllUsers: async (clinicId?: string): Promise<Omit<User, 'password'>[]> => {
+        const whereClause = clinicId ? { clinicId } : {};
         const users = await prisma.user.findMany({
+            where: whereClause,
             include: { clinic: true },
         });
         return users.map(({ password, clinic, ...user }) => ({
@@ -416,10 +418,13 @@ export const db = {
     },
 
     // --- Appointment operations ---
-    getAppointmentsForProviderOnDate: async (providerId: string, date: string): Promise<Appointment[]> => {
+    getAppointmentsForProviderOnDate: async (providerUsername: string, date: string): Promise<Appointment[]> => {
+        const provider = await db.findUser(providerUsername);
+        if(!provider) return [];
+        
         const appointments = await prisma.appointment.findMany({
             where: {
-                visitProvider: providerId,
+                visitProvider: provider.username,
                 date: new Date(date)
             }
         });

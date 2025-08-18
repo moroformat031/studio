@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Procedure } from '@/types/ehr';
 import { useToast } from '@/hooks/use-toast';
 import { Combobox } from '@/components/ui/combobox';
+import { useProviders } from '@/hooks/use-providers';
 
 interface ProcedureDialogProps {
     isOpen: boolean;
@@ -24,17 +25,9 @@ interface ProcedureDialogProps {
     procedure: Procedure | null;
 }
 
-const sampleProviders = [
-    'Dr. Smith',
-    'Dra. Jones',
-    'Dr. Martinez',
-    'Técnico Radiólogo',
-    'Cirujano General'
-];
-const providerOptions = sampleProviders.map(p => ({label: p, value: p}));
-
 export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: ProcedureDialogProps) {
     const { toast } = useToast();
+    const { providers } = useProviders();
     const [procedureOptions, setProcedureOptions] = useState<{label: string, value: string}[]>([]);
 
     useEffect(() => {
@@ -106,6 +99,8 @@ export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: Procedur
     const handleSelectChange = (id: string, value: string) => {
         setFormData(prev => ({ ...prev, [id]: value }));
     }
+    
+    const providerOptions = useMemo(() => providers.map(p => ({label: p.username, value: p.username})), [providers]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

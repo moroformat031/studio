@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { useProviders } from '@/hooks/use-providers';
 
 interface SchedulingTabProps {
     patient: Patient;
@@ -19,7 +20,7 @@ interface SchedulingTabProps {
 
 export function SchedulingTab({ patient }: SchedulingTabProps) {
     const { toast } = useToast();
-    const [providers, setProviders] = useState<User[]>([]);
+    const { providers, loading: loadingProviders } = useProviders();
     const [selectedProviderId, setSelectedProviderId] = useState<string>('');
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
     const [availableSlots, setAvailableSlots] = useState<string[]>([]);
@@ -30,24 +31,11 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
     const [isScheduling, setIsScheduling] = useState(false);
     const [error, setError] = useState<string | null>(null);
     
-    useEffect(() => {
-        const fetchProviders = async () => {
-            try {
-                const res = await fetch('/api/users');
-                if (res.ok) {
-                    const allUsers: User[] = await res.json();
-                    const medicos = allUsers.filter(u => u.plan === 'Medico' || u.plan === 'Admin');
-                    setProviders(medicos);
-                    if (medicos.length > 0) {
-                        setSelectedProviderId(medicos[0].id);
-                    }
-                }
-            } catch (e) {
-                console.error(e);
-            }
-        };
-        fetchProviders();
-    }, []);
+     useEffect(() => {
+        if (providers.length > 0 && !selectedProviderId) {
+            setSelectedProviderId(providers[0].id);
+        }
+    }, [providers, selectedProviderId]);
 
     const fetchAvailableSlots = useCallback(async () => {
         if (!selectedProviderId || !selectedDate) return;
@@ -84,7 +72,8 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
 
 
     const handleScheduleAppointment = async () => {
-        if (!patient || !selectedProviderId || !selectedDate || !selectedSlot || !reason) {
+        const selectedProvider = providers.find(p => p.id === selectedProviderId);
+        if (!patient || !selectedProvider || !selectedDate || !selectedSlot || !reason) {
             toast({
                 variant: 'destructive',
                 title: 'Faltan Datos',
@@ -100,8 +89,8 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
             time: selectedSlot.split('T')[1].substring(0, 5),
             reason,
             status: 'Programada' as const,
-            visitProvider: selectedProviderId,
-            billingProvider: selectedProviderId // Assuming same provider for billing for now
+            visitProvider: selectedProvider.username,
+            billingProvider: selectedProvider.username // Assuming same provider for billing for now
         };
 
         try {
@@ -118,7 +107,7 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
 
             toast({
                 title: 'Cita Programada',
-                description: `Cita para ${patient.name} con ${providers.find(p => p.id === selectedProviderId)?.username} programada exitosamente.`,
+                description: `Cita para ${patient.name} con ${selectedProvider.username} programada exitosamente.`,
             });
             // Reset form
             setSelectedSlot(null);
@@ -169,7 +158,7 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
                     </div>
                     <div className="md:col-span-2 space-y-4">
                         <h3 className="font-semibold">Horarios Disponibles para {selectedDate?.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h3>
-                        {isLoadingSlots ? (
+                        {isLoadingSlots || loadingProviders ? (
                             <div className="flex items-center justify-center h-48">
                                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                             </div>

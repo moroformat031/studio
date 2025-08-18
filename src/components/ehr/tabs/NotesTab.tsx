@@ -1,6 +1,6 @@
 
 "use client";
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Patient, PatientNote } from '@/types/ehr';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -9,23 +9,16 @@ import { PlusCircle } from 'lucide-react';
 import { NotasMedApp } from '@/components/notasmed/NotasMedApp';
 import { Combobox } from '@/components/ui/combobox';
 import { Label } from '@/components/ui/label';
+import { useProviders } from '@/hooks/use-providers';
 
 interface NotesTabProps {
     patient: Patient;
     onAddNote: (patientId: string, note: Omit<PatientNote, 'id'>) => void;
 }
 
-const sampleProviders = [
-    'Dr. Smith',
-    'Dra. Jones',
-    'Dr. Martinez',
-    'Enfermera (o) García',
-    'Residente de Turno'
-];
-const providerOptions = sampleProviders.map(p => ({label: p, value: p}));
-
 export function NotesTab({ patient, onAddNote }: NotesTabProps) {
     const [isCreatingNote, setIsCreatingNote] = useState(false);
+    const { providers } = useProviders();
     const [provider, setProvider] = useState('');
     
     const handleSaveNote = (note: { transcription: string; summary: string; date: string }) => {
@@ -42,6 +35,8 @@ export function NotesTab({ patient, onAddNote }: NotesTabProps) {
     const handleStartNewNote = () => {
         setIsCreatingNote(true);
     }
+    
+    const providerOptions = useMemo(() => providers.map(p => ({label: p.username, value: p.username})), [providers]);
 
     return (
         <Card>
@@ -126,5 +121,3 @@ export function NotesTab({ patient, onAddNote }: NotesTabProps) {
         </Card>
     );
 }
-
-    

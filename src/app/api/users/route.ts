@@ -1,11 +1,14 @@
 
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import type { User } from '@/types/ehr';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const users = await db.getAllUsers();
+    const { searchParams } = new URL(request.url);
+    const clinicId = searchParams.get('clinicId');
+
+    const users = await db.getAllUsers(clinicId || undefined);
     return NextResponse.json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
