@@ -110,30 +110,6 @@ export function EHRApp() {
                                 )}
                              </div>
                         </div>
-                         <div className="flex gap-2">
-                             <PlanGate allowedPlans={['Hospital', 'Admin']}>
-                                 <AddClinicDialog
-                                    open={isAddClinicDialogOpen}
-                                    onOpenChange={setIsAddClinicDialogOpen}
-                                    onSave={handleAddClinic}
-                                >
-                                    <Button size="sm" variant="outline">
-                                        <Home className="h-4 w-4 mr-2" />
-                                        Agregar Clínica
-                                    </Button>
-                                </AddClinicDialog>
-                            </PlanGate>
-                            <AddPatientDialog
-                                open={isAddPatientDialogOpen}
-                                onOpenChange={setIsAddPatientDialogOpen}
-                                onSave={handleAddPatient}
-                            >
-                                <Button size="sm" variant="outline" className="w-full md:w-auto">
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Agregar Paciente
-                                </Button>
-                            </AddPatientDialog>
-                        </div>
                     </div>
                     
                     <div>
@@ -152,7 +128,7 @@ export function EHRApp() {
                             />
                         ) : (
                             <div className="flex items-center justify-center h-[400px] text-muted-foreground border-2 border-dashed rounded-lg">
-                                Seleccione un paciente para ver sus detalles o agregue un nuevo paciente.
+                                Seleccione un paciente para ver sus detalles.
                             </div>
                         )}
                     </div>
@@ -162,4 +138,3 @@ export function EHRApp() {
     );
 }
 
-    
