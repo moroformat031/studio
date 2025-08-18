@@ -11,14 +11,14 @@ export function usePatientData() {
     const [loading, setLoading] = useState(true);
 
     const fetchPatients = useCallback(async () => {
-        if (!user) {
+        if (!user?.clinicId) {
             setPatients([]);
             setLoading(false);
             return;
         };
         try {
             setLoading(true);
-            const response = await fetch(`/api/patients/all`);
+            const response = await fetch(`/api/patients?clinicId=${user.clinicId}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch patients');
             }
@@ -125,5 +125,6 @@ export function usePatientData() {
         updatePatientVitals,
         updatePatientMedications,
         updatePatientProcedures,
+        fetchPatients,
     };
 }
