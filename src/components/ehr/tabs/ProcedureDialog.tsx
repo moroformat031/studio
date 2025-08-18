@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Procedure } from '@/types/ehr';
 import { useToast } from '@/hooks/use-toast';
 import { Combobox } from '@/components/ui/combobox';
+import { useProviders } from '@/hooks/use-providers';
 
 interface ProcedureDialogProps {
     isOpen: boolean;
@@ -24,28 +25,29 @@ interface ProcedureDialogProps {
     procedure: Procedure | null;
 }
 
-const sampleProcedures = [
-    'Biopsia de piel',
-    'Colonoscopia',
-    'Endoscopia',
-    'Electrocardiograma (ECG)',
-    'Radiografía de tórax',
-    'Ultrasonido abdominal',
-    'Sutura de herida'
-];
-const procedureOptions = sampleProcedures.map(p => ({ label: p, value: p }));
-
-const sampleProviders = [
-    'Dr. Smith',
-    'Dra. Jones',
-    'Dr. Martinez',
-    'Técnico Radiólogo',
-    'Cirujano General'
-];
-const providerOptions = sampleProviders.map(p => ({label: p, value: p}));
-
 export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: ProcedureDialogProps) {
     const { toast } = useToast();
+    const { providers } = useProviders();
+    const [procedureOptions, setProcedureOptions] = useState<{label: string, value: string}[]>([]);
+
+    useEffect(() => {
+        const fetchProcedures = async () => {
+             try {
+                const res = await fetch('/api/master-data/procedures');
+                if (res.ok) {
+                    const data = await res.json();
+                    setProcedureOptions(data.map((p: {id: string, name: string}) => ({ label: p.name, value: p.name })));
+                }
+            } catch (error) {
+                console.error("Failed to fetch master procedures", error);
+                toast({ variant: "destructive", title: "Error", description: "No se pudo cargar la lista de procedimientos." });
+            }
+        }
+        if (isOpen) {
+            fetchProcedures();
+        }
+    }, [isOpen, toast]);
+
     const initialState = useMemo(() => ({
         date: new Date().toISOString().split('T')[0],
         name: '',
@@ -97,6 +99,8 @@ export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: Procedur
     const handleSelectChange = (id: string, value: string) => {
         setFormData(prev => ({ ...prev, [id]: value }));
     }
+    
+    const providerOptions = useMemo(() => providers.map(p => ({label: p.username, value: p.username})), [providers]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -159,5 +163,3 @@ export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: Procedur
     </Dialog>
   )
 }
-
-    

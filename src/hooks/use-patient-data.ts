@@ -11,14 +11,26 @@ export function usePatientData() {
     const [loading, setLoading] = useState(true);
 
     const fetchPatients = useCallback(async () => {
+        if (!user) { // Don't filter by clinic if admin, show all
+             const response = await fetch(`/api/patients/all`);
+              if (!response.ok) {
+                throw new Error('Failed to fetch patients');
+            }
+            const data = await response.json();
+            setPatients(data);
+            setLoading(false);
+            return;
+        };
+
         if (!user?.clinicId) {
             setPatients([]);
             setLoading(false);
             return;
-        };
+        }
+
         try {
             setLoading(true);
-            const response = await fetch(`/api/patients?clinicId=${encodeURIComponent(user.clinicId)}`);
+            const response = await fetch(`/api/patients?clinicId=${user.clinicId}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch patients');
             }
@@ -30,7 +42,7 @@ export function usePatientData() {
         } finally {
             setLoading(false);
         }
-    }, [user?.clinicId]);
+    }, [user]);
 
     useEffect(() => {
         fetchPatients();
@@ -125,7 +137,6 @@ export function usePatientData() {
         updatePatientVitals,
         updatePatientMedications,
         updatePatientProcedures,
+        fetchPatients,
     };
 }
-
-    

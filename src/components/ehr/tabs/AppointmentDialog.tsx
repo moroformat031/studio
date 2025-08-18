@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Appointment } from '@/types/ehr';
 import { useToast } from '@/hooks/use-toast';
 import { Combobox } from '@/components/ui/combobox';
+import { useProviders } from '@/hooks/use-providers';
 
 interface AppointmentDialogProps {
     isOpen: boolean;
@@ -24,19 +25,10 @@ interface AppointmentDialogProps {
     appointment: Appointment | null;
 }
 
-const sampleProviders = [
-    'Dr. Smith',
-    'Dra. Jones',
-    'Dr. Martinez',
-    'Clínica General',
-    'Hospital Central',
-    'Laboratorio Clínico XYZ'
-];
-
-const providerOptions = sampleProviders.map(p => ({label: p, value: p}));
-
 export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: AppointmentDialogProps) {
     const { toast } = useToast();
+    const { providers, loading: loadingProviders } = useProviders();
+
     const initialState = useMemo(() => ({
         date: new Date().toISOString().split('T')[0],
         time: '',
@@ -95,6 +87,8 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
     const handleStatusChange = (value: Appointment['status']) => {
         setFormData(prev => ({ ...prev, status: value }));
     }
+    
+    const providerOptions = useMemo(() => providers.map(p => ({label: p.username, value: p.username})), [providers]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

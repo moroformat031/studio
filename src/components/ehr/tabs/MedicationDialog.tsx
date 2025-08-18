@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Medication } from '@/types/ehr';
 import { useToast } from '@/hooks/use-toast';
 import { Combobox } from '@/components/ui/combobox';
+import { useProviders } from '@/hooks/use-providers';
 
 interface MedicationDialogProps {
     isOpen: boolean;
@@ -23,27 +24,29 @@ interface MedicationDialogProps {
     medication: Medication | null;
 }
 
-const sampleMedications = [
-    'Lisinopril',
-    'Metformina',
-    'Atorvastatina',
-    'Amoxicilina',
-    'Ibuprofeno',
-    'Omeprazol',
-    'Paracetamol',
-    'Salbutamol'
-];
-const medicationOptions = sampleMedications.map(m => ({ label: m, value: m }));
-
-const sampleProviders = [
-    'Dr. Smith',
-    'Dra. Jones',
-    'Dr. Martinez',
-];
-const providerOptions = sampleProviders.map(p => ({label: p, value: p}));
-
 export function MedicationDialog({ isOpen, onClose, onSave, medication }: MedicationDialogProps) {
     const { toast } = useToast();
+    const { providers } = useProviders();
+    const [medicationOptions, setMedicationOptions] = useState<{label: string, value: string}[]>([]);
+
+    useEffect(() => {
+        const fetchMedications = async () => {
+            try {
+                const res = await fetch('/api/master-data/medications');
+                if (res.ok) {
+                    const data = await res.json();
+                    setMedicationOptions(data.map((m: {id: string, name: string}) => ({ label: m.name, value: m.name })));
+                }
+            } catch (error) {
+                console.error("Failed to fetch master medications", error);
+                toast({ variant: "destructive", title: "Error", description: "No se pudo cargar la lista de medicamentos." });
+            }
+        };
+        if (isOpen) {
+            fetchMedications();
+        }
+    }, [isOpen, toast]);
+
     const initialState = useMemo(() => ({
         prescribedDate: new Date().toISOString().split('T')[0],
         name: '',
@@ -96,6 +99,8 @@ export function MedicationDialog({ isOpen, onClose, onSave, medication }: Medica
     const handleSelectChange = (id: string, value: string) => {
         setFormData(prev => ({ ...prev, [id]: value }));
     }
+    
+    const providerOptions = useMemo(() => providers.map(p => ({label: p.username, value: p.username})), [providers]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -164,5 +169,3 @@ export function MedicationDialog({ isOpen, onClose, onSave, medication }: Medica
     </Dialog>
   )
 }
-
-    

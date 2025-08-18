@@ -4,13 +4,19 @@ import { db } from '@/lib/db';
 import type { Appointment } from '@/types/ehr';
 import { getAvailableSlots } from '@/lib/availability';
 import { emailService } from '@/lib/email';
+import { prisma } from '@prisma/client';
 
 export async function POST(request: Request) {
   try {
     const appointmentData = (await request.json()) as Omit<Appointment, 'id' | 'patientId'> & { patientId: string };
     
+    const provider = await db.findUser(appointmentData.visitProvider);
+    if (!provider) {
+        return NextResponse.json({ message: 'Provider not found' }, { status: 404 });
+    }
+
     // Verify slot is available before creating
-    const availableSlots = await getAvailableSlots(appointmentData.visitProvider, appointmentData.date);
+    const availableSlots = await getAvailableSlots(provider.id, appointmentData.date);
     const requestedSlot = new Date(`${appointmentData.date}T${appointmentData.time}`);
 
     const isSlotAvailable = availableSlots.some(slot => new Date(slot).getTime() === requestedSlot.getTime());

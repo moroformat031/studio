@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Vital } from '@/types/ehr';
 import { useToast } from '@/hooks/use-toast';
 import { Combobox } from '@/components/ui/combobox';
+import { useProviders } from '@/hooks/use-providers';
 
 interface VitalDialogProps {
     isOpen: boolean;
@@ -23,17 +24,10 @@ interface VitalDialogProps {
     vital: Vital | null;
 }
 
-const sampleProviders = [
-    'Dr. Smith',
-    'Dra. Jones',
-    'Dr. Martinez',
-    'Enfermera (o) García',
-    'Técnico de Lab.'
-];
-const providerOptions = sampleProviders.map(p => ({label: p, value: p}));
-
 export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps) {
     const { toast } = useToast();
+    const { providers } = useProviders();
+
     const initialState = useMemo(() => ({
         date: new Date().toISOString().split('T')[0],
         hr: '',
@@ -98,6 +92,8 @@ export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps
      const handleSelectChange = (id: string, value: string) => {
         setFormData(prev => ({ ...prev, [id]: value }));
     }
+    
+    const providerOptions = useMemo(() => providers.map(p => ({label: p.username, value: p.username})), [providers]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -163,5 +159,3 @@ export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps
     </Dialog>
   )
 }
-
-    

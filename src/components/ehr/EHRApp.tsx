@@ -4,72 +4,35 @@ import { useState, useEffect } from 'react';
 import { usePatientData } from '@/hooks/use-patient-data';
 import { PatientDetail } from './PatientDetail';
 import { Header } from '../notasmed/Header';
-import { AddPatientDialog } from './AddPatientDialog';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { Patient, Appointment, Vital, Medication, Procedure, Clinic } from '@/types/ehr';
-import { Button } from '../ui/button';
-import { Plus, Home } from 'lucide-react';
+import { Patient, Appointment, Vital, Medication, Procedure } from '@/types/ehr';
 import { PatientCombobox } from './PatientCombobox';
 import { Skeleton } from '../ui/skeleton';
-import { AddClinicDialog } from './AddClinicDialog';
-import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { PlanGate } from '../notasmed/PlanGate';
 
 export function EHRApp() {
-    const { patients, addPatient, updatePatient, addNoteToPatient, updatePatientAppointments, updatePatientVitals, updatePatientMedications, updatePatientProcedures, loading } = usePatientData();
+    const { patients, updatePatient, addNoteToPatient, updatePatientAppointments, updatePatientVitals, updatePatientMedications, updatePatientProcedures, loading, fetchPatients } = usePatientData();
     const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
     const [fontSize] = useLocalStorage('notasmed-fontSize', 16);
-    const [isAddPatientDialogOpen, setIsAddPatientDialogOpen] = useState(false);
-    const [isAddClinicDialogOpen, setIsAddClinicDialogOpen] = useState(false);
-    const { toast } = useToast();
     const { user } = useAuth();
     
     const selectedPatient = patients.find(p => p.id === selectedPatientId) || null;
 
-    const handleAddPatient = async (patient: Omit<Patient, 'id' | 'vitals' | 'medications' | 'appointments' | 'procedures' | 'notes'>) => {
-        const newPatientData: Omit<Patient, 'id'> = {
-            ...patient,
-            vitals: [],
-            medications: [],
-            appointments: [],
-            procedures: [],
-            notes: []
-        };
-        const newPatient = await addPatient(newPatientData);
-        setSelectedPatientId(newPatient.id);
-        setIsAddPatientDialogOpen(false);
-    };
-
-    const handleAddClinic = async (clinicData: Omit<Clinic, 'id'>) => {
-        try {
-            const response = await fetch('/api/clinics', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(clinicData),
-            });
-
-            if (!response.ok) {
-                const { message } = await response.json();
-                throw new Error(message || 'Failed to add clinic');
-            }
-
-            const newClinic = await response.json();
-
-            toast({
-                title: 'Clínica Agregada',
-                description: `La clínica "${newClinic.name}" ha sido creada exitosamente.`,
-            });
-            setIsAddClinicDialogOpen(false);
-        } catch (error) {
-            const e = error as Error;
-            toast({
-                variant: 'destructive',
-                title: 'Error al Agregar Clínica',
-                description: e.message,
-            });
+    useEffect(() => {
+        if (user) {
+            fetchPatients();
         }
-    };
+    }, [user, fetchPatients]);
+    
+    // When the list of patients changes (e.g., due to user change),
+    // check if the currently selected patient is still in the list.
+    // If not, reset the selection.
+    useEffect(() => {
+        if (selectedPatientId && !patients.some(p => p.id === selectedPatientId)) {
+            setSelectedPatientId(null);
+        }
+    }, [patients, selectedPatientId]);
+
 
     const handleUpdateAppointments = (patientId: string, appointments: Appointment[]) => {
         updatePatientAppointments(patientId, appointments);
@@ -113,7 +76,7 @@ export function EHRApp() {
                     </div>
                     
                     <div>
-                        {loading ? (
+                        {loading && !selectedPatient ? (
                              <Skeleton className="h-[600px] w-full" />
                         ) : selectedPatient ? (
                             <PatientDetail
@@ -128,7 +91,7 @@ export function EHRApp() {
                             />
                         ) : (
                             <div className="flex items-center justify-center h-[400px] text-muted-foreground border-2 border-dashed rounded-lg">
-                                Seleccione un paciente para ver sus detalles.
+                                {patients.length > 0 ? 'Seleccione un paciente para ver sus detalles.' : 'No hay pacientes en esta clínica.'}
                             </div>
                         )}
                     </div>
@@ -137,4 +100,3 @@ export function EHRApp() {
         </div>
     );
 }
-

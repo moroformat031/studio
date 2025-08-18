@@ -1,5 +1,6 @@
 
 import { db } from './db';
+import { User } from '@/types/ehr';
 
 // Returns available slots for a given provider and date
 export const getAvailableSlots = async (providerId: string, date: string): Promise<string[]> => {
@@ -13,8 +14,11 @@ export const getAvailableSlots = async (providerId: string, date: string): Promi
     if (!dayAvailability || !dayAvailability.isAvailable) {
         return []; // Provider is not available on this day
     }
+    
+    const provider = await prisma.user.findUnique({ where: { id: providerId }});
+    if (!provider) return [];
 
-    const appointments = await db.getAppointmentsForProviderOnDate(providerId, date);
+    const appointments = await db.getAppointmentsForProviderOnDate(provider.username, date);
     
     const appointmentDuration = 30; // in minutes
     const slots: string[] = [];
