@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import type { Patient } from '@/types/ehr';
+import { db } from '@/lib/db';
 
 const prisma = new PrismaClient();
 
@@ -17,34 +18,10 @@ export async function GET(
 ) {
   try {
     const patientId = params.patientId;
-    const patient = await prisma.patient.findUnique({
-        where: { id: patientId },
-        include: {
-            vitals: { orderBy: { date: 'desc' } },
-            medications: { orderBy: { prescribedDate: 'desc' } },
-            appointments: { orderBy: { date: 'desc' } },
-            procedures: { orderBy: { date: 'desc' } },
-            notes: { orderBy: { date: 'desc' } },
-        },
-    });
+    const patient = await db.getPatient(patientId);
 
     if (patient) {
-      const responseData = {
-            ...patient,
-            demographics: {
-                dob: formatDate(patient.dob),
-                gender: patient.gender,
-                address: patient.address,
-                phone: patient.phone,
-                email: patient.email,
-            },
-            vitals: patient.vitals.map(v => ({ ...v, date: formatDate(v.date) })),
-            medications: patient.medications.map(m => ({ ...m, prescribedDate: formatDate(m.prescribedDate) })),
-            appointments: patient.appointments.map(a => ({ ...a, date: formatDate(a.date) })),
-            procedures: patient.procedures.map(p => ({ ...p, date: formatDate(p.date) })),
-            notes: patient.notes.map(n => ({ ...n, date: n.date.toISOString() })),
-        };
-      return NextResponse.json(responseData);
+      return NextResponse.json(patient);
     }
     return NextResponse.json({ message: 'Patient not found' }, { status: 404 });
   } catch (error) {
@@ -61,9 +38,10 @@ export async function PUT(
     const patientId = params.patientId;
     const updatedData = (await request.json()) as Partial<Patient>;
 
-    const { name, demographics } = updatedData;
+    const { name, demographics, clinicId } = updatedData;
     const dataToUpdate: any = {};
     if (name) dataToUpdate.name = name;
+    if (clinicId) dataToUpdate.clinicId = clinicId;
     if (demographics) {
         if(demographics.dob) dataToUpdate.dob = new Date(demographics.dob);
         if(demographics.gender) dataToUpdate.gender = demographics.gender;
@@ -75,32 +53,11 @@ export async function PUT(
     const updatedPatient = await prisma.patient.update({
         where: { id: patientId },
         data: dataToUpdate,
-        include: {
-            vitals: { orderBy: { date: 'desc' } },
-            medications: { orderBy: { prescribedDate: 'desc' } },
-            appointments: { orderBy: { date: 'desc' } },
-            procedures: { orderBy: { date: 'desc' } },
-            notes: { orderBy: { date: 'desc' } },
-        },
     });
 
-    const responseData = {
-        ...updatedPatient,
-        demographics: {
-            dob: formatDate(updatedPatient.dob),
-            gender: updatedPatient.gender,
-            address: updatedPatient.address,
-            phone: updatedPatient.phone,
-            email: updatedPatient.email,
-        },
-        vitals: updatedPatient.vitals.map(v => ({ ...v, date: formatDate(v.date) })),
-        medications: updatedPatient.medications.map(m => ({ ...m, prescribedDate: formatDate(m.prescribedDate) })),
-        appointments: updatedPatient.appointments.map(a => ({ ...a, date: formatDate(a.date) })),
-        procedures: updatedPatient.procedures.map(p => ({ ...p, date: formatDate(p.date) })),
-        notes: updatedPatient.notes.map(n => ({ ...n, date: n.date.toISOString() })),
-    };
+    const fullPatient = await db.getPatient(updatedPatient.id);
 
-    return NextResponse.json(responseData);
+    return NextResponse.json(fullPatient);
 
   } catch (error) {
     console.error("Error updating patient:", error);
@@ -108,4 +65,19 @@ export async function PUT(
   }
 }
 
-    
+export async function DELETE(
+  request: Request,
+  { params }: { params: { patientId: string } }
+) {
+    try {
+        const patientId = params.patientId;
+        const success = await db.deletePatient(patientId);
+        if (success) {
+            return NextResponse.json({ message: 'Patient deleted successfully' });
+        }
+        return NextResponse.json({ message: 'Patient not found' }, { status: 404 });
+    } catch (error) {
+        console.error("Error deleting patient:", error);
+        return NextResponse.json({ message: 'An error occurred' }, { status: 500 });
+    }
+}

@@ -87,6 +87,5 @@ export interface Patient {
     procedures: Procedure[];
     notes: PatientNote[];
     clinicId: string;
+    clinicName?: string;
 }
-
-    

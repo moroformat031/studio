@@ -1,6 +1,6 @@
 
 import { PrismaClient } from '@prisma/client';
-import type { Patient, User, PatientNote, Appointment, Vital, Medication, Procedure, Clinic, Plan } from '@/types/ehr';
+import type { Patient, User, Clinic, Plan } from '@/types/ehr';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -130,12 +130,15 @@ export const db = {
     },
 
     // --- Patient operations ---
-    getAllPatients: async (clinicId: string): Promise<Patient[]> => {
+    getAllPatients: async (clinicId?: string): Promise<Patient[]> => {
+        const whereClause = clinicId ? { clinicId } : {};
         const patients = await prisma.patient.findMany({
-            where: { clinicId },
+            where: whereClause,
+            include: { clinic: true },
         });
         return patients.map(p => ({
             ...p,
+            clinicName: p.clinic.name,
             demographics: {
                 dob: formatDate(p.dob),
                 gender: p.gender as 'Masculino' | 'Femenino' | 'Otro',
@@ -159,6 +162,7 @@ export const db = {
                 appointments: { orderBy: { date: 'desc' } },
                 procedures: { orderBy: { date: 'desc' } },
                 notes: { orderBy: { date: 'desc' } },
+                clinic: true,
             },
         });
 
@@ -166,6 +170,7 @@ export const db = {
 
         return {
             ...patient,
+            clinicName: patient.clinic.name,
             demographics: {
                 dob: formatDate(patient.dob),
                 gender: patient.gender as 'Masculino' | 'Femenino' | 'Otro',
@@ -195,6 +200,11 @@ export const db = {
         });
         return { ...newPatient, demographics, vitals: [], medications: [], appointments: [], procedures: [], notes: [] };
     },
+     deletePatient: async (id: string): Promise<boolean> => {
+        // Cascade delete is handled by prisma schema, so we just need to delete the patient
+        await prisma.patient.delete({ where: { id } });
+        return true;
+    },
 
     // --- Clinic operations ---
     getAllClinics: async (): Promise<Clinic[]> => {
@@ -213,15 +223,12 @@ export const db = {
         });
     },
     deleteClinic: async (id: string): Promise<boolean> => {
-        await prisma.user.updateMany({ where: { clinicId: id }, data: { clinicId: null } });
-        // Decide on patient handling strategy. Here we prevent deletion if patients exist.
         const patientCount = await prisma.patient.count({ where: { clinicId: id } });
         if (patientCount > 0) {
             throw new Error("Cannot delete clinic with associated patients. Please reassign patients first.");
         }
+        await prisma.user.updateMany({ where: { clinicId: id }, data: { clinicId: null } });
         await prisma.clinic.delete({ where: { id } });
         return true;
     }
 };
-
-    
