@@ -1,9 +1,8 @@
 
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Patient, User, Appointment } from '@/types/ehr';
+import type { Patient, Appointment } from '@/types/ehr';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { es } from 'date-fns/locale';
 import { Combobox } from '@/components/ui/combobox';
@@ -13,6 +12,10 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { useProviders } from '@/hooks/use-providers';
 import { AppointmentDialog } from './AppointmentDialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+interface SchedulingTabProps {
+    patient: Patient;
+}
 
 const AppointmentCard = ({ appointment, onEdit }: { appointment: Appointment; onEdit: (appointment: Appointment) => void; }) => {
     const startTime = new Date(`${appointment.date}T${appointment.time}`);
@@ -124,7 +127,7 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
             const res = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dataToSend),
+                body: JSON.stringify(JSON.stringify(dataToSend)),
             });
 
             if (!res.ok) {
@@ -258,4 +261,3 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
         </>
     );
 }
-
