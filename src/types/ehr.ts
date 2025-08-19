@@ -1,15 +1,20 @@
 
-import type { Plan as PrismaPlan } from '@prisma/client';
+import type { Plan as PrismaPlan, Role as PrismaRole, UserType as PrismaUserType } from '@prisma/client';
 
-export type Plan = PrismaPlan | 'Nurse';
+export type Plan = PrismaPlan;
+export type Role = PrismaRole;
+export type UserType = PrismaUserType;
+
 
 export interface User {
   id: string;
   username: string;
   password?: string;
-  plan: Plan;
+  role: Role;
+  type: UserType;
   clinicId: string | null;
   clinicName?: string;
+  clinic?: Clinic;
 }
 
 export interface DoctorAvailability {
@@ -26,10 +31,11 @@ export interface Clinic {
     name: string;
     address: string;
     phone: string;
+    plan: Plan;
 }
 
 export interface PatientNote {
-    id: string;
+    id:string;
     patientId: string;
     date: string;
     provider: string;

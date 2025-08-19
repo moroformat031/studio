@@ -1,6 +1,6 @@
 
 import { PrismaClient, Prisma } from '@prisma/client';
-import type { Patient, User, Clinic, Plan, DoctorAvailability, Appointment, MasterMedication, MasterProcedure } from '@/types/ehr';
+import type { Patient, User, Clinic, Plan, DoctorAvailability, MasterMedication, MasterProcedure, Role, UserType } from '@/types/ehr';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -27,17 +27,17 @@ const initializeDatabase = async () => {
         const hospitalCentral = await prisma.clinic.upsert({
             where: { name: 'Hospital Central' },
             update: {},
-            create: { name: 'Hospital Central', address: '123 Admin Way', phone: '555-0000' }
+            create: { name: 'Hospital Central', address: '123 Admin Way', phone: '555-0000', plan: 'Hospital' }
         });
         const clinicaDelSol = await prisma.clinic.upsert({
             where: { name: 'Clínica del Sol' },
             update: {},
-            create: { name: 'Clínica del Sol', address: '456 Sol Avenue', phone: '555-1111' }
+            create: { name: 'Clínica del Sol', address: '456 Sol Avenue', phone: '555-1111', plan: 'Clinica' }
         });
         const centroMedicoIntegral = await prisma.clinic.upsert({
             where: { name: 'Centro Médico Integral' },
             update: {},
-            create: { name: 'Centro Médico Integral', address: '789 Luna Street', phone: '555-2222' }
+            create: { name: 'Centro Médico Integral', address: '789 Luna Street', phone: '555-2222', plan: 'Clinica' }
         });
 
         // --- Users (Admin, Doctors, Nurse) ---
@@ -48,7 +48,8 @@ const initializeDatabase = async () => {
             create: {
                 username: 'admin',
                 password: await bcrypt.hash('code', 10),
-                plan: 'Admin',
+                role: 'ADMIN',
+                type: 'Otro',
                 clinicId: hospitalCentral.id
             }
         });
@@ -59,7 +60,8 @@ const initializeDatabase = async () => {
             create: {
                 username: 'Dra. Elena Garcia',
                 password: await bcrypt.hash('code', 10),
-                plan: 'Medico',
+                role: 'USER',
+                type: 'Doctor',
                 clinicId: clinicaDelSol.id
             }
         });
@@ -70,7 +72,8 @@ const initializeDatabase = async () => {
             create: {
                 username: 'Dr. Carlos Martinez',
                 password: await bcrypt.hash('code', 10),
-                plan: 'Medico',
+                role: 'USER',
+                type: 'Doctor',
                 clinicId: centroMedicoIntegral.id
             }
         });
@@ -81,7 +84,8 @@ const initializeDatabase = async () => {
             create: {
                 username: 'Enfermera Joy',
                 password: await bcrypt.hash('code', 10),
-                plan: 'Nurse',
+                role: 'USER',
+                type: 'Enfermera',
                 clinicId: clinicaDelSol.id
             }
         });
@@ -221,8 +225,8 @@ export const db = {
         });
         return users.map(({ password, clinic, ...user }) => ({
             ...user,
-            plan: user.plan as Plan,
             clinicName: clinic?.name || '',
+            clinic: clinic ? { ...clinic, plan: clinic.plan as Plan } : undefined
         }));
     },
     findUser: async (username: string): Promise<User | null> => {
@@ -232,7 +236,11 @@ export const db = {
         });
         if (!user) return null;
         const { clinic, ...rest } = user;
-        return { ...rest, plan: rest.plan as Plan, clinicName: clinic?.name || '' };
+        return { 
+            ...rest, 
+            clinicName: clinic?.name || '',
+            clinic: clinic ? { ...clinic, plan: clinic.plan as Plan } : undefined
+        };
     },
      findUserById: async (id: string): Promise<User | null> => {
         const user = await prisma.user.findUnique({
@@ -241,9 +249,13 @@ export const db = {
         });
         if (!user) return null;
         const { clinic, ...rest } = user;
-        return { ...rest, plan: rest.plan as Plan, clinicName: clinic?.name || '' };
+        return { 
+            ...rest, 
+            clinicName: clinic?.name || '',
+            clinic: clinic ? { ...clinic, plan: clinic.plan as Plan } : undefined
+        };
     },
-    createUser: async (userData: { username: string, password?: string, plan: Plan, clinicName: string }): Promise<Omit<User, 'password'>> => {
+    createUser: async (userData: { username: string, password?: string, role: Role, type: UserType, clinicName: string, clinicPlan?: Plan }): Promise<Omit<User, 'password'>> => {
         const existingUser = await db.findUser(userData.username);
         if (existingUser) {
             throw new Error('Username already exists');
@@ -255,7 +267,7 @@ export const db = {
 
         let clinic = await db.findClinicByName(userData.clinicName);
         if (!clinic) {
-            clinic = await db.createClinic({ name: userData.clinicName, address: '', phone: '' });
+            clinic = await db.createClinic({ name: userData.clinicName, address: '', phone: '', plan: userData.clinicPlan || 'Free' });
         }
 
         const hashedPassword = await bcrypt.hash(userData.password!, 10);
@@ -264,7 +276,8 @@ export const db = {
             data: {
                 username: userData.username,
                 password: hashedPassword,
-                plan: userData.plan,
+                role: userData.role,
+                type: userData.type,
                 clinicId: clinic.id,
             }
         });
@@ -272,9 +285,11 @@ export const db = {
         return {
             id: newUser.id,
             username: newUser.username,
-            plan: newUser.plan as Plan,
+            role: newUser.role,
+            type: newUser.type,
             clinicId: clinic.id,
             clinicName: clinic.name,
+            clinic: { ...clinic, plan: clinic.plan as Plan }
         };
     },
     updateUser: async (id: string, userData: Partial<Omit<User, 'id' | 'password'>> & { password?: string, clinicName?: string }): Promise<Omit<User, 'password'> | null> => {
@@ -288,7 +303,8 @@ export const db = {
         if (clinicName) {
             let clinic = await db.findClinicByName(clinicName);
             if (!clinic) {
-                clinic = await db.createClinic({ name: clinicName });
+                // Should not happen in the new flow, but as a fallback.
+                clinic = await db.createClinic({ name: clinicName, plan: 'Free' });
             }
             dataToUpdate.clinicId = clinic.id;
         }
@@ -300,7 +316,11 @@ export const db = {
         });
 
         const { password: _, clinic, ...userWithoutPassword } = updatedUser;
-        return { ...userWithoutPassword, plan: userWithoutPassword.plan as Plan, clinicName: clinic?.name || '' };
+        return { 
+            ...userWithoutPassword,
+            clinicName: clinic?.name || '',
+            clinic: clinic ? { ...clinic, plan: clinic.plan as Plan } : undefined
+        };
     },
     deleteUser: async (id: string): Promise<boolean> => {
         await prisma.doctorAvailability.deleteMany({ where: { userId: id } });
@@ -387,19 +407,25 @@ export const db = {
 
     // --- Clinic operations ---
     getAllClinics: async (): Promise<Clinic[]> => {
-        return prisma.clinic.findMany();
+        const clinics = await prisma.clinic.findMany();
+        return clinics.map(c => ({...c, plan: c.plan as Plan}));
     },
     findClinicByName: async (name: string): Promise<Clinic | null> => {
-        return prisma.clinic.findUnique({ where: { name } });
+        const clinic = await prisma.clinic.findUnique({ where: { name } });
+        if(!clinic) return null;
+        return {...clinic, plan: clinic.plan as Plan};
     },
     createClinic: async (clinicData: Omit<Clinic, 'id'>): Promise<Clinic> => {
-        return prisma.clinic.create({ data: clinicData });
+        const clinic = await prisma.clinic.create({ data: clinicData });
+        return {...clinic, plan: clinic.plan as Plan};
     },
     updateClinic: async (id: string, clinicData: Partial<Omit<Clinic, 'id'>>): Promise<Clinic | null> => {
-        return prisma.clinic.update({
+        const clinic = await prisma.clinic.update({
             where: { id },
             data: clinicData,
         });
+        if(!clinic) return null;
+        return {...clinic, plan: clinic.plan as Plan};
     },
     deleteClinic: async (id: string): Promise<boolean> => {
         const patientCount = await prisma.patient.count({ where: { clinicId: id } });
@@ -463,6 +489,22 @@ export const db = {
             }
         });
         return { ...newAppointment, date: formatDate(newAppointment.date), status: newAppointment.status as 'Programada' | 'Completada' | 'Cancelada' };
+    },
+     updateAppointment: async (id: string, appointmentData: Partial<Appointment>): Promise<Appointment | null> => {
+        const { date, ...rest } = appointmentData;
+        const dataToUpdate: any = { ...rest };
+        if (date) {
+            dataToUpdate.date = new Date(date);
+        }
+
+        const updatedAppointment = await prisma.appointment.update({
+            where: { id },
+            data: dataToUpdate,
+        });
+
+        if (!updatedAppointment) return null;
+
+        return { ...updatedAppointment, date: formatDate(updatedAppointment.date), status: updatedAppointment.status as 'Programada' | 'Completada' | 'Cancelada' };
     },
 
     // --- Master Data Operations ---

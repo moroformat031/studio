@@ -19,9 +19,10 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useAuth } from "@/context/AuthContext";
-import { DoctorAvailability, Plan } from "@/types/ehr";
+import { DoctorAvailability } from "@/types/ehr";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SettingsDialogProps {
   children: ReactNode;
@@ -160,7 +161,7 @@ function GeneralSettingsTab() {
 
 export function SettingsDialog({ children }: SettingsDialogProps) {
   const { user } = useAuth();
-  const isDoctor = user?.plan === 'Medico' || user?.plan === 'Admin';
+  const isDoctor = user?.type === 'Doctor';
 
   return (
     <Dialog>

@@ -1,7 +1,7 @@
 
 import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/lib/db';
-import type { User } from '@/types/ehr';
+import type { User, Role, UserType } from '@/types/ehr';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,17 +18,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: Request) {
   try {
-    const { username, password, plan, clinicName } = (await request.json()) as Omit<User, 'id' | 'clinicId'> & { password?: string, clinicName: string };
+    const { username, password, role, type, clinicName } = (await request.json()) as { username: string, password?: string, role: Role, type: UserType, clinicName: string };
 
-    if (!username || !password || !plan || !clinicName) {
-         return NextResponse.json({ message: 'Username, password, plan, and clinic name are required' }, { status: 400 });
+    if (!username || !password || !role || !type || !clinicName) {
+         return NextResponse.json({ message: 'Username, password, role, type, and clinic name are required' }, { status: 400 });
     }
     
     if (await db.findUser(username)) {
        return NextResponse.json({ message: 'Username already exists' }, { status: 409 });
     }
 
-    const newUser = await db.createUser({ username, password, plan, clinicName });
+    const newUser = await db.createUser({ username, password, role, type, clinicName });
     
     const { password: _, ...userWithoutPassword } = newUser;
 
@@ -40,5 +40,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: e.message || 'An error occurred during user creation' }, { status: 500 });
   }
 }
-
-    

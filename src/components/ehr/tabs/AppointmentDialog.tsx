@@ -29,12 +29,12 @@ interface AppointmentDialogProps {
 
 export function AppointmentDialog({ isOpen, onClose, onSave, appointment, selectedDate, selectedTime }: AppointmentDialogProps) {
     const { toast } = useToast();
-    const { providers, loading: loadingProviders } = useProviders();
+    const { doctors, loading: loadingProviders } = useProviders();
 
     const getInitialState = useCallback(() => {
         const baseState = {
             date: new Date().toISOString().split('T')[0],
-            time: '',
+            time: '09:00',
             reason: '',
             status: 'Programada' as const,
             visitProvider: '',
@@ -47,8 +47,13 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment, select
         if (selectedTime) {
             baseState.time = selectedTime;
         }
+        if (doctors.length > 0) {
+            baseState.visitProvider = doctors[0].username;
+            baseState.billingProvider = doctors[0].username;
+        }
+
         return baseState;
-    }, [selectedDate, selectedTime]);
+    }, [selectedDate, selectedTime, doctors]);
 
 
     const [formData, setFormData] = useState(getInitialState());
@@ -66,7 +71,7 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment, select
 
 
     const handleSave = () => {
-        if (!formData.date || !formData.time || !formData.reason || (!appointment && (!formData.visitProvider || !formData.billingProvider))) {
+        if (!formData.date || !formData.time || !formData.reason || !formData.visitProvider || !formData.billingProvider) {
             toast({
                 variant: 'destructive',
                 title: 'Campos Faltantes',
@@ -88,7 +93,10 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment, select
     }
     
     const handleSelectChange = (id: string, value: string) => {
-        setFormData(prev => ({ ...prev, [id]: value }));
+        const selectedDoctor = doctors.find(d => d.username === value);
+        if(selectedDoctor){
+            setFormData(prev => ({ ...prev, [id]: selectedDoctor.username }));
+        }
     }
 
 
@@ -96,7 +104,7 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment, select
         setFormData(prev => ({ ...prev, status: value }));
     }
     
-    const providerOptions = useMemo(() => providers.map(p => ({label: p.username, value: p.username})), [providers]);
+    const providerOptions = useMemo(() => doctors.map(p => ({label: p.username, value: p.username})), [doctors]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -112,13 +120,13 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment, select
             <Label htmlFor="date" className="text-right">
               Fecha
             </Label>
-            <Input id="date" type="date" value={formData.date} onChange={handleInputChange} className="col-span-3" readOnly={!appointment} />
+            <Input id="date" type="date" value={formData.date} onChange={handleInputChange} className="col-span-3" readOnly />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="time" className="text-right">
               Hora
             </Label>
-            <Input id="time" type="time" value={formData.time} onChange={handleInputChange} className="col-span-3" readOnly={!appointment}/>
+            <Input id="time" type="time" value={formData.time} onChange={handleInputChange} className="col-span-3" readOnly/>
           </div>
            <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="reason" className="text-right">
@@ -126,54 +134,40 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment, select
             </Label>
             <Input id="reason" value={formData.reason} onChange={handleInputChange} className="col-span-3" />
           </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="visitProvider" className="text-right">
+                Doctor
+                </Label>
+                <div className="col-span-3">
+                    <Combobox
+                        options={providerOptions}
+                        value={formData.visitProvider}
+                        onChange={(value) => {
+                            handleSelectChange('visitProvider', value)
+                            handleSelectChange('billingProvider', value)
+                        }}
+                        placeholder="Seleccionar doctor"
+                        searchPlaceholder="Buscar doctor..."
+                        emptyMessage="No se encontró doctor."
+                    />
+                </div>
+            </div>
           {appointment && (
-            <>
-                <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="visitProvider" className="text-right">
-                    Prov. Visita
-                    </Label>
-                    <div className="col-span-3">
-                        <Combobox
-                            options={providerOptions}
-                            value={formData.visitProvider}
-                            onChange={(value) => handleSelectChange('visitProvider', value)}
-                            placeholder="Seleccionar proveedor"
-                            searchPlaceholder="Buscar proveedor..."
-                            emptyMessage="No se encontró proveedor."
-                        />
-                    </div>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="billingProvider" className="text-right">
-                    Prov. Factura
-                    </Label>
-                    <div className="col-span-3">
-                        <Combobox
-                            options={providerOptions}
-                            value={formData.billingProvider}
-                            onChange={(value) => handleSelectChange('billingProvider', value)}
-                            placeholder="Seleccionar proveedor"
-                            searchPlaceholder="Buscar proveedor..."
-                            emptyMessage="No se encontró proveedor."
-                        />
-                    </div>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="status" className="text-right">
-                    Estado
-                    </Label>
-                    <Select onValueChange={handleStatusChange} value={formData.status}>
-                        <SelectTrigger className="col-span-3">
-                            <SelectValue placeholder="Seleccionar estado" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Programada">Programada</SelectItem>
-                            <SelectItem value="Completada">Completada</SelectItem>
-                            <SelectItem value="Cancelada">Cancelada</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-            </>
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="status" className="text-right">
+                Estado
+                </Label>
+                <Select onValueChange={handleStatusChange} value={formData.status}>
+                    <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="Seleccionar estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Programada">Programada</SelectItem>
+                        <SelectItem value="Completada">Completada</SelectItem>
+                        <SelectItem value="Cancelada">Cancelada</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
           )}
         </div>
         <DialogFooter>

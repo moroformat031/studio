@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { User } from '@/types/ehr';
 import { useAuth } from './AuthContext';
 import { useToast } from './use-toast';
@@ -27,9 +27,7 @@ export function useProviders() {
                     throw new Error("Failed to fetch providers");
                 }
                 const allUsers: User[] = await res.json();
-                // Filter for Medico and Admin roles
-                const providerUsers = allUsers.filter(u => u.plan === 'Medico' || u.plan === 'Admin');
-                setProviders(providerUsers);
+                setProviders(allUsers);
             } catch (error) {
                 console.error(error);
                 toast({
@@ -45,5 +43,7 @@ export function useProviders() {
         fetchProviders();
     }, [user, toast]);
 
-    return { providers, loading };
+    const doctors = useMemo(() => providers.filter(p => p.type === 'Doctor'), [providers]);
+
+    return { providers, doctors, loading };
 }

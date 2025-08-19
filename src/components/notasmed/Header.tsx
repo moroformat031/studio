@@ -14,7 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { PlanGate } from './PlanGate';
 import { ManagementDialog } from './ManagementDialog';
 import { useState } from 'react';
 
@@ -43,12 +42,12 @@ export function Header() {
               <Settings className="h-4 w-4" />
             </Button>
           </SettingsDialog>
-          <PlanGate allowedPlans={['Admin']}>
+          {user?.role === 'ADMIN' && (
             <Button variant="outline" size="sm" onClick={() => setIsManagementOpen(true)}>
                 <Briefcase className="h-4 w-4 mr-2" />
                 Gestionar
             </Button>
-          </PlanGate>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="cursor-pointer h-9 w-9">
@@ -66,7 +65,7 @@ export function Header() {
                         {user.clinicName}
                     </p>
                   )}
-                  <p className="text-xs leading-none text-muted-foreground">Plan {user?.plan}</p>
+                  <p className="text-xs leading-none text-muted-foreground">Rol: {user?.role}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
