@@ -5,7 +5,7 @@ import { LogOut, Settings, Stethoscope, Building, Users, Briefcase } from 'lucid
 import { Button } from '@/components/ui/button';
 import { SettingsDialog } from './SettingsDialog';
 import { useAuth } from '@/context/AuthContext';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import { PlanGate } from './PlanGate';
 import { ManagementDialog } from './ManagementDialog';
 import { useState } from 'react';
@@ -83,5 +83,3 @@ export function Header() {
     </>
   );
 }
-
-    

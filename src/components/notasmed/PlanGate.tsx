@@ -5,7 +5,7 @@ import React, { ReactNode } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lock } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { Plan } from '@/types/ehr';
 
 interface PlanGateProps {
@@ -41,5 +41,3 @@ export function PlanGate({ allowedPlans, children }: PlanGateProps) {
 
   return <>{children}</>;
 }
-
-    

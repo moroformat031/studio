@@ -7,7 +7,7 @@ import { Header } from '../notasmed/Header';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { Patient, Appointment, Vital, Medication, Procedure } from '@/types/ehr';
 import { PatientCombobox } from './PatientCombobox';
-import { Skeleton } from '../ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/AuthContext';
 
 export function EHRApp() {
