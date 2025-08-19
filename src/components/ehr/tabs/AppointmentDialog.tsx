@@ -23,22 +23,35 @@ interface AppointmentDialogProps {
     onClose: () => void;
     onSave: (appointment: Omit<Appointment, 'id'> | Appointment) => void;
     appointment: Appointment | null;
+    selectedDate?: Date;
+    selectedTime?: string | null;
 }
 
-export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: AppointmentDialogProps) {
+export function AppointmentDialog({ isOpen, onClose, onSave, appointment, selectedDate, selectedTime }: AppointmentDialogProps) {
     const { toast } = useToast();
     const { providers, loading: loadingProviders } = useProviders();
 
-    const initialState = useMemo(() => ({
-        date: new Date().toISOString().split('T')[0],
-        time: '',
-        reason: '',
-        status: 'Programada' as const,
-        visitProvider: '',
-        billingProvider: ''
-    }), []);
+    const getInitialState = useCallback(() => {
+        const baseState = {
+            date: new Date().toISOString().split('T')[0],
+            time: '',
+            reason: '',
+            status: 'Programada' as const,
+            visitProvider: '',
+            billingProvider: ''
+        };
 
-    const [formData, setFormData] = useState(initialState);
+        if (selectedDate) {
+            baseState.date = selectedDate.toISOString().split('T')[0];
+        }
+        if (selectedTime) {
+            baseState.time = selectedTime;
+        }
+        return baseState;
+    }, [selectedDate, selectedTime]);
+
+
+    const [formData, setFormData] = useState(getInitialState());
     
     useEffect(() => {
         if (appointment) {
@@ -47,13 +60,13 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
                 date: new Date(appointment.date).toISOString().split('T')[0]
             });
         } else {
-            setFormData(initialState);
+            setFormData(getInitialState());
         }
-    }, [appointment, isOpen, initialState]);
+    }, [appointment, isOpen, getInitialState]);
 
 
     const handleSave = () => {
-        if (!formData.date || !formData.time || !formData.reason || !formData.visitProvider || !formData.billingProvider) {
+        if (!formData.date || !formData.time || !formData.reason || (!appointment && (!formData.visitProvider || !formData.billingProvider))) {
             toast({
                 variant: 'destructive',
                 title: 'Campos Faltantes',
@@ -67,11 +80,6 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
             : formData;
         
         onSave(dataToSave);
-        onClose();
-        toast({
-            title: `Cita ${appointment ? 'Actualizada' : 'Programada'}`,
-            description: `La cita ha sido ${appointment ? 'actualizada' : 'guardada'} exitosamente.`
-        })
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,13 +112,13 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
             <Label htmlFor="date" className="text-right">
               Fecha
             </Label>
-            <Input id="date" type="date" value={formData.date} onChange={handleInputChange} className="col-span-3" />
+            <Input id="date" type="date" value={formData.date} onChange={handleInputChange} className="col-span-3" readOnly={!appointment} />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="time" className="text-right">
               Hora
             </Label>
-            <Input id="time" type="time" value={formData.time} onChange={handleInputChange} className="col-span-3" />
+            <Input id="time" type="time" value={formData.time} onChange={handleInputChange} className="col-span-3" readOnly={!appointment}/>
           </div>
            <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="reason" className="text-right">
@@ -118,51 +126,55 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
             </Label>
             <Input id="reason" value={formData.reason} onChange={handleInputChange} className="col-span-3" />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="visitProvider" className="text-right">
-              Prov. Visita
-            </Label>
-             <div className="col-span-3">
-                <Combobox
-                    options={providerOptions}
-                    value={formData.visitProvider}
-                    onChange={(value) => handleSelectChange('visitProvider', value)}
-                    placeholder="Seleccionar proveedor"
-                    searchPlaceholder="Buscar proveedor..."
-                    emptyMessage="No se encontró proveedor."
-                />
-            </div>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="billingProvider" className="text-right">
-              Prov. Factura
-            </Label>
-             <div className="col-span-3">
-                <Combobox
-                    options={providerOptions}
-                    value={formData.billingProvider}
-                    onChange={(value) => handleSelectChange('billingProvider', value)}
-                    placeholder="Seleccionar proveedor"
-                    searchPlaceholder="Buscar proveedor..."
-                    emptyMessage="No se encontró proveedor."
-                />
-            </div>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="status" className="text-right">
-              Estado
-            </Label>
-             <Select onValueChange={handleStatusChange} value={formData.status}>
-                <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Seleccionar estado" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="Programada">Programada</SelectItem>
-                    <SelectItem value="Completada">Completada</SelectItem>
-                    <SelectItem value="Cancelada">Cancelada</SelectItem>
-                </SelectContent>
-            </Select>
-          </div>
+          {appointment && (
+            <>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="visitProvider" className="text-right">
+                    Prov. Visita
+                    </Label>
+                    <div className="col-span-3">
+                        <Combobox
+                            options={providerOptions}
+                            value={formData.visitProvider}
+                            onChange={(value) => handleSelectChange('visitProvider', value)}
+                            placeholder="Seleccionar proveedor"
+                            searchPlaceholder="Buscar proveedor..."
+                            emptyMessage="No se encontró proveedor."
+                        />
+                    </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="billingProvider" className="text-right">
+                    Prov. Factura
+                    </Label>
+                    <div className="col-span-3">
+                        <Combobox
+                            options={providerOptions}
+                            value={formData.billingProvider}
+                            onChange={(value) => handleSelectChange('billingProvider', value)}
+                            placeholder="Seleccionar proveedor"
+                            searchPlaceholder="Buscar proveedor..."
+                            emptyMessage="No se encontró proveedor."
+                        />
+                    </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="status" className="text-right">
+                    Estado
+                    </Label>
+                    <Select onValueChange={handleStatusChange} value={formData.status}>
+                        <SelectTrigger className="col-span-3">
+                            <SelectValue placeholder="Seleccionar estado" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Programada">Programada</SelectItem>
+                            <SelectItem value="Completada">Completada</SelectItem>
+                            <SelectItem value="Cancelada">Cancelada</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
@@ -172,5 +184,3 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment }: Appo
     </Dialog>
   )
 }
-
-    
