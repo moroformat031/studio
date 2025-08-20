@@ -12,9 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserManagementTab } from './management-tabs/UserManagementTab';
 import { ClinicManagementTab } from './management-tabs/ClinicManagementTab';
 import { PatientManagementTab } from "./management-tabs/PatientManagementTab";
-import { ProviderManagementTab } from "./management-tabs/ProviderManagementTab";
 import { MedicationManagementTab } from "./management-tabs/MedicationManagementTab";
 import { ProcedureManagementTab } from "./management-tabs/ProcedureManagementTab";
+import { useAuth } from "@/context/AuthContext";
 
 interface ManagementDialogProps {
   open: boolean;
@@ -22,34 +22,35 @@ interface ManagementDialogProps {
 }
 
 export function ManagementDialog({ open, onOpenChange }: ManagementDialogProps) {
+  const { user } = useAuth();
+  const isHospitalPlan = user?.clinic?.plan === 'Hospital';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Panel de Administración</DialogTitle>
           <DialogDescription>
-            Gestiona usuarios, clínicas y pacientes en el sistema.
+            Gestiona empleados, clínicas, pacientes y más en el sistema.
           </DialogDescription>
         </DialogHeader>
-        <Tabs defaultValue="users" className="w-full mt-4 flex-grow flex flex-col">
-            <TabsList className="grid w-full grid-cols-6">
-                <TabsTrigger value="users">Usuarios</TabsTrigger>
-                <TabsTrigger value="medicos">Medicos</TabsTrigger>
-                <TabsTrigger value="clinics">Clínicas</TabsTrigger>
+        <Tabs defaultValue="employees" className="w-full mt-4 flex-grow flex flex-col">
+            <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="employees">Empleados</TabsTrigger>
+                {isHospitalPlan && <TabsTrigger value="clinics">Clínicas</TabsTrigger>}
                 <TabsTrigger value="patients">Pacientes</TabsTrigger>
                 <TabsTrigger value="medications">Medicamentos</TabsTrigger>
                 <TabsTrigger value="procedures">Procedimientos</TabsTrigger>
             </TabsList>
             <div className="flex-grow overflow-hidden mt-4">
-                <TabsContent value="users" className="h-full">
+                <TabsContent value="employees" className="h-full">
                     <UserManagementTab />
                 </TabsContent>
-                <TabsContent value="medicos" className="h-full">
-                    <ProviderManagementTab />
-                </TabsContent>
-                <TabsContent value="clinics" className="h-full">
-                    <ClinicManagementTab />
-                </TabsContent>
+                {isHospitalPlan && (
+                    <TabsContent value="clinics" className="h-full">
+                        <ClinicManagementTab />
+                    </TabsContent>
+                )}
                 <TabsContent value="patients" className="h-full">
                     <PatientManagementTab />
                 </TabsContent>

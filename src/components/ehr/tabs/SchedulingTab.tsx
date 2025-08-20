@@ -18,7 +18,7 @@ interface SchedulingTabProps {
 }
 
 const AppointmentCard = ({ appointment, onEdit }: { appointment: Appointment; onEdit: (appointment: Appointment) => void; }) => {
-    const startTime = new Date(`${appointment.date}T${appointment.time}`);
+    const startTime = new Date(`${new Date(appointment.date).toISOString().split('T')[0]}T${appointment.time}`);
     const endTime = new Date(startTime.getTime() + 30 * 60 * 1000); // Assuming 30min duration
 
     const startHour = startTime.getHours();
@@ -50,7 +50,7 @@ const AppointmentCard = ({ appointment, onEdit }: { appointment: Appointment; on
 
 export function SchedulingTab({ patient }: SchedulingTabProps) {
     const { toast } = useToast();
-    const { providers, loading: loadingProviders } = useProviders();
+    const { doctors, loading: loadingProviders } = useProviders();
     const [selectedProviderId, setSelectedProviderId] = useState<string>('');
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
     const [availableSlots, setAvailableSlots] = useState<Date[]>([]);
@@ -65,10 +65,10 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
     const [selectedSlot, setSelectedSlot] = useState<Date | null>(null);
 
      useEffect(() => {
-        if (providers.length > 0 && !selectedProviderId) {
-            setSelectedProviderId(providers[0].id);
+        if (doctors.length > 0 && !selectedProviderId) {
+            setSelectedProviderId(doctors[0].id);
         }
-    }, [providers, selectedProviderId]);
+    }, [doctors, selectedProviderId]);
 
     const fetchScheduleData = useCallback(async () => {
         if (!selectedProviderId || !selectedDate) return;
@@ -104,7 +104,7 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
     }, [fetchScheduleData]);
 
     const handleSaveAppointment = async (appointmentData: Omit<Appointment, 'id'> | Appointment) => {
-        const selectedProvider = providers.find(p => p.id === selectedProviderId);
+        const selectedProvider = doctors.find(p => p.id === selectedProviderId);
         if (!patient || !selectedProvider) return;
 
         setIsScheduling(true);
@@ -127,7 +127,7 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
             const res = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(JSON.stringify(dataToSend)),
+                body: JSON.stringify(dataToSend),
             });
 
             if (!res.ok) {
@@ -172,7 +172,7 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
         return slots;
     }, []);
 
-    const providerOptions = useMemo(() => providers.map(p => ({ label: p.username, value: p.id })), [providers]);
+    const providerOptions = useMemo(() => doctors.map(p => ({ label: p.username, value: p.id })), [doctors]);
     
     return (
         <>
@@ -189,9 +189,9 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
                                 options={providerOptions}
                                 value={selectedProviderId}
                                 onChange={setSelectedProviderId}
-                                placeholder="Seleccionar proveedor"
-                                searchPlaceholder="Buscar proveedor..."
-                                emptyMessage="No se encontró proveedor."
+                                placeholder="Seleccionar doctor"
+                                searchPlaceholder="Buscar doctor..."
+                                emptyMessage="No se encontró doctor."
                             />
                         </div>
                         <Calendar
@@ -256,7 +256,7 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
                 onSave={handleSaveAppointment}
                 appointment={currentAppointment}
                 selectedDate={selectedDate}
-                selectedTime={selectedSlot ? selectedSlot.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null}
+                selectedTime={selectedSlot ? selectedSlot.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' }) : null}
             />
         </>
     );

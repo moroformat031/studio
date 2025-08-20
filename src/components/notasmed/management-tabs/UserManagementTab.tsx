@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plan, User, Clinic } from '@/types/ehr';
+import { Role, User, Clinic, UserType } from '@/types/ehr';
 import { PlusCircle, Building, User as UserIcon, Eye, EyeOff, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -24,13 +24,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Combobox } from '@/components/ui/combobox';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAuth } from '@/context/AuthContext';
 
 type OmittedUser = Omit<User, 'password'>;
 
 export function UserManagementTab() {
+    const { user: adminUser } = useAuth();
     const { toast } = useToast();
     const [users, setUsers] = useState<OmittedUser[]>([]);
-    const [clinics, setClinics] = useState<Clinic[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     
     // Form state
@@ -39,17 +40,18 @@ export function UserManagementTab() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [plan, setPlan] = useState<Plan>('Medico');
-    const [clinicName, setClinicName] = useState('');
+    const [role, setRole] = useState<Role>('USER');
+    const [type, setType] = useState<UserType>('Enfermera');
 
     // Delete confirmation
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState<OmittedUser | null>(null);
 
     const fetchUsers = async () => {
+        if (!adminUser?.clinicId) return;
         setIsLoading(true);
         try {
-            const res = await fetch('/api/users');
+            const res = await fetch(`/api/users?clinicId=${adminUser.clinicId}`);
             if(res.ok) {
                 const data = await res.json();
                 setUsers(data);
@@ -64,26 +66,11 @@ export function UserManagementTab() {
         }
     }
 
-     const fetchClinics = async () => {
-        try {
-            const res = await fetch('/api/clinics');
-            if(res.ok) {
-                const data = await res.json();
-                setClinics(data);
-            } else {
-                throw new Error("Failed to fetch clinics");
-            }
-        } catch (e) {
-            const err = e as Error;
-            toast({ variant: 'destructive', title: 'Error', description: err.message || 'No se pudieron cargar las clínicas.' })
-        }
-    }
-
-
     useEffect(() => {
-        fetchUsers();
-        fetchClinics();
-    }, []);
+        if(adminUser?.clinicId){
+            fetchUsers();
+        }
+    }, [adminUser]);
 
     const resetForm = () => {
         setIsEditing(false);
@@ -91,20 +78,24 @@ export function UserManagementTab() {
         setUsername('');
         setPassword('');
         setShowPassword(false);
-        setPlan('Medico');
-        setClinicName('');
+        setRole('USER');
+        setType('Enfermera');
     }
 
     const handleEditClick = (user: OmittedUser) => {
         setIsEditing(true);
         setCurrentUser(user);
         setUsername(user.username);
-        setPlan(user.plan);
-        setClinicName(user.clinicName || '');
+        setRole(user.role);
+        setType(user.type);
         setPassword(''); // Clear password field for security
     };
 
     const handleDeleteClick = (user: OmittedUser) => {
+        if (user.id === adminUser?.id) {
+            toast({ variant: 'destructive', title: 'Acción no permitida', description: 'No puede eliminarse a sí mismo.' });
+            return;
+        }
         setUserToDelete(user);
         setIsDeleteDialogOpen(true);
     };
@@ -130,8 +121,8 @@ export function UserManagementTab() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if(!clinicName){
-            toast({ variant: 'destructive', title: 'Clínica Requerida', description: 'Por favor, seleccione una clínica para el usuario.'});
+        if(!adminUser?.clinicName){
+            toast({ variant: 'destructive', title: 'Error', description: 'No se pudo determinar la clínica del administrador.'});
             return;
         }
 
@@ -142,8 +133,9 @@ export function UserManagementTab() {
 
         const body: Partial<User> & { password?: string, clinicName?: string } = {
             username,
-            plan,
-            clinicName
+            role,
+            type,
+            clinicName: adminUser.clinicName
         };
 
         if(password || !isEditing) {
@@ -161,8 +153,8 @@ export function UserManagementTab() {
                 throw new Error(message);
             }
             toast({
-                title: `Usuario ${isEditing ? 'Actualizado' : 'Agregado'}`,
-                description: `El usuario ${username} ha sido ${isEditing ? 'actualizado' : 'creado'}.`
+                title: `Empleado ${isEditing ? 'Actualizado' : 'Agregado'}`,
+                description: `El empleado ${username} ha sido ${isEditing ? 'actualizado' : 'creado'}.`
             });
             resetForm();
             fetchUsers();
@@ -170,30 +162,28 @@ export function UserManagementTab() {
             const e = error as Error;
             toast({
                 variant: 'destructive',
-                title: `Error al ${isEditing ? 'Actualizar' : 'Agregar'} Usuario`,
+                title: `Error al ${isEditing ? 'Actualizar' : 'Agregar'} Empleado`,
                 description: e.message
             });
         } finally {
             setIsLoading(false);
         }
     }
-
-    const clinicOptions = clinics.map(c => ({ label: c.name, value: c.name }));
   
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* User List */}
         <div className="lg:col-span-2 space-y-4">
-            <h3 className="font-semibold text-lg">Usuarios Existentes</h3>
+            <h3 className="font-semibold text-lg">Empleados Existentes</h3>
             <Card>
                 <CardContent className="p-0">
                      <ScrollArea className="h-[400px]">
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Usuario</TableHead>
-                                    <TableHead>Plan</TableHead>
-                                    <TableHead className="hidden md:table-cell">Clínica</TableHead>
+                                    <TableHead>Nombre</TableHead>
+                                    <TableHead>Tipo</TableHead>
+                                    <TableHead className="hidden md:table-cell">Rol</TableHead>
                                     <TableHead className="text-right">Acciones</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -204,8 +194,8 @@ export function UserManagementTab() {
                                     users.map(user => (
                                         <TableRow key={user.id}>
                                             <TableCell className="font-medium">{user.username}</TableCell>
-                                            <TableCell>{user.plan}</TableCell>
-                                            <TableCell className="hidden md:table-cell">{user.clinicName || 'N/A'}</TableCell>
+                                            <TableCell>{user.type}</TableCell>
+                                            <TableCell className="hidden md:table-cell">{user.role}</TableCell>
                                             <TableCell className="text-right">
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
@@ -219,7 +209,7 @@ export function UserManagementTab() {
                                                             <Edit className="mr-2 h-4 w-4" />
                                                             <span>Editar</span>
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => handleDeleteClick(user)} className="text-destructive">
+                                                        <DropdownMenuItem onClick={() => handleDeleteClick(user)} className="text-destructive" disabled={user.id === adminUser?.id}>
                                                             <Trash2 className="mr-2 h-4 w-4" />
                                                             <span>Eliminar</span>
                                                         </DropdownMenuItem>
@@ -229,7 +219,7 @@ export function UserManagementTab() {
                                         </TableRow>
                                     ))
                                 ) : (
-                                    <TableRow><TableCell colSpan={4} className="text-center">No hay usuarios.</TableCell></TableRow>
+                                    <TableRow><TableCell colSpan={4} className="text-center">No hay empleados.</TableCell></TableRow>
                                 )}
                             </TableBody>
                         </Table>
@@ -239,10 +229,10 @@ export function UserManagementTab() {
         </div>
         {/* Add/Edit User Form */}
         <div className="space-y-4">
-                <h3 className="font-semibold text-lg">{isEditing ? 'Editar Usuario' : 'Agregar Nuevo Usuario'}</h3>
+                <h3 className="font-semibold text-lg">{isEditing ? 'Editar Empleado' : 'Agregar Nuevo Empleado'}</h3>
                 <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg">
                 <div className="space-y-2">
-                    <Label htmlFor="new-username">Usuario</Label>
+                    <Label htmlFor="new-username">Nombre</Label>
                     <div className="relative">
                         <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input id="new-username" value={username} onChange={e => setUsername(e.target.value)} required disabled={isLoading} className="pl-10" />
@@ -262,35 +252,37 @@ export function UserManagementTab() {
                         </button>
                         </div>
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="new-plan">Rol/Plan</Label>
-                    <Select value={plan} onValueChange={(value: Plan) => setPlan(value)} required disabled={isLoading}>
-                        <SelectTrigger id="new-plan">
-                            <SelectValue placeholder="Seleccionar plan" />
+                 <div className="space-y-2">
+                    <Label htmlFor="new-type">Tipo de Empleado</Label>
+                    <Select value={type} onValueChange={(value: UserType) => setType(value)} required disabled={isLoading}>
+                        <SelectTrigger id="new-type">
+                            <SelectValue placeholder="Seleccionar tipo" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Medico">Medico</SelectItem>
-                            <SelectItem value="Nurse">Nurse</SelectItem>
-                            <SelectItem value="Admin">Admin</SelectItem>
+                            <SelectItem value="Doctor">Doctor</SelectItem>
+                            <SelectItem value="Enfermera">Enfermera</SelectItem>
+                            <SelectItem value="Otro">Otro</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="new-clinicname">Nombre Clinica</Label>
-                    <Combobox
-                        options={clinicOptions}
-                        value={clinicName}
-                        onChange={setClinicName}
-                        placeholder="Seleccionar clínica"
-                        searchPlaceholder="Buscar clínica..."
-                        emptyMessage="No se encontró clínica."
-                    />
+                    <Label htmlFor="new-role">Rol del Sistema</Label>
+                    <Select value={role} onValueChange={(value: Role) => setRole(value)} required disabled={isLoading || (currentUser?.id === adminUser?.id)}>
+                        <SelectTrigger id="new-role">
+                            <SelectValue placeholder="Seleccionar rol" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ADMIN">Admin</SelectItem>
+                            <SelectItem value="USER">User</SelectItem>
+                        </SelectContent>
+                    </Select>
+                     {currentUser?.id === adminUser?.id && isEditing && <p className="text-xs text-muted-foreground">No puede cambiar su propio rol.</p>}
                 </div>
                 <div className="flex gap-2">
                     {isEditing && <Button type="button" variant="outline" onClick={resetForm} disabled={isLoading}>Cancelar</Button>}
                     <Button type="submit" disabled={isLoading} className="w-full">
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        {isLoading ? (isEditing ? 'Actualizando...' : 'Agregando...') : (isEditing ? 'Actualizar Usuario' : 'Agregar Usuario')}
+                        {isLoading ? (isEditing ? 'Actualizando...' : 'Agregando...') : (isEditing ? 'Actualizar Empleado' : 'Agregar Empleado')}
                     </Button>
                 </div>
                 </form>

@@ -1,12 +1,12 @@
 
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { User } from '@/types/ehr';
+import { User, Plan } from '@/types/ehr';
 import bcrypt from 'bcryptjs';
 
 export async function POST(request: Request) {
   try {
-    const { username, password, plan, clinicName } = (await request.json()) as Omit<User, 'id' | 'clinicId'> & { password?: string, clinicName?: string };
+    const { username, password, plan, clinicName } = (await request.json()) as { username: string, password?: string, plan: Plan, clinicName: string };
 
     if (!password) {
       return NextResponse.json({ message: 'Password is required' }, { status: 400 });
@@ -20,7 +20,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Username already exists' }, { status: 409 });
     }
     
-    const newUser = await db.createUser({ username, password: password, plan, clinicName });
+    // The first user signing up for a clinic is an ADMIN
+    const newUser = await db.createUser({ 
+        username, 
+        password: password, 
+        role: 'ADMIN',
+        type: 'Otro', // Admins can be of any type, default to 'Other'
+        clinicName,
+        clinicPlan: plan,
+    });
 
     return NextResponse.json(newUser, { status: 201 });
 
@@ -30,5 +38,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: e.message || 'An error occurred during signup' }, { status: 500 });
   }
 }
-
-    

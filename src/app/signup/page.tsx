@@ -119,7 +119,7 @@ export default function SignupPage() {
                 <div className="space-y-4 pt-4 border-t">
                     <h3 className="text-lg font-semibold">Paso 2: Completa tu Registro</h3>
                      <div className="space-y-2">
-                        <Label htmlFor="username">Usuario</Label>
+                        <Label htmlFor="username">Tu Nombre de Usuario</Label>
                         <Input
                             id="username"
                             type="text"
@@ -131,7 +131,7 @@ export default function SignupPage() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="password">Contraseña</Label>
+                        <Label htmlFor="password">Tu Contraseña</Label>
                         <div className="relative">
                             <Input
                                 id="password"
@@ -189,5 +189,3 @@ export default function SignupPage() {
     </div>
   );
 }
-
-    
