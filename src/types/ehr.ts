@@ -1,9 +1,9 @@
 
-import type { Plan as PrismaPlan, Role as PrismaRole, UserType as PrismaUserType } from '@prisma/client';
+import type { Role as PrismaRole, UserType as PrismaUserType, Plan as PrismaPlan } from '@prisma/client';
 
-export type Plan = PrismaPlan;
 export type Role = PrismaRole;
 export type UserType = PrismaUserType;
+export type Plan = PrismaPlan;
 
 
 export interface User {

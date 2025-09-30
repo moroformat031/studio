@@ -42,7 +42,7 @@ const initializeDatabase = async () => {
 
         // --- Users (Admin, Doctors, Nurse) ---
         console.log("Creating users...");
-        const adminUser = await prisma.user.upsert({
+        await prisma.user.upsert({
             where: { username: 'admin' },
             update: {},
             create: {
@@ -78,7 +78,7 @@ const initializeDatabase = async () => {
             }
         });
 
-        const nurseJoy = await prisma.user.upsert({
+        await prisma.user.upsert({
             where: { username: 'Enfermera Joy' },
             update: {},
             create: {

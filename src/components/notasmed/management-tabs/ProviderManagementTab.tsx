@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plan, User, Clinic } from '@/types/ehr';
-import { PlusCircle, Building, User as UserIcon, Eye, EyeOff, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { Role, User, Clinic, UserType } from '@/types/ehr';
+import { PlusCircle, User as UserIcon, Eye, EyeOff, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -39,7 +39,7 @@ export function ProviderManagementTab() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [plan, setPlan] = useState<Plan>('Medico');
+    const [role, setRole] = useState<Role>('USER');
     const [clinicName, setClinicName] = useState('');
 
     // Delete confirmation
@@ -52,7 +52,7 @@ export function ProviderManagementTab() {
             const res = await fetch('/api/users');
             if(res.ok) {
                 const data = (await res.json()) as OmittedUser[];
-                setProviders(data.filter(u => u.plan === 'Medico' || u.plan === 'Admin'));
+                setProviders(data.filter(u => u.type === 'Doctor' || u.role === 'ADMIN'));
             } else {
                 throw new Error("Failed to fetch users");
             }
@@ -91,7 +91,7 @@ export function ProviderManagementTab() {
         setUsername('');
         setPassword('');
         setShowPassword(false);
-        setPlan('Medico');
+        setRole('USER');
         setClinicName('');
     }
 
@@ -99,7 +99,7 @@ export function ProviderManagementTab() {
         setIsEditing(true);
         setCurrentUser(user);
         setUsername(user.username);
-        setPlan(user.plan);
+        setRole(user.role);
         setClinicName(user.clinicName || '');
         setPassword(''); // Clear password field for security
     };
@@ -134,10 +134,6 @@ export function ProviderManagementTab() {
             toast({ variant: 'destructive', title: 'Clínica Requerida', description: 'Por favor, seleccione una clínica para el proveedor.'});
             return;
         }
-        if(!['Admin', 'Medico'].includes(plan)){
-            toast({ variant: 'destructive', title: 'Rol Inválido', description: 'Solo se pueden agregar roles de Medico o Admin desde esta pestaña.'});
-            return;
-        }
 
         setIsLoading(true);
 
@@ -146,7 +142,8 @@ export function ProviderManagementTab() {
 
         const body: Partial<User> & { password?: string, clinicName?: string } = {
             username,
-            plan,
+            role,
+            type: 'Doctor', // Providers are always Doctors in this context
             clinicName
         };
 
@@ -208,7 +205,7 @@ export function ProviderManagementTab() {
                                     providers.map(user => (
                                         <TableRow key={user.id}>
                                             <TableCell className="font-medium">{user.username}</TableCell>
-                                            <TableCell>{user.plan}</TableCell>
+                                            <TableCell>{user.role}</TableCell>
                                             <TableCell className="hidden md:table-cell">{user.clinicName || 'N/A'}</TableCell>
                                             <TableCell className="text-right">
                                                 <DropdownMenu>
@@ -267,14 +264,14 @@ export function ProviderManagementTab() {
                         </div>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="new-plan-provider">Rol/Plan</Label>
-                    <Select value={plan} onValueChange={(value: Plan) => setPlan(value)} required disabled={isLoading}>
-                        <SelectTrigger id="new-plan-provider">
-                            <SelectValue placeholder="Seleccionar plan" />
+                    <Label htmlFor="new-role-provider">Rol del Sistema</Label>
+                    <Select value={role} onValueChange={(value: Role) => setRole(value)} required disabled={isLoading}>
+                        <SelectTrigger id="new-role-provider">
+                            <SelectValue placeholder="Seleccionar rol" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Medico">Medico</SelectItem>
-                            <SelectItem value="Admin">Admin</SelectItem>
+                            <SelectItem value="ADMIN">Admin</SelectItem>
+                            <SelectItem value="USER">User</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
