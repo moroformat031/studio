@@ -16,13 +16,9 @@ interface PlanGateProps {
 export function PlanGate({ allowedPlans, children }: PlanGateProps) {
   const { user } = useAuth();
   
-  const hasAccess = user && allowedPlans.includes(user.plan);
+  const hasAccess = user && user.clinic && allowedPlans.includes(user.clinic.plan);
 
   if (!hasAccess) {
-    if (allowedPlans.includes('Admin')) {
-        return null;
-    }
-    
     return (
       <Card className="flex flex-col items-center justify-center text-center bg-muted/40">
         <CardHeader>

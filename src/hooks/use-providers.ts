@@ -40,7 +40,9 @@ export function useProviders() {
             }
         };
 
-        fetchProviders();
+        if(user?.clinicId) {
+            fetchProviders();
+        }
     }, [user, toast]);
 
     const doctors = useMemo(() => providers.filter(p => p.type === 'Doctor'), [providers]);
