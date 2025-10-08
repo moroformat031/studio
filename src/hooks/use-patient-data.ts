@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -11,34 +10,29 @@ export function usePatientData() {
     const [loading, setLoading] = useState(true);
 
     const fetchPatients = useCallback(async () => {
-        if (!user) { // Don't filter by clinic if admin, show all
-             const response = await fetch(`/api/patients/all`);
-              if (!response.ok) {
-                throw new Error('Failed to fetch patients');
-            }
-            const data = await response.json();
-            setPatients(data);
-            setLoading(false);
-            return;
-        };
-
-        if (!user?.clinicId) {
-            setPatients([]);
-            setLoading(false);
-            return;
-        }
-
+        setLoading(true);
         try {
-            setLoading(true);
-            const response = await fetch(`/api/patients?clinicId=${user.clinicId}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch patients');
+            // Fetch all patients if user is admin
+            if (user?.role === 'ADMIN') {
+                const response = await fetch(`/api/patients/all`);
+                if (!response.ok) throw new Error('Failed to fetch patients');
+                const data = await response.json();
+                setPatients(data);
             }
-            const data = await response.json();
-            setPatients(data);
+            // Fetch by clinic if user has clinicId
+            else if (user?.clinicId) {
+                const response = await fetch(`/api/patients?clinicId=${user.clinicId}`);
+                if (!response.ok) throw new Error('Failed to fetch patients');
+                const data = await response.json();
+                setPatients(data);
+            }
+            // No clinicId, no patients
+            else {
+                setPatients([]);
+            }
         } catch (error) {
             console.error(error);
-            // Handle error (e.g., show toast)
+            setPatients([]);
         } finally {
             setLoading(false);
         }
