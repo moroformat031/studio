@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { User, Role, UserType } from '@/types/ehr';
-import { PlusCircle, User as UserIcon, Eye, EyeOff } from 'lucide-react';
+import { PlusCircle, User as UserIcon, Eye, EyeOff, Mail } from 'lucide-react';
 
 type OmittedUser = Omit<User, 'password'>;
 
@@ -29,7 +29,10 @@ interface UserDialogProps {
 }
 
 export function UserDialog({ isOpen, onClose, onSave, user, isSaving, adminUser }: UserDialogProps) {
-    const [username, setUsername] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [paternalLastName, setPaternalLastName] = useState('');
+    const [maternalLastName, setMaternalLastName] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [role, setRole] = useState<Role>('USER');
@@ -38,12 +41,18 @@ export function UserDialog({ isOpen, onClose, onSave, user, isSaving, adminUser 
     useEffect(() => {
         if (isOpen) {
             if (user) {
-                setUsername(user.username);
+                setFirstName(user.firstName);
+                setPaternalLastName(user.paternalLastName);
+                setMaternalLastName(user.maternalLastName || '');
+                setEmail(user.email);
                 setRole(user.role);
                 setType(user.type);
                 setPassword('');
             } else {
-                setUsername('');
+                setFirstName('');
+                setPaternalLastName('');
+                setMaternalLastName('');
+                setEmail('');
                 setPassword('');
                 setShowPassword(false);
                 setRole('USER');
@@ -55,7 +64,10 @@ export function UserDialog({ isOpen, onClose, onSave, user, isSaving, adminUser 
 
     const handleSave = () => {
         const userData: Partial<User> & { password?: string } = {
-            username,
+            firstName,
+            paternalLastName,
+            maternalLastName,
+            email,
             role,
             type
         };
@@ -69,7 +81,7 @@ export function UserDialog({ isOpen, onClose, onSave, user, isSaving, adminUser 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
           <DialogTitle>{user ? 'Editar Empleado' : 'Agregar Nuevo Empleado'}</DialogTitle>
           <DialogDescription>
@@ -77,13 +89,29 @@ export function UserDialog({ isOpen, onClose, onSave, user, isSaving, adminUser 
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-           <div className="space-y-2">
-                <Label htmlFor="new-username">Nombre</Label>
-                <div className="relative">
-                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="new-username" value={username} onChange={e => setUsername(e.target.value)} required disabled={isSaving} className="pl-10" />
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="firstName-user">Nombre(s)</Label>
+                    <Input id="firstName-user" value={firstName} onChange={e => setFirstName(e.target.value)} required disabled={isSaving} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="paternalLastName-user">Apellido Paterno</Label>
+                    <Input id="paternalLastName-user" value={paternalLastName} onChange={e => setPaternalLastName(e.target.value)} required disabled={isSaving} />
                 </div>
             </div>
+            <div className="space-y-2">
+                <Label htmlFor="maternalLastName-user">Apellido Materno</Label>
+                <Input id="maternalLastName-user" value={maternalLastName} onChange={e => setMaternalLastName(e.target.value)} disabled={isSaving} />
+            </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="email-user">Correo Electrónico (para iniciar sesión)</Label>
+                <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="email-user" type="email" value={email} onChange={e => setEmail(e.target.value)} required disabled={isSaving} className="pl-10" />
+                </div>
+            </div>
+
             <div className="space-y-2">
                 <Label htmlFor="new-password">Contraseña</Label>
                 <div className="relative">

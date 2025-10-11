@@ -109,6 +109,8 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
 
         setIsScheduling(true);
         
+        const providerName = `${selectedProvider.firstName} ${selectedProvider.paternalLastName} ${selectedProvider.maternalLastName || ''}`.trim();
+        
         const dataToSend = 'id' in appointmentData ?
             // Editing existing
             { ...appointmentData, patientId: patient.id } :
@@ -116,8 +118,8 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
             {
                 ...appointmentData,
                 patientId: patient.id,
-                visitProvider: selectedProvider.username,
-                billingProvider: selectedProvider.username,
+                visitProvider: providerName,
+                billingProvider: providerName,
             };
 
         const url = 'id' in appointmentData ? `/api/appointments/${appointmentData.id}` : '/api/appointments';
@@ -134,10 +136,11 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
                 const { message } = await res.json();
                 throw new Error(message || 'No se pudo programar la cita.');
             }
+            const patientName = `${patient.firstName} ${patient.paternalLastName} ${patient.maternalLastName || ''}`.trim();
 
             toast({
                 title: `Cita ${'id' in appointmentData ? 'Actualizada' : 'Programada'}`,
-                description: `La cita para ${patient.name} ha sido guardada.`,
+                description: `La cita para ${patientName} ha sido guardada.`,
             });
             fetchScheduleData(); // Refresh schedule
             setIsAppointmentDialogOpen(false);
@@ -172,7 +175,10 @@ export function SchedulingTab({ patient }: SchedulingTabProps) {
         return slots;
     }, []);
 
-    const providerOptions = useMemo(() => doctors.map(p => ({ label: p.username, value: p.id })), [doctors]);
+    const getProviderName = (provider: { firstName: string; paternalLastName: string; maternalLastName?: string | null }) => {
+        return `${provider.firstName} ${provider.paternalLastName} ${provider.maternalLastName || ''}`.trim();
+    }
+    const providerOptions = useMemo(() => doctors.map(p => ({ label: getProviderName(p), value: p.id })), [doctors]);
     
     return (
         <>

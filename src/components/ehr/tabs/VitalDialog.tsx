@@ -28,6 +28,10 @@ export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps
     const { toast } = useToast();
     const { providers } = useProviders();
 
+    const getProviderName = (provider: { firstName: string; paternalLastName: string; maternalLastName?: string | null }) => {
+        return `${provider.firstName} ${provider.paternalLastName} ${provider.maternalLastName || ''}`.trim();
+    }
+
     const initialState = useMemo(() => ({
         date: new Date().toISOString().split('T')[0],
         hr: '',
@@ -93,7 +97,7 @@ export function VitalDialog({ isOpen, onClose, onSave, vital }: VitalDialogProps
         setFormData(prev => ({ ...prev, [id]: value }));
     }
     
-    const providerOptions = useMemo(() => providers.map(p => ({label: p.username, value: p.username})), [providers]);
+    const providerOptions = useMemo(() => providers.map(p => ({label: getProviderName(p), value: getProviderName(p)})), [providers]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

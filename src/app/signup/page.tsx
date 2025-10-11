@@ -18,8 +18,11 @@ import { Input } from '@/components/ui/input';
 export default function SignupPage() {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [paternalLastName, setPaternalLastName] = useState('');
+  const [maternalLastName, setMaternalLastName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [clinicName, setClinicName] = useState('');
 
@@ -48,9 +51,9 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      await signup(username, password, selectedPlan, clinicName);
+      await signup({ email, password, plan: selectedPlan, clinicName, firstName, paternalLastName, maternalLastName });
       // Automatically log the user in after successful signup
-      await login(username, password);
+      await login(email, password);
       toast({
         title: "¡Cuenta Creada!",
         description: `Bienvenido a NotasMed. Tu cuenta ha sido creada exitosamente.`,
@@ -118,17 +121,48 @@ export default function SignupPage() {
             {selectedPlan && (
                 <div className="space-y-4 pt-4 border-t">
                     <h3 className="text-lg font-semibold">Paso 2: Completa tu Registro</h3>
-                     <div className="space-y-2">
-                        <Label htmlFor="username">Tu Nombre de Usuario</Label>
-                        <Input
-                            id="username"
-                            type="text"
-                            placeholder="p.ej. drasmith"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                            disabled={isLoading}
-                        />
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div className="space-y-2">
+                            <Label htmlFor="firstName">Nombre(s)</Label>
+                            <Input
+                                id="firstName"
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                                required
+                                disabled={isLoading}
+                            />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="paternalLastName">Apellido Paterno</Label>
+                            <Input
+                                id="paternalLastName"
+                                value={paternalLastName}
+                                onChange={(e) => setPaternalLastName(e.target.value)}
+                                required
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="maternalLastName">Apellido Materno</Label>
+                            <Input
+                                id="maternalLastName"
+                                value={maternalLastName}
+                                onChange={(e) => setMaternalLastName(e.target.value)}
+                                disabled={isLoading}
+                            />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="email">Correo Electrónico</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="tu@correo.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                disabled={isLoading}
+                            />
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="password">Tu Contraseña</Label>

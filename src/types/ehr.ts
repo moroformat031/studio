@@ -8,7 +8,10 @@ export type Plan = PrismaPlan;
 
 export interface User {
   id: string;
-  username: string;
+  email: string;
+  firstName: string;
+  paternalLastName: string;
+  maternalLastName: string | null;
   password?: string;
   role: Role;
   type: UserType;
@@ -71,8 +74,8 @@ export interface Appointment {
     time: string; // HH:mm
     reason: string;
     status: 'Programada' | 'Completada' | 'Cancelada';
-    visitProvider: string; // User ID
-    billingProvider: string; // User ID
+    visitProvider: string; // provider full name
+    billingProvider: string; // provider full name
 }
 
 export interface Procedure {
@@ -94,7 +97,9 @@ export interface Demographics {
 
 export interface Patient {
     id: string;
-    name: string;
+    firstName: string;
+    paternalLastName: string;
+    maternalLastName: string | null;
     demographics: Demographics;
     vitals: Vital[];
     medications: Medication[];

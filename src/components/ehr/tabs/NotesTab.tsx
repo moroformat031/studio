@@ -36,7 +36,11 @@ export function NotesTab({ patient, onAddNote }: NotesTabProps) {
         setIsCreatingNote(true);
     }
     
-    const providerOptions = useMemo(() => providers.map(p => ({label: p.username, value: p.username})), [providers]);
+    const getProviderName = (provider: { firstName: string; paternalLastName: string; maternalLastName?: string | null }) => {
+        return `${provider.firstName} ${provider.paternalLastName} ${provider.maternalLastName || ''}`.trim();
+    }
+    
+    const providerOptions = useMemo(() => providers.map(p => ({label: getProviderName(p), value: getProviderName(p)})), [providers]);
 
     return (
         <Card>

@@ -31,6 +31,10 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment, select
     const { toast } = useToast();
     const { doctors, loading: loadingProviders } = useProviders();
 
+    const getProviderName = (provider: { firstName: string; paternalLastName: string; maternalLastName?: string | null }) => {
+        return `${provider.firstName} ${provider.paternalLastName} ${provider.maternalLastName || ''}`.trim();
+    }
+
     const getInitialState = useCallback(() => {
         const baseState = {
             date: new Date().toISOString().split('T')[0],
@@ -48,8 +52,9 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment, select
             baseState.time = selectedTime;
         }
         if (doctors.length > 0) {
-            baseState.visitProvider = doctors[0].username;
-            baseState.billingProvider = doctors[0].username;
+            const providerName = getProviderName(doctors[0]);
+            baseState.visitProvider = providerName;
+            baseState.billingProvider = providerName;
         }
 
         return baseState;
@@ -93,10 +98,7 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment, select
     }
     
     const handleSelectChange = (id: string, value: string) => {
-        const selectedDoctor = doctors.find(d => d.username === value);
-        if(selectedDoctor){
-            setFormData(prev => ({ ...prev, [id]: selectedDoctor.username }));
-        }
+        setFormData(prev => ({ ...prev, [id]: value }));
     }
 
 
@@ -104,7 +106,7 @@ export function AppointmentDialog({ isOpen, onClose, onSave, appointment, select
         setFormData(prev => ({ ...prev, status: value }));
     }
     
-    const providerOptions = useMemo(() => doctors.map(p => ({label: p.username, value: p.username})), [doctors]);
+    const providerOptions = useMemo(() => doctors.map(p => ({label: getProviderName(p), value: getProviderName(p)})), [doctors]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

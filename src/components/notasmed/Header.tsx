@@ -21,6 +21,16 @@ export function Header() {
   const { user, logout } = useAuth();
   const [isManagementOpen, setIsManagementOpen] = useState(false);
 
+  const getUsername = () => {
+    if (!user) return '';
+    return `${user.firstName} ${user.paternalLastName}`.trim();
+  }
+
+  const getInitials = () => {
+    if (!user) return '';
+    return `${user.firstName.charAt(0)}${user.paternalLastName.charAt(0)}`.toUpperCase();
+  }
+
   return (
     <>
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -51,19 +61,22 @@ export function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="cursor-pointer h-9 w-9">
-                <AvatarImage src={`https://placehold.co/100x100.png`} alt={user?.username} />
-                <AvatarFallback>{user?.username.charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarImage src={`https://placehold.co/100x100.png`} alt={getUsername()} />
+                <AvatarFallback>{getInitials()}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user?.username}</p>
+                  <p className="text-sm font-medium leading-none">{getUsername()}</p>
                    {user?.clinicName && (
                      <p className="text-xs leading-none text-muted-foreground flex items-center gap-1">
                         <Building className="h-3 w-3" />
                         {user.clinicName}
                     </p>
+                  )}
+                  {user?.email && (
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                   )}
                   <p className="text-xs leading-none text-muted-foreground">Rol: {user?.role}</p>
                 </div>

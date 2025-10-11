@@ -5,8 +5,8 @@ import bcrypt from 'bcryptjs';
 
 export async function POST(request: Request) {
   try {
-    const { username, password } = await request.json();
-    const user = await db.findUser(username);
+    const { email, password } = await request.json();
+    const user = await db.findUserByEmail(email);
 
     if (user && user.password && await bcrypt.compare(password, user.password)) {
       const { password: _, ...userWithoutPassword } = user;
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       });
 
       // Simple token simulation
-      const token = Buffer.from(JSON.stringify({ username: user.username, timestamp: Date.now() })).toString('base64');
+      const token = Buffer.from(JSON.stringify({ email: user.email, timestamp: Date.now() })).toString('base64');
       response.cookies.set('auth_token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       return response;
     }
 
-    return NextResponse.json({ message: 'Invalid username or password' }, { status: 401 });
+    return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json({ message: 'An error occurred' }, { status: 500 });

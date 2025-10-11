@@ -18,17 +18,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: Request) {
   try {
-    const { username, password, role, type, clinicName } = (await request.json()) as { username: string, password?: string, role: Role, type: UserType, clinicName: string };
+    const { email, password, role, type, clinicName, firstName, paternalLastName, maternalLastName } = (await request.json()) as { email: string, password?: string, role: Role, type: UserType, clinicName: string, firstName: string, paternalLastName: string, maternalLastName: string };
 
-    if (!username || !password || !role || !type || !clinicName) {
-         return NextResponse.json({ message: 'Username, password, role, type, and clinic name are required' }, { status: 400 });
+    if (!email || !password || !role || !type || !clinicName || !firstName || !paternalLastName) {
+         return NextResponse.json({ message: 'All fields are required.' }, { status: 400 });
     }
     
-    if (await db.findUser(username)) {
-       return NextResponse.json({ message: 'Username already exists' }, { status: 409 });
+    if (await db.findUserByEmail(email)) {
+       return NextResponse.json({ message: 'Email already exists' }, { status: 409 });
     }
 
-    const newUser = await db.createUser({ username, password, role, type, clinicName });
+    const newUser = await db.createUser({ email, password, role, type, clinicName, firstName, paternalLastName, maternalLastName });
     
     const { password: _, ...userWithoutPassword } = newUser;
 

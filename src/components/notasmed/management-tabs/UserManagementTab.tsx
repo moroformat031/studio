@@ -40,6 +40,10 @@ export function UserManagementTab() {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState<OmittedUser | null>(null);
 
+    const getUserName = (user: OmittedUser) => {
+        return `${user.firstName} ${user.paternalLastName} ${user.maternalLastName || ''}`.trim();
+    }
+
     const fetchUsers = async () => {
         if (!adminUser?.clinicId) return;
         setIsLoading(true);
@@ -92,7 +96,7 @@ export function UserManagementTab() {
                 const { message } = await response.json();
                 throw new Error(message);
             }
-            toast({ title: 'Usuario Eliminado', description: `El usuario ${userToDelete.username} ha sido eliminado.` });
+            toast({ title: 'Usuario Eliminado', description: `El usuario ${getUserName(userToDelete)} ha sido eliminado.` });
             fetchUsers();
         } catch (error) {
             const e = error as Error;
@@ -130,7 +134,7 @@ export function UserManagementTab() {
             }
             toast({
                 title: `Empleado ${currentUser ? 'Actualizado' : 'Agregado'}`,
-                description: `El empleado ${userData.username} ha sido ${currentUser ? 'actualizado' : 'creado'}.`
+                description: `El empleado ${userData.firstName} ${userData.paternalLastName} ha sido ${currentUser ? 'actualizado' : 'creado'}.`
             });
             setIsUserDialogOpen(false);
             fetchUsers();
@@ -174,7 +178,7 @@ export function UserManagementTab() {
                                 ) : users.length > 0 ? (
                                     users.map(user => (
                                         <TableRow key={user.id}>
-                                            <TableCell className="font-medium">{user.username}</TableCell>
+                                            <TableCell className="font-medium">{getUserName(user)}</TableCell>
                                             <TableCell>{user.type}</TableCell>
                                             <TableCell className="hidden md:table-cell">{user.role}</TableCell>
                                             <TableCell className="text-right">
@@ -223,7 +227,7 @@ export function UserManagementTab() {
                 <AlertDialogHeader>
                 <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                 <AlertDialogDescription>
-                    Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario <span className="font-bold">{userToDelete?.username}</span> y todos sus datos asociados.
+                    Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario <span className="font-bold">{userToDelete ? getUserName(userToDelete) : ''}</span> y todos sus datos asociados.
                 </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

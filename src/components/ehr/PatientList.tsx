@@ -11,6 +11,13 @@ interface PatientListProps {
     onSelectPatient: (id: string) => void;
 }
 
+const getPatientName = (patient: Patient) => {
+    return `${patient.firstName} ${patient.paternalLastName} ${patient.maternalLastName || ''}`.trim();
+}
+const getInitials = (patient: Patient) => {
+    return `${patient.firstName.charAt(0)}${patient.paternalLastName.charAt(0)}`;
+}
+
 export function PatientList({ patients, selectedPatientId, onSelectPatient }: PatientListProps) {
     return (
         <Card>
@@ -29,10 +36,10 @@ export function PatientList({ patients, selectedPatientId, onSelectPatient }: Pa
                         >
                             <Avatar>
                                 <AvatarImage src={`https://placehold.co/100x100.png`} data-ai-hint="person" />
-                                <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>{getInitials(patient)}</AvatarFallback>
                             </Avatar>
                             <div className="flex-1 truncate">
-                                <p className="font-semibold truncate">{patient.name}</p>
+                                <p className="font-semibold truncate">{getPatientName(patient)}</p>
                                 <p className={cn("text-xs truncate", selectedPatientId === patient.id ? 'text-primary-foreground/80' : 'text-muted-foreground')}>
                                     FDN: {patient.demographics.dob}
                                 </p>
