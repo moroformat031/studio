@@ -215,11 +215,11 @@ const initializeDatabase = async () => {
 
         await prisma.masterProcedure.createMany({
             data: [
-                { name: 'Consulta General' },
-                { name: 'Consulta de Especialidad' },
-                { name: 'Radiografía de Tórax' },
-                { name: 'Análisis de Sangre Completo' },
-                { name: 'Sutura de Herida Simple' }
+                { code: 'G001', name: 'Consulta General' },
+                { code: 'E012', name: 'Consulta de Especialidad' },
+                { code: 'X-998', name: 'Radiografía de Tórax' },
+                { code: 'L4B-4', name: 'Análisis de Sangre Completo' },
+                { code: 'S-WND', name: 'Sutura de Herida Simple' }
             ],
             skipDuplicates: true
         });
@@ -267,8 +267,9 @@ export const db = {
         });
         if (!user) return null;
         const { clinic, ...rest } = user;
+        const fullName = `${rest.firstName} ${rest.paternalLastName} ${rest.maternalLastName || ''}`.trim();
         return { 
-            ...rest, 
+            ...rest,
             clinicName: clinic?.name || '',
             clinic: clinic ? { ...clinic, plan: clinic.plan as Plan } : undefined
         };
@@ -473,7 +474,10 @@ export const db = {
     },
 
     // --- Appointment operations ---
-    getAppointmentsForProviderOnDate: async (providerName: string, date: string): Promise<Appointment[]> => {
+    getAppointmentsForProviderOnDate: async (providerId: string, date: string): Promise<Appointment[]> => {
+        const provider = await db.findUserById(providerId);
+        if (!provider) return [];
+        const providerName = `${provider.firstName} ${provider.paternalLastName} ${provider.maternalLastName || ''}`.trim();
         const appointments = await prisma.appointment.findMany({
             where: {
                 visitProvider: providerName,
@@ -541,10 +545,10 @@ export const db = {
     getAllMasterProcedures: async (): Promise<MasterProcedure[]> => {
         return prisma.masterProcedure.findMany({ orderBy: { name: 'asc' } });
     },
-    createMasterProcedure: async (data: { name: string }): Promise<MasterProcedure> => {
+    createMasterProcedure: async (data: { code: string, name: string }): Promise<MasterProcedure> => {
         return prisma.masterProcedure.create({ data });
     },
-    updateMasterProcedure: async (id: string, data: { name: string }): Promise<MasterProcedure> => {
+    updateMasterProcedure: async (id: string, data: { code: string, name: string }): Promise<MasterProcedure> => {
         return prisma.masterProcedure.update({ where: { id }, data });
     },
     deleteMasterProcedure: async (id: string): Promise<boolean> => {

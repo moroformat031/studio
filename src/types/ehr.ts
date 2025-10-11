@@ -117,5 +117,6 @@ export interface MasterMedication {
 
 export interface MasterProcedure {
     id: string;
+    code: string;
     name: string;
 }

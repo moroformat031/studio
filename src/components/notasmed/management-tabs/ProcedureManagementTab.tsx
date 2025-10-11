@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MasterItemDialog } from './MasterItemDialog';
+import { ProcedureDialog } from './ProcedureDialog';
 
 export function ProcedureManagementTab() {
     const { toast } = useToast();
@@ -92,16 +92,16 @@ export function ProcedureManagementTab() {
         }
     };
 
-    const handleSave = async (itemName: string) => {
-        if (!itemName.trim()) {
-            toast({ variant: 'destructive', title: 'Nombre Requerido', description: 'El nombre del procedimiento no puede estar vacío.' });
+    const handleSave = async (itemData: { code: string, name: string }) => {
+        if (!itemData.code.trim() || !itemData.name.trim()) {
+            toast({ variant: 'destructive', title: 'Campos Requeridos', description: 'El código y el nombre del procedimiento no pueden estar vacíos.' });
             return;
         }
         setIsSaving(true);
 
         const url = currentItem ? `/api/master-data/procedures/${currentItem.id}` : '/api/master-data/procedures';
         const method = currentItem ? 'PUT' : 'POST';
-        const body = { name: itemName };
+        const body = { code: itemData.code, name: itemData.name };
 
         try {
             const response = await fetch(url, {
@@ -115,7 +115,7 @@ export function ProcedureManagementTab() {
             }
             toast({
                 title: `Procedimiento ${currentItem ? 'Actualizado' : 'Agregado'}`,
-                description: `El procedimiento ${itemName} ha sido ${currentItem ? 'actualizado' : 'creado'}.`
+                description: `El procedimiento ${itemData.name} ha sido ${currentItem ? 'actualizado' : 'creado'}.`
             });
             setIsDialogOpen(false);
             fetchProcedures();
@@ -147,16 +147,18 @@ export function ProcedureManagementTab() {
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead>Código</TableHead>
                                 <TableHead>Nombre del Procedimiento</TableHead>
                                 <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {isLoading ? (
-                                    <TableRow><TableCell colSpan={2} className="text-center">Cargando...</TableCell></TableRow>
+                                    <TableRow><TableCell colSpan={3} className="text-center">Cargando...</TableCell></TableRow>
                                 ) : procedures.length > 0 ? (
                                     procedures.map(proc => (
                                         <TableRow key={proc.id}>
+                                            <TableCell className="font-mono">{proc.code}</TableCell>
                                             <TableCell className="font-medium">{proc.name}</TableCell>
                                             <TableCell className="text-right">
                                                 <DropdownMenu>
@@ -181,7 +183,7 @@ export function ProcedureManagementTab() {
                                         </TableRow>
                                     ))
                                 ) : (
-                                    <TableRow><TableCell colSpan={2} className="text-center">No hay procedimientos.</TableCell></TableRow>
+                                    <TableRow><TableCell colSpan={3} className="text-center">No hay procedimientos.</TableCell></TableRow>
                                 )}
                         </TableBody>
                     </Table>
@@ -190,14 +192,12 @@ export function ProcedureManagementTab() {
         </Card>
     </div>
 
-    <MasterItemDialog
+    <ProcedureDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onSave={handleSave}
         item={currentItem}
         isSaving={isSaving}
-        itemName="Procedimiento"
-        itemIcon="Stethoscope"
     />
 
     <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

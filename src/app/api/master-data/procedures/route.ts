@@ -14,13 +14,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { name } = await request.json() as { name: string };
+    const { code, name } = await request.json() as { code: string, name: string };
 
-    if (!name) {
-         return NextResponse.json({ message: 'Name is required' }, { status: 400 });
+    if (!code || !name) {
+         return NextResponse.json({ message: 'Code and name are required' }, { status: 400 });
     }
 
-    const newProc = await db.createMasterProcedure({ name });
+    const newProc = await db.createMasterProcedure({ code, name });
 
     return NextResponse.json(newProc, { status: 201 });
 
