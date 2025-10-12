@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PatientDialog } from './PatientDialog';
+import { usePatientData } from '@/hooks/use-patient-data';
 
 
 export function PatientManagementTab() {
@@ -57,7 +58,7 @@ export function PatientManagementTab() {
         }
     }
 
-    const fetchPatients = useCallback(async () => {
+    const fetchPatientsLocal = useCallback(async () => {
         setIsLoading(true);
         try {
             const clinicsData = await fetchClinics();
@@ -81,9 +82,24 @@ export function PatientManagementTab() {
         }
     }, [toast]);
 
+    const { fetchPatients, addPatient, patients: globalPatients } = usePatientData();
+
     useEffect(() => {
-        fetchPatients();
+        // load clinics then ensure global patients are fetched on mount
+        (async () => {
+            await fetchClinics();
+            fetchPatients();
+        })();
     }, [fetchPatients]);
+
+    // map global patients into the local table (adds clinicName)
+    useEffect(() => {
+        const mapped = (globalPatients || []).map(p => ({
+            ...p,
+            clinicName: clinics.find((c: Clinic) => c.id === p.clinicId)?.name || 'N/A'
+        }));
+        setPatients(mapped);
+    }, [globalPatients, clinics]);
 
     const handleAddClick = () => {
         setCurrentPatient(null);
@@ -109,7 +125,10 @@ export function PatientManagementTab() {
                 throw new Error(message);
             }
             toast({ title: 'Paciente Eliminado', description: `El paciente ${patientToDelete.firstName} ${patientToDelete.paternalLastName} ha sido eliminado.` });
+            // refresh global list so EHRApp and combobox update
             fetchPatients();
+            // notify other parts of the app (in case hooks/components need to react)
+            window.dispatchEvent(new CustomEvent('patients:changed'));
         } catch (error) {
             const e = error as Error;
             toast({ variant: 'destructive', title: 'Error al Eliminar', description: e.message });
@@ -125,6 +144,18 @@ export function PatientManagementTab() {
         const method = currentPatient ? 'PUT' : 'POST';
 
         try {
+            if (!currentPatient && addPatient) {
+                const created = await addPatient(patientData as Omit<Patient, 'id'>);
+                toast({
+                    title: `Paciente Agregado`,
+                    description: `El paciente ${created.firstName} ${created.paternalLastName} ha sido creado.`
+                });
+                setIsPatientDialogOpen(false);
+                // notify other parts of the app (in case hooks/components need to react)
+                window.dispatchEvent(new CustomEvent('patients:changed'));
+                return;
+            }
+
             const response = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
@@ -139,7 +170,10 @@ export function PatientManagementTab() {
                 description: `El paciente ${patientData.firstName} ${patientData.paternalLastName} ha sido ${currentPatient ? 'actualizado' : 'creado'}.`
             });
             setIsPatientDialogOpen(false);
+            // refresh global list so EHRApp and combobox update
             fetchPatients();
+            // notify other parts of the app (in case hooks/components need to react)
+            window.dispatchEvent(new CustomEvent('patients:changed'));
         } catch (error) {
             const e = error as Error;
             toast({
@@ -181,39 +215,39 @@ export function PatientManagementTab() {
                             </TableHeader>
                             <TableBody>
                                 {isLoading ? (
-                                        <TableRow><TableCell colSpan={5} className="text-center">Cargando...</TableCell></TableRow>
-                                    ) : patients.length > 0 ? (
-                                        patients.map(patient => (
-                                            <TableRow key={patient.id}>
-                                                <TableCell className="font-medium">{getPatientName(patient)}</TableCell>
-                                                <TableCell>{patient.clinicName}</TableCell>
-                                                <TableCell className="hidden md:table-cell">{patient.demographics.dob}</TableCell>
-                                                <TableCell className="hidden md:table-cell">{patient.demographics.gender}</TableCell>
-                                                <TableCell className="text-right">
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                                                <span className="sr-only">Abrir menú</span>
-                                                                <MoreHorizontal className="h-4 w-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                            <DropdownMenuItem onClick={() => handleEditClick(patient)}>
-                                                                <Edit className="mr-2 h-4 w-4" />
-                                                                <span>Editar</span>
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem onClick={() => handleDeleteClick(patient)} className="text-destructive">
-                                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                                <span>Eliminar</span>
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    ) : (
-                                        <TableRow><TableCell colSpan={5} className="text-center">No hay pacientes.</TableCell></TableRow>
-                                    )}
+                                    <TableRow><TableCell colSpan={5} className="text-center">Cargando...</TableCell></TableRow>
+                                ) : (globalPatients && globalPatients.length > 0) ? (
+                                    (globalPatients || []).map(patient => (
+                                        <TableRow key={patient.id}>
+                                            <TableCell className="font-medium">{getPatientName(patient)}</TableCell>
+                                            <TableCell>{clinics.find((c: Clinic) => c.id === patient.clinicId)?.name || 'N/A'}</TableCell>
+                                            <TableCell className="hidden md:table-cell">{patient.demographics?.dob}</TableCell>
+                                            <TableCell className="hidden md:table-cell">{patient.demographics?.gender}</TableCell>
+                                            <TableCell className="text-right">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                                            <span className="sr-only">Abrir menú</span>
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onClick={() => handleEditClick(patient)}>
+                                                            <Edit className="mr-2 h-4 w-4" />
+                                                            <span>Editar</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleDeleteClick(patient)} className="text-destructive">
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            <span>Eliminar</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow><TableCell colSpan={5} className="text-center">No hay pacientes.</TableCell></TableRow>
+                                )}
                             </TableBody>
                         </Table>
                     </ScrollArea>
