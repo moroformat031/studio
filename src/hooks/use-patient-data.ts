@@ -42,6 +42,12 @@ export function usePatientData() {
         fetchPatients();
     }, [fetchPatients]);
 
+    useEffect(() => {
+        const handler = () => fetchPatients();
+        window.addEventListener('patients:changed', handler as EventListener);
+        return () => window.removeEventListener('patients:changed', handler as EventListener);
+    }, [fetchPatients]);
+
     const getPatient = useCallback((id: string | null) => {
         if (!id) return null;
         return patients.find(p => p.id === id) || null;
