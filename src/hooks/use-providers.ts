@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { User } from '@/types/ehr';
-import { useAuth } from './AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { useToast } from './use-toast';
 
 export function useProviders() {
