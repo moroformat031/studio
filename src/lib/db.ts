@@ -43,10 +43,12 @@ const initializeDatabase = async () => {
         // --- Users (Admin, Doctors, Nurse) ---
         console.log("Creating users...");
         await prisma.user.upsert({
-            where: { username: 'admin' },
+            where: { email: 'admin@notasmed.com' },
             update: {},
             create: {
-                username: 'admin',
+                email: 'admin@notasmed.com',
+                firstName: 'Admin',
+                paternalLastName: 'User',
                 password: await bcrypt.hash('code', 10),
                 role: 'ADMIN',
                 type: 'Otro',
@@ -55,10 +57,12 @@ const initializeDatabase = async () => {
         });
 
         const draGarcia = await prisma.user.upsert({
-            where: { username: 'Dra. Elena Garcia' },
+            where: { email: 'elena.garcia@notasmed.com' },
             update: {},
             create: {
-                username: 'Dra. Elena Garcia',
+                email: 'elena.garcia@notasmed.com',
+                firstName: 'Elena',
+                paternalLastName: 'Garcia',
                 password: await bcrypt.hash('code', 10),
                 role: 'USER',
                 type: 'Doctor',
@@ -67,10 +71,12 @@ const initializeDatabase = async () => {
         });
         
         const drMartinez = await prisma.user.upsert({
-            where: { username: 'Dr. Carlos Martinez' },
+            where: { email: 'carlos.martinez@notasmed.com' },
             update: {},
             create: {
-                username: 'Dr. Carlos Martinez',
+                email: 'carlos.martinez@notasmed.com',
+                firstName: 'Carlos',
+                paternalLastName: 'Martinez',
                 password: await bcrypt.hash('code', 10),
                 role: 'USER',
                 type: 'Doctor',
@@ -79,10 +85,12 @@ const initializeDatabase = async () => {
         });
 
         await prisma.user.upsert({
-            where: { username: 'Enfermera Joy' },
+            where: { email: 'joy@notasmed.com' },
             update: {},
             create: {
-                username: 'Enfermera Joy',
+                email: 'joy@notasmed.com',
+                firstName: 'Joy',
+                paternalLastName: 'Enfermera',
                 password: await bcrypt.hash('code', 10),
                 role: 'USER',
                 type: 'Enfermera',
@@ -109,7 +117,9 @@ const initializeDatabase = async () => {
         console.log("Creating patients...");
         const patient1 = await prisma.patient.create({
             data: {
-                name: 'Ana Pérez',
+                firstName: 'Ana',
+                paternalLastName: 'Pérez',
+                maternalLastName: 'García',
                 dob: new Date('1985-05-15'),
                 gender: 'Femenino',
                 address: 'Calle Falsa 123',
@@ -120,7 +130,9 @@ const initializeDatabase = async () => {
         });
         const patient2 = await prisma.patient.create({
              data: {
-                name: 'Juan Rodríguez',
+                firstName: 'Juan',
+                paternalLastName: 'Rodríguez',
+                maternalLastName: 'López',
                 dob: new Date('1990-08-20'),
                 gender: 'Masculino',
                 address: 'Avenida Siempreviva 742',
@@ -131,7 +143,9 @@ const initializeDatabase = async () => {
         });
          const patient3 = await prisma.patient.create({
             data: {
-                name: 'Luisa Gomez',
+                firstName: 'Luisa',
+                paternalLastName: 'Gomez',
+                maternalLastName: 'Hernández',
                 dob: new Date('1978-11-30'),
                 gender: 'Femenino',
                 address: 'Boulevard de los Sueños Rotos 100',
@@ -149,6 +163,10 @@ const initializeDatabase = async () => {
         if (nextMonday < today) nextMonday.setDate(nextMonday.getDate() + 7);
         const nextTuesday = new Date(nextMonday);
         nextTuesday.setDate(nextMonday.getDate() + 1);
+        
+        const draGarciaName = `${draGarcia.firstName} ${draGarcia.paternalLastName}`;
+        const drMartinezName = `${drMartinez.firstName} ${drMartinez.paternalLastName}`;
+
 
         await prisma.appointment.createMany({
             data: [
@@ -158,8 +176,8 @@ const initializeDatabase = async () => {
                     time: '10:00',
                     reason: 'Consulta de seguimiento',
                     status: 'Programada',
-                    visitProvider: draGarcia.username,
-                    billingProvider: draGarcia.username,
+                    visitProvider: draGarciaName,
+                    billingProvider: draGarciaName,
                 },
                  {
                     patientId: patient2.id,
@@ -167,8 +185,8 @@ const initializeDatabase = async () => {
                     time: '11:30',
                     reason: 'Revisión anual',
                     status: 'Programada',
-                    visitProvider: draGarcia.username,
-                    billingProvider: draGarcia.username,
+                    visitProvider: draGarciaName,
+                    billingProvider: draGarciaName,
                 },
                 {
                     patientId: patient3.id,
@@ -176,8 +194,8 @@ const initializeDatabase = async () => {
                     time: '09:00',
                     reason: 'Dolor de cabeza crónico',
                     status: 'Programada',
-                    visitProvider: drMartinez.username,
-                    billingProvider: drMartinez.username,
+                    visitProvider: drMartinezName,
+                    billingProvider: drMartinezName,
                 }
             ]
         });
@@ -197,11 +215,11 @@ const initializeDatabase = async () => {
 
         await prisma.masterProcedure.createMany({
             data: [
-                { name: 'Consulta General' },
-                { name: 'Consulta de Especialidad' },
-                { name: 'Radiografía de Tórax' },
-                { name: 'Análisis de Sangre Completo' },
-                { name: 'Sutura de Herida Simple' }
+                { code: 'G001', name: 'Consulta General' },
+                { code: 'E012', name: 'Consulta de Especialidad' },
+                { code: 'X-998', name: 'Radiografía de Tórax' },
+                { code: 'L4B-4', name: 'Análisis de Sangre Completo' },
+                { code: 'S-WND', name: 'Sutura de Herida Simple' }
             ],
             skipDuplicates: true
         });
@@ -229,9 +247,9 @@ export const db = {
             clinic: clinic ? { ...clinic, plan: clinic.plan as Plan } : undefined
         }));
     },
-    findUser: async (username: string): Promise<User | null> => {
+    findUserByEmail: async (email: string): Promise<User | null> => {
         const user = await prisma.user.findUnique({
-            where: { username },
+            where: { email },
             include: { clinic: true },
         });
         if (!user) return null;
@@ -249,16 +267,17 @@ export const db = {
         });
         if (!user) return null;
         const { clinic, ...rest } = user;
+        const fullName = `${rest.firstName} ${rest.paternalLastName} ${rest.maternalLastName || ''}`.trim();
         return { 
-            ...rest, 
+            ...rest,
             clinicName: clinic?.name || '',
             clinic: clinic ? { ...clinic, plan: clinic.plan as Plan } : undefined
         };
     },
-    createUser: async (userData: { username: string, password?: string, role: Role, type: UserType, clinicName: string, clinicPlan?: Plan }): Promise<Omit<User, 'password'>> => {
-        const existingUser = await db.findUser(userData.username);
+    createUser: async (userData: { email: string, password?: string, role: Role, type: UserType, clinicName: string, clinicPlan?: Plan, firstName: string, paternalLastName: string, maternalLastName?: string }): Promise<Omit<User, 'password'>> => {
+        const existingUser = await db.findUserByEmail(userData.email);
         if (existingUser) {
-            throw new Error('Username already exists');
+            throw new Error('Email already exists');
         }
 
         if (!userData.clinicName) {
@@ -274,20 +293,20 @@ export const db = {
 
         const newUser = await prisma.user.create({
             data: {
-                username: userData.username,
+                email: userData.email,
                 password: hashedPassword,
                 role: userData.role,
                 type: userData.type,
                 clinicId: clinic.id,
+                firstName: userData.firstName,
+                paternalLastName: userData.paternalLastName,
+                maternalLastName: userData.maternalLastName
             }
         });
 
+        const { password, ...userWithoutPassword } = newUser;
         return {
-            id: newUser.id,
-            username: newUser.username,
-            role: newUser.role,
-            type: newUser.type,
-            clinicId: clinic.id,
+            ...userWithoutPassword,
             clinicName: clinic.name,
             clinic: { ...clinic, plan: clinic.plan as Plan }
         };
@@ -385,10 +404,12 @@ export const db = {
         };
     },
     addPatient: async (patientData: Omit<Patient, 'id'>): Promise<Patient> => {
-        const { name, demographics, clinicId } = patientData;
+        const { firstName, paternalLastName, maternalLastName, demographics, clinicId } = patientData;
         const newPatient = await prisma.patient.create({
             data: {
-                name,
+                firstName,
+                paternalLastName,
+                maternalLastName,
                 dob: new Date(demographics.dob),
                 gender: demographics.gender,
                 address: demographics.address,
@@ -453,13 +474,13 @@ export const db = {
     },
 
     // --- Appointment operations ---
-    getAppointmentsForProviderOnDate: async (providerUsername: string, date: string): Promise<Appointment[]> => {
-        const provider = await db.findUser(providerUsername);
-        if(!provider) return [];
-        
+    getAppointmentsForProviderOnDate: async (providerId: string, date: string): Promise<Appointment[]> => {
+        const provider = await db.findUserById(providerId);
+        if (!provider) return [];
+        const providerName = `${provider.firstName} ${provider.paternalLastName} ${provider.maternalLastName || ''}`.trim();
         const appointments = await prisma.appointment.findMany({
             where: {
-                visitProvider: provider.username,
+                visitProvider: providerName,
                 date: new Date(`${date}T00:00:00Z`)
             }
         });
@@ -524,10 +545,10 @@ export const db = {
     getAllMasterProcedures: async (): Promise<MasterProcedure[]> => {
         return prisma.masterProcedure.findMany({ orderBy: { name: 'asc' } });
     },
-    createMasterProcedure: async (data: { name: string }): Promise<MasterProcedure> => {
+    createMasterProcedure: async (data: { code: string, name: string }): Promise<MasterProcedure> => {
         return prisma.masterProcedure.create({ data });
     },
-    updateMasterProcedure: async (id: string, data: { name: string }): Promise<MasterProcedure> => {
+    updateMasterProcedure: async (id: string, data: { code: string, name: string }): Promise<MasterProcedure> => {
         return prisma.masterProcedure.update({ where: { id }, data });
     },
     deleteMasterProcedure: async (id: string): Promise<boolean> => {

@@ -8,13 +8,13 @@ export async function PUT(
 ) {
   try {
     const id = params.id;
-    const { name } = await request.json() as { name: string };
+    const { code, name } = await request.json() as { code: string, name: string };
     
-    if (!name) {
-         return NextResponse.json({ message: 'Name is required' }, { status: 400 });
+    if (!code || !name) {
+         return NextResponse.json({ message: 'Code and name are required' }, { status: 400 });
     }
 
-    const updatedProc = await db.updateMasterProcedure(id, { name });
+    const updatedProc = await db.updateMasterProcedure(id, { code, name });
     return NextResponse.json(updatedProc);
 
   } catch (error) {

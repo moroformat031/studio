@@ -22,7 +22,7 @@ import { PlusCircle } from 'lucide-react';
 interface PatientDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (patient: Omit<Patient, 'id'>) => void;
+    onSave: (patient: Omit<Patient, 'id'> | Partial<Patient>) => void;
     patient: Patient | null;
     clinics: Clinic[];
     isSaving: boolean;
@@ -32,7 +32,9 @@ export function PatientDialog({ isOpen, onClose, onSave, patient, clinics, isSav
     const { toast } = useToast();
     
     const initialState = useMemo(() => ({
-        name: '',
+        firstName: '',
+        paternalLastName: '',
+        maternalLastName: '',
         clinicId: '',
         demographics: {
             dob: '',
@@ -49,7 +51,9 @@ export function PatientDialog({ isOpen, onClose, onSave, patient, clinics, isSav
         if (isOpen) {
             if (patient) {
                 setFormData({
-                    name: patient.name,
+                    firstName: patient.firstName,
+                    paternalLastName: patient.paternalLastName,
+                    maternalLastName: patient.maternalLastName,
                     clinicId: patient.clinicId,
                     demographics: patient.demographics
                 });
@@ -61,24 +65,25 @@ export function PatientDialog({ isOpen, onClose, onSave, patient, clinics, isSav
 
 
     const handleSave = () => {
-        if (!formData.name || !formData.demographics.dob || !formData.clinicId) {
+        if (!formData.firstName || !formData.paternalLastName || !formData.demographics.dob || !formData.clinicId) {
             toast({
                 variant: 'destructive',
                 title: 'Campos Faltantes',
-                description: 'Nombre, Fecha de Nacimiento y Clínica son requeridos.'
+                description: 'Nombre, Apellido Paterno, Fecha de Nacimiento y Clínica son requeridos.'
             });
             return;
         }
 
-        const dataToSave = {
-            ...formData,
-            // ensure empty records are not created
-            vitals: [],
-            medications: [],
-            appointments: [],
-            procedures: [],
-            notes: []
-        };
+        const dataToSave: Omit<Patient, 'id'> | Partial<Patient> = patient 
+            ? { ...patient, ...formData }
+            : {
+                ...formData,
+                vitals: [],
+                medications: [],
+                appointments: [],
+                procedures: [],
+                notes: []
+            };
         
         onSave(dataToSave);
     };
@@ -110,7 +115,7 @@ export function PatientDialog({ isOpen, onClose, onSave, patient, clinics, isSav
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle>{patient ? 'Editar Paciente' : 'Agregar Nuevo Paciente'}</DialogTitle>
           <DialogDescription>
@@ -118,66 +123,66 @@ export function PatientDialog({ isOpen, onClose, onSave, patient, clinics, isSav
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Nombre
-            </Label>
-            <Input id="name" value={formData.name} onChange={handleInputChange} className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="clinicId" className="text-right">
-              Clínica
-            </Label>
-            <div className="col-span-3">
-                <Combobox
-                    options={clinicOptions}
-                    value={formData.clinicId}
-                    onChange={(value) => handleSelectChange('clinicId', value)}
-                    placeholder="Seleccionar clínica"
-                    searchPlaceholder="Buscar clínica..."
-                    emptyMessage="No se encontró clínica."
-                />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="firstName">Nombre(s)</Label>
+                    <Input id="firstName" value={formData.firstName} onChange={handleInputChange} disabled={isSaving} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="paternalLastName">Apellido Paterno</Label>
+                    <Input id="paternalLastName" value={formData.paternalLastName} onChange={handleInputChange} disabled={isSaving} />
+                </div>
             </div>
-          </div>
-           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="dob" className="text-right">
-              F. de Nac.
-            </Label>
-            <Input id="dob" type="date" value={formData.demographics.dob} onChange={handleInputChange} className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="gender" className="text-right">
-              Género
-            </Label>
-             <Select onValueChange={(value: string) => handleSelectChange('gender', value)} value={formData.demographics.gender}>
-                <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Seleccionar género" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="Masculino">Masculino</SelectItem>
-                    <SelectItem value="Femenino">Femenino</SelectItem>
-                    <SelectItem value="Otro">Otro</SelectItem>
-                </SelectContent>
-            </Select>
-          </div>
-           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="address" className="text-right">
-              Dirección
-            </Label>
-            <Input id="address" value={formData.demographics.address} onChange={handleInputChange} className="col-span-3" />
-          </div>
-           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="phone" className="text-right">
-              Teléfono
-            </Label>
-            <Input id="phone" value={formData.demographics.phone} onChange={handleInputChange} className="col-span-3" />
-          </div>
-           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">
-              Email
-            </Label>
-            <Input id="email" type="email" value={formData.demographics.email} onChange={handleInputChange} className="col-span-3" />
-          </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                 <div className="space-y-2">
+                    <Label htmlFor="maternalLastName">Apellido Materno</Label>
+                    <Input id="maternalLastName" value={formData.maternalLastName || ''} onChange={handleInputChange} disabled={isSaving} />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="clinicId">Clínica</Label>
+                    <Combobox
+                        options={clinicOptions}
+                        value={formData.clinicId}
+                        onChange={(value) => handleSelectChange('clinicId', value)}
+                        placeholder="Seleccionar clínica"
+                        searchPlaceholder="Buscar clínica..."
+                        emptyMessage="No se encontró clínica."
+                    />
+                </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="dob">Fecha de Nacimiento</Label>
+                    <Input id="dob" type="date" value={formData.demographics.dob} onChange={handleInputChange} disabled={isSaving} />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="gender">Género</Label>
+                    <Select onValueChange={(value: string) => handleSelectChange('gender', value)} value={formData.demographics.gender}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar género" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Masculino">Masculino</SelectItem>
+                            <SelectItem value="Femenino">Femenino</SelectItem>
+                            <SelectItem value="Otro">Otro</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="address">Dirección</Label>
+                <Input id="address" value={formData.demographics.address} onChange={handleInputChange} disabled={isSaving} />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="phone">Teléfono</Label>
+                    <Input id="phone" value={formData.demographics.phone} onChange={handleInputChange} disabled={isSaving} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" type="email" value={formData.demographics.email} onChange={handleInputChange} disabled={isSaving} />
+                </div>
+            </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={isSaving}>Cancelar</Button>

@@ -16,55 +16,70 @@ interface DemographicsTabProps {
 
 export function DemographicsTab({ patient, onUpdatePatient }: DemographicsTabProps) {
     const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState<Demographics>(patient.demographics);
+    const [formData, setFormData] = useState<Partial<Patient>>(patient);
     const { toast } = useToast();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, [e.target.id]: e.target.value });
+        const { id, value } = e.target;
+        if (id in formData.demographics!) {
+            setFormData({ ...formData, demographics: { ...formData.demographics!, [id]: value } });
+        } else {
+            setFormData({ ...formData, [id]: value });
+        }
     };
 
     const handleGenderChange = (value: Demographics['gender']) => {
-        setFormData({ ...formData, gender: value });
+        setFormData({ ...formData, demographics: { ...formData.demographics!, gender: value } });
     }
 
     const handleSave = () => {
-        onUpdatePatient(patient.id, { demographics: formData });
+        onUpdatePatient(patient.id, formData);
         setIsEditing(false);
         toast({ title: 'Éxito', description: 'Datos demográficos del paciente actualizados.' });
     };
+
+    const patientName = `${patient.firstName} ${patient.paternalLastName} ${patient.maternalLastName || ''}`.trim();
 
     return (
         <Card>
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <div>
-                        <CardTitle>Información del Paciente</CardTitle>
+                        <CardTitle>{patientName}</CardTitle>
                         <CardDescription>Información personal del paciente.</CardDescription>
                     </div>
                     {!isEditing ? (
                         <Button variant="outline" onClick={() => setIsEditing(true)}>Editar</Button>
                     ) : (
                         <div className="flex gap-2">
-                            <Button variant="outline" onClick={() => { setIsEditing(false); setFormData(patient.demographics); }}>Cancelar</Button>
+                            <Button variant="outline" onClick={() => { setIsEditing(false); setFormData(patient); }}>Cancelar</Button>
                             <Button onClick={handleSave}>Guardar</Button>
                         </div>
                     )}
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
-                        <Label htmlFor="name">Nombre Completo</Label>
-                        <Input id="name" value={patient.name} readOnly disabled className="mt-1" />
+                        <Label htmlFor="firstName">Nombre(s)</Label>
+                        <Input id="firstName" value={formData.firstName} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
+                    </div>
+                    <div>
+                        <Label htmlFor="paternalLastName">Apellido Paterno</Label>
+                        <Input id="paternalLastName" value={formData.paternalLastName} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
+                    </div>
+                    <div>
+                        <Label htmlFor="maternalLastName">Apellido Materno</Label>
+                        <Input id="maternalLastName" value={formData.maternalLastName || ''} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
                     </div>
                     <div>
                         <Label htmlFor="dob">Fecha de Nacimiento</Label>
-                        <Input id="dob" type="date" value={formData.dob} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
+                        <Input id="dob" type="date" value={formData.demographics?.dob} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
                     </div>
                     <div>
                         <Label htmlFor="gender">Género</Label>
                         {isEditing ? (
-                             <Select onValueChange={handleGenderChange} value={formData.gender}>
+                             <Select onValueChange={handleGenderChange} value={formData.demographics?.gender}>
                                 <SelectTrigger className="mt-1">
                                     <SelectValue placeholder="Seleccionar género" />
                                 </SelectTrigger>
@@ -75,25 +90,23 @@ export function DemographicsTab({ patient, onUpdatePatient }: DemographicsTabPro
                                 </SelectContent>
                             </Select>
                         ) : (
-                            <Input id="gender" value={formData.gender} readOnly disabled className="mt-1" />
+                            <Input id="gender" value={formData.demographics?.gender} readOnly disabled className="mt-1" />
                         )}
                     </div>
                      <div>
                         <Label htmlFor="phone">Teléfono</Label>
-                        <Input id="phone" value={formData.phone} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
+                        <Input id="phone" value={formData.demographics?.phone} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
                     </div>
                     <div>
                         <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" value={formData.email} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
+                        <Input id="email" type="email" value={formData.demographics?.email} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
                     </div>
                      <div className="md:col-span-2">
                         <Label htmlFor="address">Dirección</Label>
-                        <Input id="address" value={formData.address} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
+                        <Input id="address" value={formData.demographics?.address} readOnly={!isEditing} onChange={handleInputChange} className="mt-1" />
                     </div>
                 </div>
             </CardContent>
         </Card>
     );
 }
-
-    

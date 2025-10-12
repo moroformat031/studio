@@ -3,11 +3,9 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { MasterProcedure } from '@/types/ehr';
-import { PlusCircle, Stethoscope, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -22,20 +20,21 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { ProcedureDialog } from './ProcedureDialog';
 
 export function ProcedureManagementTab() {
     const { toast } = useToast();
     const [procedures, setProcedures] = useState<MasterProcedure[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    
-    // Form state
-    const [isEditing, setIsEditing] = useState(false);
-    const [currentProc, setCurrentProc] = useState<MasterProcedure | null>(null);
-    const [procName, setProcName] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Dialog state
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [currentItem, setCurrentItem] = useState<MasterProcedure | null>(null);
 
     // Delete confirmation
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [procToDelete, setProcToDelete] = useState<MasterProcedure | null>(null);
+    const [itemToDelete, setItemToDelete] = useState<MasterProcedure | null>(null);
 
     const fetchProcedures = async () => {
         setIsLoading(true);
@@ -59,54 +58,50 @@ export function ProcedureManagementTab() {
         fetchProcedures();
     }, []);
 
-    const resetForm = () => {
-        setIsEditing(false);
-        setCurrentProc(null);
-        setProcName('');
-    }
+    const handleAddClick = () => {
+        setCurrentItem(null);
+        setIsDialogOpen(true);
+    };
 
     const handleEditClick = (proc: MasterProcedure) => {
-        setIsEditing(true);
-        setCurrentProc(proc);
-        setProcName(proc.name);
+        setCurrentItem(proc);
+        setIsDialogOpen(true);
     };
 
     const handleDeleteClick = (proc: MasterProcedure) => {
-        setProcToDelete(proc);
+        setItemToDelete(proc);
         setIsDeleteDialogOpen(true);
     };
 
     const confirmDelete = async () => {
-        if (!procToDelete) return;
+        if (!itemToDelete) return;
         try {
-            const response = await fetch(`/api/master-data/procedures/${procToDelete.id}`, { method: 'DELETE' });
+            const response = await fetch(`/api/master-data/procedures/${itemToDelete.id}`, { method: 'DELETE' });
             if (!response.ok) {
                 const { message } = await response.json();
                 throw new Error(message);
             }
-            toast({ title: 'Procedimiento Eliminado', description: `El procedimiento ${procToDelete.name} ha sido eliminado.` });
+            toast({ title: 'Procedimiento Eliminado', description: `El procedimiento ${itemToDelete.name} ha sido eliminado.` });
             fetchProcedures();
         } catch (error) {
             const e = error as Error;
             toast({ variant: 'destructive', title: 'Error al Eliminar', description: e.message });
         } finally {
             setIsDeleteDialogOpen(false);
-            setProcToDelete(null);
+            setItemToDelete(null);
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!procName.trim()) {
-            toast({ variant: 'destructive', title: 'Nombre Requerido', description: 'El nombre del procedimiento no puede estar vacío.' });
+    const handleSave = async (itemData: { code: string, name: string }) => {
+        if (!itemData.code.trim() || !itemData.name.trim()) {
+            toast({ variant: 'destructive', title: 'Campos Requeridos', description: 'El código y el nombre del procedimiento no pueden estar vacíos.' });
             return;
         }
-        setIsLoading(true);
+        setIsSaving(true);
 
-        const url = isEditing && currentProc ? `/api/master-data/procedures/${currentProc.id}` : '/api/master-data/procedures';
-        const method = isEditing ? 'PUT' : 'POST';
-
-        const body = { name: procName };
+        const url = currentItem ? `/api/master-data/procedures/${currentItem.id}` : '/api/master-data/procedures';
+        const method = currentItem ? 'PUT' : 'POST';
+        const body = { code: itemData.code, name: itemData.name };
 
         try {
             const response = await fetch(url, {
@@ -119,111 +114,106 @@ export function ProcedureManagementTab() {
                 throw new Error(message);
             }
             toast({
-                title: `Procedimiento ${isEditing ? 'Actualizado' : 'Agregado'}`,
-                description: `El procedimiento ${procName} ha sido ${isEditing ? 'actualizado' : 'creado'}.`
+                title: `Procedimiento ${currentItem ? 'Actualizado' : 'Agregado'}`,
+                description: `El procedimiento ${itemData.name} ha sido ${currentItem ? 'actualizado' : 'creado'}.`
             });
-            resetForm();
+            setIsDialogOpen(false);
             fetchProcedures();
         } catch (error) {
             const e = error as Error;
             toast({
                 variant: 'destructive',
-                title: `Error al ${isEditing ? 'Actualizar' : 'Agregar'} Procedimiento`,
+                title: `Error al ${currentItem ? 'Actualizar' : 'Agregar'} Procedimiento`,
                 description: e.message
             });
         } finally {
-            setIsLoading(false);
+            setIsSaving(false);
         }
     }
   
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
-        {/* Procedure List */}
-        <div className="lg:col-span-2 space-y-4 flex flex-col">
-            <h3 className="font-semibold text-lg">Lista Maestra de Procedimientos</h3>
-            <Card className="flex-grow">
-                <CardContent className="p-0 h-full">
-                    <ScrollArea className="h-[calc(100vh-28rem)]">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Nombre del Procedimiento</TableHead>
-                                    <TableHead className="text-right">Acciones</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {isLoading ? (
-                                        <TableRow><TableCell colSpan={2} className="text-center">Cargando...</TableCell></TableRow>
-                                    ) : procedures.length > 0 ? (
-                                        procedures.map(proc => (
-                                            <TableRow key={proc.id}>
-                                                <TableCell className="font-medium">{proc.name}</TableCell>
-                                                <TableCell className="text-right">
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                                                <span className="sr-only">Abrir menú</span>
-                                                                <MoreHorizontal className="h-4 w-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                            <DropdownMenuItem onClick={() => handleEditClick(proc)}>
-                                                                <Edit className="mr-2 h-4 w-4" />
-                                                                <span>Editar</span>
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem onClick={() => handleDeleteClick(proc)} className="text-destructive">
-                                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                                <span>Eliminar</span>
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    ) : (
-                                        <TableRow><TableCell colSpan={2} className="text-center">No hay procedimientos.</TableCell></TableRow>
-                                    )}
-                            </TableBody>
-                        </Table>
-                    </ScrollArea>
-                </CardContent>
-            </Card>
+    <>
+    <div className="flex flex-col h-full">
+        <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold text-lg">Lista Maestra de Procedimientos</h3>
+                 <Button size="sm" onClick={handleAddClick}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Agregar Procedimiento
+                </Button>
         </div>
-        {/* Add/Edit Procedure Form */}
-        <div className="space-y-4">
-                <h3 className="font-semibold text-lg">{isEditing ? 'Editar Procedimiento' : 'Agregar Nuevo Procedimiento'}</h3>
-                <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg">
-                    <div className="space-y-2">
-                        <Label htmlFor="proc-name">Nombre del Procedimiento</Label>
-                        <div className="relative">
-                            <Stethoscope className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input id="proc-name" value={procName} onChange={e => setProcName(e.target.value)} required disabled={isLoading} className="pl-10" />
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                        {isEditing && <Button type="button" variant="outline" onClick={resetForm} disabled={isLoading}>Cancelar</Button>}
-                        <Button type="submit" disabled={isLoading} className="w-full">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            {isLoading ? (isEditing ? 'Actualizando...' : 'Agregando...') : (isEditing ? 'Actualizar' : 'Agregar')}
-                        </Button>
-                    </div>
-                </form>
-        </div>
-
-        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                <AlertDialogDescription>
-                    Esta acción no se puede deshacer. Esto eliminará permanentemente el procedimiento <span className="font-bold">{procToDelete?.name}</span> de la lista maestra.
-                </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setProcToDelete(null)}>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+        <Card className="flex-grow">
+            <CardContent className="p-0 h-full">
+                <ScrollArea className="h-[calc(100vh-25rem)]">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Código</TableHead>
+                                <TableHead>Nombre del Procedimiento</TableHead>
+                                <TableHead className="text-right">Acciones</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {isLoading ? (
+                                    <TableRow><TableCell colSpan={3} className="text-center">Cargando...</TableCell></TableRow>
+                                ) : procedures.length > 0 ? (
+                                    procedures.map(proc => (
+                                        <TableRow key={proc.id}>
+                                            <TableCell className="font-mono">{proc.code}</TableCell>
+                                            <TableCell className="font-medium">{proc.name}</TableCell>
+                                            <TableCell className="text-right">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                                            <span className="sr-only">Abrir menú</span>
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onClick={() => handleEditClick(proc)}>
+                                                            <Edit className="mr-2 h-4 w-4" />
+                                                            <span>Editar</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleDeleteClick(proc)} className="text-destructive">
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            <span>Eliminar</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow><TableCell colSpan={3} className="text-center">No hay procedimientos.</TableCell></TableRow>
+                                )}
+                        </TableBody>
+                    </Table>
+                </ScrollArea>
+            </CardContent>
+        </Card>
     </div>
+
+    <ProcedureDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSave={handleSave}
+        item={currentItem}
+        isSaving={isSaving}
+    />
+
+    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+                Esta acción no se puede deshacer. Esto eliminará permanentemente el procedimiento <span className="font-bold">{itemToDelete?.name}</span> de la lista maestra.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setItemToDelete(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }

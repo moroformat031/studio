@@ -30,9 +30,13 @@ interface PatientComboboxProps {
 export function PatientCombobox({ patients, selectedPatientId, onSelectPatient }: PatientComboboxProps) {
   const [open, setOpen] = React.useState(false)
   
+  const getPatientName = (patient: Patient) => {
+    return `${patient.firstName} ${patient.paternalLastName} ${patient.maternalLastName || ''}`.trim();
+  }
+
   const selectedPatientName = patients.find(
       (patient) => patient.id === selectedPatientId
-    )?.name || "Seleccionar paciente..."
+    );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -43,7 +47,7 @@ export function PatientCombobox({ patients, selectedPatientId, onSelectPatient }
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {selectedPatientName}
+          {selectedPatientName ? getPatientName(selectedPatientName) : "Seleccionar paciente..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -56,7 +60,7 @@ export function PatientCombobox({ patients, selectedPatientId, onSelectPatient }
               {patients.map((patient) => (
                 <CommandItem
                   key={patient.id}
-                  value={patient.name}
+                  value={getPatientName(patient)}
                   onSelect={() => {
                     onSelectPatient(patient.id)
                     setOpen(false)
@@ -68,7 +72,7 @@ export function PatientCombobox({ patients, selectedPatientId, onSelectPatient }
                       selectedPatientId === patient.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {patient.name}
+                  {getPatientName(patient)}
                 </CommandItem>
               ))}
             </CommandGroup>

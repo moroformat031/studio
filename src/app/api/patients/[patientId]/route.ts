@@ -38,9 +38,11 @@ export async function PUT(
     const patientId = params.patientId;
     const updatedData = (await request.json()) as Partial<Patient>;
 
-    const { name, demographics, clinicId } = updatedData;
+    const { firstName, paternalLastName, maternalLastName, demographics, clinicId } = updatedData;
     const dataToUpdate: any = {};
-    if (name) dataToUpdate.name = name;
+    if (firstName) dataToUpdate.firstName = firstName;
+    if (paternalLastName) dataToUpdate.paternalLastName = paternalLastName;
+    if (maternalLastName) dataToUpdate.maternalLastName = maternalLastName;
     if (clinicId) dataToUpdate.clinicId = clinicId;
     if (demographics) {
         if(demographics.dob) dataToUpdate.dob = new Date(demographics.dob);

@@ -108,7 +108,7 @@ export function PatientManagementTab() {
                 const { message } = await response.json();
                 throw new Error(message);
             }
-            toast({ title: 'Paciente Eliminado', description: `El paciente ${patientToDelete.name} ha sido eliminado.` });
+            toast({ title: 'Paciente Eliminado', description: `El paciente ${patientToDelete.firstName} ${patientToDelete.paternalLastName} ha sido eliminado.` });
             fetchPatients();
         } catch (error) {
             const e = error as Error;
@@ -119,7 +119,7 @@ export function PatientManagementTab() {
         }
     };
 
-    const handleSavePatient = async (patientData: Omit<Patient, 'id'>) => {
+    const handleSavePatient = async (patientData: Omit<Patient, 'id'> | Partial<Patient>) => {
         setIsSaving(true);
         const url = currentPatient ? `/api/patients/${currentPatient.id}` : '/api/patients';
         const method = currentPatient ? 'PUT' : 'POST';
@@ -136,7 +136,7 @@ export function PatientManagementTab() {
             }
             toast({
                 title: `Paciente ${currentPatient ? 'Actualizado' : 'Agregado'}`,
-                description: `El paciente ${patientData.name} ha sido ${currentPatient ? 'actualizado' : 'creado'}.`
+                description: `El paciente ${patientData.firstName} ${patientData.paternalLastName} ha sido ${currentPatient ? 'actualizado' : 'creado'}.`
             });
             setIsPatientDialogOpen(false);
             fetchPatients();
@@ -151,6 +151,10 @@ export function PatientManagementTab() {
             setIsSaving(false);
         }
     };
+
+    const getPatientName = (patient: Patient) => {
+        return `${patient.firstName} ${patient.paternalLastName} ${patient.maternalLastName || ''}`.trim();
+    }
   
   return (
     <>
@@ -181,7 +185,7 @@ export function PatientManagementTab() {
                                     ) : patients.length > 0 ? (
                                         patients.map(patient => (
                                             <TableRow key={patient.id}>
-                                                <TableCell className="font-medium">{patient.name}</TableCell>
+                                                <TableCell className="font-medium">{getPatientName(patient)}</TableCell>
                                                 <TableCell>{patient.clinicName}</TableCell>
                                                 <TableCell className="hidden md:table-cell">{patient.demographics.dob}</TableCell>
                                                 <TableCell className="hidden md:table-cell">{patient.demographics.gender}</TableCell>
@@ -231,7 +235,7 @@ export function PatientManagementTab() {
                 <AlertDialogHeader>
                 <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                 <AlertDialogDescription>
-                    Esta acción no se puede deshacer. Esto eliminará permanentemente al paciente <span className="font-bold">{patientToDelete?.name}</span> y todos sus datos médicos asociados.
+                    Esta acción no se puede deshacer. Esto eliminará permanentemente al paciente <span className="font-bold">{patientToDelete ? getPatientName(patientToDelete) : ''}</span> y todos sus datos médicos asociados.
                 </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

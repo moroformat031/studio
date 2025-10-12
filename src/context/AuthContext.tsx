@@ -8,8 +8,8 @@ import { Plan, User } from '@/types/ehr';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (username: string, password?: string) => Promise<void>;
-  signup: (username: string, password?: string, plan?: Plan, clinicName?: string) => Promise<void>;
+  login: (email: string, password?: string) => Promise<void>;
+  signup: (userData: { email: string, password?: string, plan?: Plan, clinicName?: string, firstName: string, paternalLastName: string, maternalLastName?: string }) => Promise<void>;
   logout: () => void;
 }
 
@@ -36,11 +36,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const login = async (username: string, password?: string) => {
+  const login = async (email: string, password?: string) => {
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (response.ok) {
@@ -49,13 +49,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(loggedInUser);
     } else {
       const { message } = await response.json();
-      throw new Error(message || 'Invalid username or password.');
+      throw new Error(message || 'Invalid email or password.');
     }
   };
 
-  const signup = async (username: string, password?: string, plan: Plan = 'Free', clinicName?: string) => {
-      if (!username || !password) {
-          throw new Error('Username and password are required.');
+  const signup = async (userData: { email: string, password?: string, plan?: Plan, clinicName?: string, firstName: string, paternalLastName: string, maternalLastName?: string }) => {
+      const { email, password, plan = 'Free', clinicName, firstName, paternalLastName, maternalLastName } = userData;
+      if (!email || !password || !firstName || !paternalLastName) {
+          throw new Error('Email, password, first name, and paternal last name are required.');
       }
       if (!clinicName) {
         throw new Error('Clinic name is required.');
@@ -64,7 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, plan, clinicName }),
+        body: JSON.stringify({ email, password, plan, clinicName, firstName, paternalLastName, maternalLastName }),
       });
       
       if (!response.ok) {

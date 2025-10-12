@@ -30,6 +30,10 @@ export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: Procedur
     const { providers } = useProviders();
     const [procedureOptions, setProcedureOptions] = useState<{label: string, value: string}[]>([]);
 
+    const getProviderName = (provider: { firstName: string; paternalLastName: string; maternalLastName?: string | null }) => {
+        return `${provider.firstName} ${provider.paternalLastName} ${provider.maternalLastName || ''}`.trim();
+    }
+
     useEffect(() => {
         const fetchProcedures = async () => {
              try {
@@ -100,7 +104,7 @@ export function ProcedureDialog({ isOpen, onClose, onSave, procedure }: Procedur
         setFormData(prev => ({ ...prev, [id]: value }));
     }
     
-    const providerOptions = useMemo(() => providers.map(p => ({label: p.username, value: p.username})), [providers]);
+    const providerOptions = useMemo(() => providers.map(p => ({label: getProviderName(p), value: getProviderName(p)})), [providers]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
